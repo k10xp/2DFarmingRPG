@@ -134,15 +134,16 @@ void Co_DrawComponents(
         switch(entity->components[i].type)
         {
         case ETE_Sprite:
-            SpriteComp_Draw(
-                &entity->components[i].data.sprite,
-                entity,
-                pLayer,
-                pCam,
-                outVerts,
-                outIndices,
-                pNextIndex
-            );
+            if(entity->components[i].data.sprite.bDraw)
+                SpriteComp_Draw(
+                    &entity->components[i].data.sprite,
+                    entity,
+                    pLayer,
+                    pCam,
+                    outVerts,
+                    outIndices,
+                    pNextIndex
+                );
             break;
         case ETE_StaticCollider:
             break;
@@ -151,16 +152,17 @@ void Co_DrawComponents(
         case ETE_TextSprite:
             break;
         case ETE_SpriteAnimator:
-            AnimatedSprite_Draw(
-                &entity->components[i].data.spriteAnimator,
-                entity,
-                pLayer,
-                pCam,
-                outVerts,
-                outIndices,
-                pNextIndex
-            );
-            break;
+            if(entity->components[i].data.spriteAnimator.bDraw)
+                AnimatedSprite_Draw(
+                    &entity->components[i].data.spriteAnimator,
+                    entity,
+                    pLayer,
+                    pCam,
+                    outVerts,
+                    outIndices,
+                    pNextIndex
+                );
+                break;
         default:
             EASSERT(false);
         }

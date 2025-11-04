@@ -9,6 +9,7 @@
 void AnimatedSprite_OnInit(struct AnimatedSprite* pAnimatedSprite, struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, float deltaT)
 {
     struct GameLayer2DData* pData = pLayer->userData;
+    if(!pAnimatedSprite->bDraw) return;
     struct AtlasAnimation* pAnim = At_FindAnim(pData->hAtlas, pAnimatedSprite->animationName);
     EASSERT(pAnim);
     pAnimatedSprite->pSprites = pAnim->frames;
@@ -69,6 +70,7 @@ void AnimatedSprite_OnUpdate(struct AnimatedSprite* pAnimatedSprite, struct Enti
 void AnimatedSprite_GetBoundingBox(struct Entity2D* pEnt, struct AnimatedSprite* pAnimatedSprite, struct GameFrameworkLayer* pLayer, vec2 outTL, vec2 outBR)
 {
     struct GameLayer2DData* pLayerData = pLayer->userData;
+    if(!pAnimatedSprite->bDraw) return;
     AtlasSprite* pSprite = At_GetSprite(pAnimatedSprite->pSprites[pAnimatedSprite->onSprite], pLayerData->hAtlas);
     vec2 tl = {pEnt->transform.position[0], pEnt->transform.position[1]};
     vec2 br;

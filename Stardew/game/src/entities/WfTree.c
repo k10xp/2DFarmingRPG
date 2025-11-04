@@ -107,6 +107,7 @@ void WfMakeEntityIntoTreeBasedAt(struct Entity2D* pEnt, float x, float y, struct
     memset(&pComponent2->data.sprite.transform, 0, sizeof(struct Transform2D));
     pComponent2->data.sprite.transform.scale[0] = 1.0f;
     pComponent2->data.sprite.transform.scale[1] = 1.0f;
+    pComponent2->data.sprite.bDraw = true;
 
     pComponent1->type = ETE_Sprite;
     pComponent1->data.sprite.sprite = trunkSprite;
@@ -114,6 +115,7 @@ void WfMakeEntityIntoTreeBasedAt(struct Entity2D* pEnt, float x, float y, struct
     pComponent1->data.sprite.transform.position[1] = trunkOffsetPx;
     pComponent1->data.sprite.transform.scale[0] = 1.0f;
     pComponent1->data.sprite.transform.scale[1] = 1.0f;
+    pComponent1->data.sprite.bDraw = true;
 
     vec2 transform2Ground = {
         combinedSpriteWidth / 2.0f,
@@ -129,6 +131,7 @@ void WfMakeEntityIntoTreeBasedAt(struct Entity2D* pEnt, float x, float y, struct
     pComponent3->data.staticCollider.onSensorOverlapBegin = NULL;
     pComponent3->data.staticCollider.onSensorOverlapEnd = NULL;
     pComponent3->data.staticCollider.bGenerateSensorEvents = false;
+    pComponent3->data.sprite.bDraw = true;
 
     HGeneric hTreeData = NULL_HANDLE;
     gTreeDataObjectPool = GetObjectPoolIndex(gTreeDataObjectPool, &hTreeData);

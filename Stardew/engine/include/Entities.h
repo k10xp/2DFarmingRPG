@@ -59,6 +59,7 @@ struct Sprite
 {
     hSprite sprite;
     struct Transform2D transform;
+    bool bDraw;
 };
 
 struct StaticCollider
@@ -91,6 +92,7 @@ struct TextSprite
     float fSizePts;
     hAtlas atlas;
     float r, g, b, a;
+    bool bDraw;
 };
 
 struct AnimatedSprite
@@ -103,6 +105,7 @@ struct AnimatedSprite
     float fps;
     bool bRepeat;
     bool bIsAnimating;
+    bool bDraw;
     struct Transform2D transform;
 };
 

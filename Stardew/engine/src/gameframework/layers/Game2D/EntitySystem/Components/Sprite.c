@@ -51,6 +51,7 @@ void SpriteComp_OnDestroy(struct Entity2D* pEnt)
 
 void SpriteComp_GetBoundingBox(struct Entity2D* pEnt, struct Sprite* pSpriteComp, struct GameFrameworkLayer* pLayer, vec2 outTL, vec2 outBR)
 {
+    if(!pSpriteComp->bDraw) return;
     struct GameLayer2DData* pLayerData = pLayer->userData;
     AtlasSprite* pSprite = At_GetSprite(pSpriteComp->sprite, pLayerData->hAtlas);
     vec2 tl = {pEnt->transform.position[0], pEnt->transform.position[1]};

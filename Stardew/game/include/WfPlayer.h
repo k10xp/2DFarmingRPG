@@ -2,9 +2,35 @@
 #define WFPLAYER_H
 
 #include <cglm/cglm.h>
+#include "WfEnums.h"
+
 struct BinarySerializer;
 struct Entity2D;
 struct GameLayer2DData;
+
+#define NUM_ANIMATIONS NumDirections
+
+struct WfAnimationSetLayer
+{
+    const char* animationNames[NUM_ANIMATIONS];
+};
+
+/* layers on top of the base */
+enum WfAnimationLayerNames
+{
+    WfHairAnimationLayer,
+    WfTorsoAnimationLayer,
+    WfLegAnimationLayer,
+    WfToolAnimationLayer,
+    WfNumAnimationLayers
+};
+
+/* a set of animations that overlay the base animation in layers */
+struct WfAnimationSet
+{
+    struct WfAnimationSetLayer layers[WfNumAnimationLayers];
+    unsigned int layersMask;
+};
 
 void WfInitPlayer();
 

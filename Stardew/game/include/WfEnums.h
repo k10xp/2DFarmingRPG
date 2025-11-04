@@ -10,4 +10,13 @@ enum WfSeason
     NumSeasons
 };
 
+enum WfDirection
+{
+    Up,
+    Down,
+    Left,
+    Right,
+    NumDirections
+};
+
 #endif
