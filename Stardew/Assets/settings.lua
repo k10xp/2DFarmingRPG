@@ -32,7 +32,6 @@ function GetSettingsViewModel()
 		end,
 
 		OnInitSettings = function(self, pGamelayer)
-			print(dump(args))
             self._pGamelayer = pGamelayer
             self._zoomVal = GetGameLayerZoom(pGamelayer)
             self.Set_ZoomVal(self, self._zoomVal)
@@ -49,13 +48,11 @@ function GetSettingsViewModel()
 
         OnXMLUILayerPush = function(self)
             self._escapeBtn = GetButtonBinding("settings")
-            print(self._escapeBtn)
 			self._initializeSettingsMenuListener = SubscribeGameFrameworkEvent("InitSettings", self, self.OnInitSettings)
             FireGameFrameworkEvent({vm=self, type="basic"}, "onSettingsMenuPushed")
         end,
 
 		OnXMLUILayerPop = function(self)
-			print("POP!")
             FreeButtonBinding(self._escapeBtn)
 			UnsubscribeGameFrameworkEvent(self._initializeSettingsMenuListener)
 		end

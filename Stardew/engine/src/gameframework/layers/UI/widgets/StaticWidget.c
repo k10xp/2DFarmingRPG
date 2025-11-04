@@ -39,6 +39,10 @@ void StaticWidget_Destroy(struct StaticWidgetData* pStaticData)
 void* StaticWidget_OnOutputVerts(struct StaticWidgetData* pStaticData, float left, float top, struct WidgetPadding* pPadding, VECTOR(WidgetVertex) pOutVerts)
 {
 	AtlasSprite* pSprite = At_GetSprite(pStaticData->sprite, pStaticData->atlas);
+	if(!pSprite)
+	{
+		return pOutVerts; /* sometimes hit for some reason */
+	}
 	float width = pSprite->widthPx;
 	float height = pSprite->heightPx;
 
