@@ -15,7 +15,8 @@
 			{ "playerMoveRight" : 262},
 			{ "useTool" : 32 },
 			{ "nextTool" : 69 },
-			{ "prevTool" : 81 }
+			{ "prevTool" : 81 },
+			{ "settings" : 256 }
 		],
 		"MouseScroll" : [
 			{ "zoomIn" : 2 },

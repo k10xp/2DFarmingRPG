@@ -14,6 +14,7 @@ extern "C" {
 #include "Widget.h"
 #include "DrawContext.h"
 #include "TimerPool.h"
+#include "InputContext.h"
 
 struct XMLUIData;
 struct GameFrameworkLayer;
@@ -63,8 +64,10 @@ typedef struct XMLUIData
 	int nFocusedWidgets;
 	struct SDTimerPool timerPool;
 	VECTOR(struct WidgetChildrenChangeRequest) pChildrenChangeRequests;
+	struct AxisBinding gMouseX;
+	struct AxisBinding gMouseY;
+	struct ButtonBinding gMouseBtnLeft;
 }XMLUIData;
-
 
 
 void XMLUIGameLayer_Get(struct GameFrameworkLayer* pLayer, struct XMLUIGameLayerOptions* pOptions);

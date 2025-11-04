@@ -17,8 +17,9 @@
 
 static void WfPublishInventoryChangedEvent()
 {
+    
     struct WfInventory* pInv = WfGetInventory();
-
+    Sc_ResetStack();
     struct ScriptCallArgument arg;
 	arg.type = SCA_table;
     Sc_NewTableOnStack(12, 0);
@@ -37,14 +38,28 @@ static void WfPublishInventoryChangedEvent()
     struct LuaListenedEventArgs args = { .numArgs = 1, .args = &arg };
     Ev_FireEvent("InventoryChanged", &args);
     Sc_UnRefTable(tableRef);
-	
+}
 
+static void WfPublishInitSettingsEvent(struct GameFrameworkLayer* pLayer)
+{
+    struct GameLayer2DData* pEngineLayer = pLayer->userData;
+    struct ScriptCallArgument arg;
+    arg.type = SCA_userdata;
+    arg.val.userData = pEngineLayer;
+    struct LuaListenedEventArgs args = { .numArgs = 1, .args = &arg };
+    Ev_FireEvent("InitSettings", &args);
 }
 
 static void WfOnHUDLayerPushed(void* pUserData, void* pEventData)
 {
     WfPublishInventoryChangedEvent();
 }
+
+static void WfOnSettingsLayerPushed(void* pUserData, void* pEventData)
+{
+    WfPublishInitSettingsEvent(pUserData);
+}
+
 
 void WfGameLayerOnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, InputContext* inputContext)
 {
@@ -54,6 +69,7 @@ void WfGameLayerOnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawConte
     GameLayer2D_OnPush(pLayer, drawContext, inputContext);
     struct WfGameLayerData* pWfData = pEngineLayer->pUserData;
     pWfData->HUDPushedEventListener = Ev_SubscribeEvent("onHUDLayerPushed", &WfOnHUDLayerPushed, pLayer);
+    pWfData->SettingsPushedEventListener = Ev_SubscribeEvent("onSettingsMenuPushed", &WfOnSettingsLayerPushed, pLayer);
 }
 
 void WfPreFirstInit(struct GameLayer2DData* pEngineLayer)
@@ -67,6 +83,7 @@ void WfGameLayerOnPop(struct GameFrameworkLayer* pLayer, DrawContext* drawContex
     struct GameLayer2DData* pEngineLayer = pLayer->userData;
     struct WfGameLayerData* pWFUserData = pEngineLayer->pUserData;
     Ev_UnsubscribeEvent(pWFUserData->HUDPushedEventListener);
+    Ev_UnsubscribeEvent(pWFUserData->SettingsPushedEventListener);
     free(pEngineLayer->pUserData);
     
 }

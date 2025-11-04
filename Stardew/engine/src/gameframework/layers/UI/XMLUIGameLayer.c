@@ -185,6 +185,7 @@ static void Update(struct GameFrameworkLayer* pLayer, float deltaT)
 					pWidget->fnOnWidgetChildrenChangedFn(pWidget);
 				}
 			}
+			SetRootWidgetIsDirty(pData->rootWidget, true);
 		}
 		else
 		{
@@ -229,9 +230,6 @@ static void Draw(struct GameFrameworkLayer* pLayer, DrawContext* dc)
 	dc->DrawUIVertexBuffer(pData->hVertexBuffer, size);
 }
 
-static struct AxisBinding gMouseX = { UnknownAxis, NULL_HANDLE };
-static struct AxisBinding gMouseY = { UnknownAxis, NULL_HANDLE };
-static struct ButtonBinding gMouseBtnLeft = { UnknownButton, NULL_HANDLE };
 
 static void* BuildWidgetsHoverred(VECTOR(HWidget) outWidgets, HWidget hWidget, float mouseX, float mouseY)
 {
@@ -299,8 +297,6 @@ static void Input(struct GameFrameworkLayer* pLayer, InputContext* ctx)
 	static bool bLastLeftClick = false;
 	static bool bThisLeftClick = false;
 
-
-
 	if (!pWidgetsHovverred)
 	{
 		pWidgetsHovverred = NEW_VECTOR(HWidget);
@@ -337,22 +333,9 @@ static void Input(struct GameFrameworkLayer* pLayer, InputContext* ctx)
 	//pUIData->pChildrenChangeRequests = VectorClear(pUIData->pChildrenChangeRequests);
 	float w, h;
 
-	if (gMouseX.index == NULL_HANDLE)
-	{
-		gMouseX = In_FindAxisMapping(ctx, "CursorPosX");
-	}
-	if (gMouseY.index == NULL_HANDLE)
-	{
-		gMouseY = In_FindAxisMapping(ctx, "CursorPosY");
-	}
-	if (gMouseBtnLeft.index == NULL_HANDLE)
-	{
-		gMouseBtnLeft = In_FindButtonMapping(ctx, "select");
-	}
+	bThisLeftClick = In_GetButtonValue(ctx, pUIData->gMouseBtnLeft);
 
-	bThisLeftClick = In_GetButtonValue(ctx, gMouseBtnLeft);
-
-	vec2 mousePos = { In_GetAxisValue(ctx, gMouseX), In_GetAxisValue(ctx, gMouseY) };
+	vec2 mousePos = { In_GetAxisValue(ctx, pUIData->gMouseX), In_GetAxisValue(ctx, pUIData->gMouseY) };
 
 
 	pWidgetsHovverred = BuildWidgetsHoverred(pWidgetsHovverred, pUIData->rootWidget, mousePos[0], mousePos[1]);
@@ -450,7 +433,6 @@ static void Input(struct GameFrameworkLayer* pLayer, InputContext* ctx)
 			if (SendMouseDownAndFocus(&info, hWidget, pUIData))
 			{
 				bFocusChanged = true;
-
 			}
 		}
 		if (bSendLMouseUp)
@@ -472,6 +454,12 @@ static void Input(struct GameFrameworkLayer* pLayer, InputContext* ctx)
 				pWidget->fnRecieveKeystroke(pWidget, keystroke);
 		}
 	}
+
+	if (Sc_FunctionPresentInTable(pUIData->hViewModel, "OnInput"))
+	{
+		Sc_CallFuncInRegTableEntryTable(pUIData->hViewModel, "OnInput", NULL, 0, 0);
+	}
+
 }
 
 static void LoadUIData(XMLUIData* pUIData, DrawContext* pDC);
@@ -492,6 +480,16 @@ static void OnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, 
 	{
 		Sc_CallFuncInRegTableEntryTable(pData->hViewModel, "OnXMLUILayerPush", NULL, 0, 0);
 	}
+
+	struct ActiveInputBindingsMask mask;
+	In_GetMask(&mask, inputContext);
+	pData->gMouseBtnLeft = In_FindButtonMapping(inputContext, "select");
+	pData->gMouseY = In_FindAxisMapping(inputContext, "CursorPosY");
+	pData->gMouseX = In_FindAxisMapping(inputContext, "CursorPosX");
+	In_ActivateButtonBinding(pData->gMouseBtnLeft, &mask);
+	In_ActivateAxisBinding(pData->gMouseY, &mask);
+	In_ActivateAxisBinding(pData->gMouseX, &mask); /* TODO: this is incomplete: these */
+	In_SetMask(&mask, inputContext);
 }
 
 
@@ -510,6 +508,13 @@ static void OnPop(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, I
 		Sc_DeleteTableInReg(pData->hViewModel);
 	}
 	TP_DestroyTimerPool(&pData->timerPool);
+
+	struct ActiveInputBindingsMask mask;
+	In_GetMask(&mask, inputContext);
+	In_DeactivateButtonBinding(pData->gMouseBtnLeft, &mask);
+	In_DeactivateAxisBinding(pData->gMouseX, &mask);
+	In_DeactivateAxisBinding(pData->gMouseY, &mask);
+	In_SetMask(&mask, inputContext);
 }
 
 void AddNodeChildren(HWidget widget, xmlNode* pNode, XMLUIData* pUIData)

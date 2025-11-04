@@ -359,6 +359,15 @@ static void MakeSliderFromXML(struct UIWidget* pWidget, struct SliderData* pData
 		}
 		free(attribute);
 	}
+	if(pXMLNode->fnGetPropType(pXMLNode, "maxVal") == DN_Float)
+	{
+		pData->fMaxVal = pXMLNode->fnGetFloat(pXMLNode, "maxVal");
+	}
+	if(pXMLNode->fnGetPropType(pXMLNode, "minVal") == DN_Float)
+	{
+		pData->fMinVal = pXMLNode->fnGetFloat(pXMLNode, "minVal");
+		pData->fVal = pData->fMinVal;
+	}
 }
 
 void SliderWidget_MakeDefaultSliderWidget(struct SliderData* pData, struct XMLUIData* pUILayerData, enum SliderOrientation orientation)

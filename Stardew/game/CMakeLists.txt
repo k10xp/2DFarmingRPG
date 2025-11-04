@@ -8,6 +8,7 @@ add_executable( WarFarmer
     src/WfSprites.c
     src/WfWorld.c
     src/WfGameLayer.c
+    src/WfScriptFunctions.c
     src/entities/WfDebrisField.c
     src/entities/WfExit.c
     src/entities/WfLog.c
@@ -25,7 +26,7 @@ add_executable( WarFarmer
     src/items/WfBasicPickaxe.c
     src/items/WfBasicScythe.c
     src/items/WfBasicSword.c
-    src/ui/WfHUD.c
+    src/ui/WfUI.c
 )
 
 target_include_directories(WarFarmer PRIVATE include)

@@ -37,11 +37,14 @@ static struct GameFrameworkEventListener* AddListener(struct GameFrameworkEvent*
 		EASSERT(!pEvent->pListenerHead);
 		pEvent->pListenerTail = pListener;
 		pEvent->pListenerHead = pListener;
+		pListener->pNext = NULL;
+		pListener->pPrev = NULL;
 	}
 	else
 	{
 		pEvent->pListenerTail->pNext = pListener;
 		pListener->pPrev = pEvent->pListenerTail;
+		pListener->pNext = NULL;
 		pEvent->pListenerTail = pListener;
 	}
 	return pListener;
@@ -49,6 +52,7 @@ static struct GameFrameworkEventListener* AddListener(struct GameFrameworkEvent*
 
 struct GameFrameworkEventListener* Ev_SubscribeEvent(char* eventName, EventListenerFn listenerFn, void* pUser)
 {
+	printf("SUBSCRIBING TO EVENT %s\n", eventName);
 	EASSERT(strlen(eventName) < EVENT_MAX_NAME_LEN);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, eventName);
 	if (pEvent == NULL)
@@ -62,6 +66,7 @@ struct GameFrameworkEventListener* Ev_SubscribeEvent(char* eventName, EventListe
 
 bool Ev_UnsubscribeEvent(struct GameFrameworkEventListener* pListener)
 {
+	printf("UNSUBSCRIBING TO EVENT %s\n", pListener->eventName);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, pListener->eventName);
 	if (pEvent)
 	{
@@ -93,6 +98,8 @@ bool Ev_UnsubscribeEvent(struct GameFrameworkEventListener* pListener)
 
 void Ev_FireEvent(char* eventName, void* eventArgs)
 {
+	int i = 0;
+	printf("FIRING EVENT %s\n", eventName);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, eventName);
 	if (pEvent)
 	{
@@ -101,6 +108,7 @@ void Ev_FireEvent(char* eventName, void* eventArgs)
 		{
 			pListener->eventFn(pListener->userData, eventArgs);
 			pListener = pListener->pNext;
+			printf("%s DEBUG COUNT %i\n", eventName, i++);
 		}
 	}
 }

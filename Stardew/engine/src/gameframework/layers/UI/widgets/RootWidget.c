@@ -142,6 +142,7 @@ void RootWidget_OnWindowSizeChanged(HWidget rootWidget, int newW, int newH)
 	pRootData->windowW = newW;
 	pWidget->width.data = newW;
 	pWidget->height.data = newH;
+	pRootData->bIsDirty = true;
 }
 bool GetRootWidgetIsDirty(HWidget hRootWidget)
 {

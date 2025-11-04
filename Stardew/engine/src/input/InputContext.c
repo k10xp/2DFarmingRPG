@@ -317,10 +317,12 @@ void In_RecieveKeyboardKey(InputContext* context, int key, int scancode, int act
 				if (action == GLFW_PRESS)
 				{
 					pMapping->data.ButtonMapping.bCurrent = true;
+					pMapping->data.ButtonMapping.bPressThisFrame = true;
 				}
 				else if (action == GLFW_RELEASE)
 				{
 					pMapping->data.ButtonMapping.bCurrent = false;
+					pMapping->data.ButtonMapping.bReleaseThisFrame = true;
 				}
 			}
 		}
@@ -360,10 +362,12 @@ void In_RecieveMouseButton(InputContext* context, int button, int action, int mo
 					static int dCounter = 0;
 					printf("glfw mouse press %i \n", dCounter++);
 					pMapping->data.ButtonMapping.bCurrent = true;
+					pMapping->data.ButtonMapping.bPressThisFrame = true;
 				}
 				else if (action == GLFW_RELEASE)
 				{
 					pMapping->data.ButtonMapping.bCurrent = false;
+					pMapping->data.ButtonMapping.bReleaseThisFrame = true;
 				}
 			}
 		}
@@ -404,20 +408,28 @@ void In_RecieveScroll(InputContext* context, double xoffset, double yoffset)
 				if (pMapping->data.ButtonMapping.data.mouseScrollButton.dir == Axis_Pos && xoffset > 0)
 				{
 					pMapping->data.ButtonMapping.bCurrent = true;
+					pMapping->data.ButtonMapping.bPressThisFrame = true;
+					pMapping->data.ButtonMapping.bReleaseThisFrame = true;
 				}
 				if (pMapping->data.ButtonMapping.data.mouseScrollButton.dir == Axis_Neg && xoffset < 0)
 				{
 					pMapping->data.ButtonMapping.bCurrent = true;
+					pMapping->data.ButtonMapping.bPressThisFrame = true;
+					pMapping->data.ButtonMapping.bReleaseThisFrame = true;
 				}
 				break;
 			case Axis_Y:
 				if (pMapping->data.ButtonMapping.data.mouseScrollButton.dir == Axis_Pos && yoffset > 0)
 				{
 					pMapping->data.ButtonMapping.bCurrent = true;
+					pMapping->data.ButtonMapping.bPressThisFrame = true;
+					pMapping->data.ButtonMapping.bReleaseThisFrame = true;
 				}
 				if (pMapping->data.ButtonMapping.data.mouseScrollButton.dir == Axis_Neg && yoffset < 0)
 				{
 					pMapping->data.ButtonMapping.bCurrent = true;
+					pMapping->data.ButtonMapping.bPressThisFrame = true;
+					pMapping->data.ButtonMapping.bReleaseThisFrame = true;
 				}
 				break;
 			}
@@ -442,7 +454,31 @@ void In_EndFrame(InputContext* context)
 	{
 		InputMapping* pMapping = &context->buttonMappings.MouseScrollButtonMappings.arr[i];
 		pMapping->data.ButtonMapping.bCurrent = false;
+		pMapping->data.ButtonMapping.bPressThisFrame = false;
+		pMapping->data.ButtonMapping.bReleaseThisFrame = false;
 	}
+
+	for (int i = 0; i < context->buttonMappings.KeyboardButtonMappings.size; i++)
+	{
+		InputMapping* pMapping = &context->buttonMappings.KeyboardButtonMappings.arr[i];
+		pMapping->data.ButtonMapping.bPressThisFrame = false;
+		pMapping->data.ButtonMapping.bReleaseThisFrame = false;
+	}
+
+	for (int i = 0; i < context->buttonMappings.MouseButtonMappings.size; i++)
+	{
+		InputMapping* pMapping = &context->buttonMappings.MouseButtonMappings.arr[i];
+		pMapping->data.ButtonMapping.bPressThisFrame = false;
+		pMapping->data.ButtonMapping.bReleaseThisFrame = false;
+	}
+
+	for (int i = 0; i < context->buttonMappings.GamepadMappings.size; i++)
+	{
+		InputMapping* pMapping = &context->buttonMappings.GamepadMappings.arr[i];
+		pMapping->data.ButtonMapping.bPressThisFrame = false;
+		pMapping->data.ButtonMapping.bReleaseThisFrame = false;
+	}
+
 }
 
 typedef void(*SetButtonCodeCallback)(InputMapping*, int);
@@ -461,6 +497,9 @@ static void AddChildButtonStructs(cJSON* parent, InputMappingArray* outMappings,
 		mapping.type = Button;
 		mapping.data.ButtonMapping.type = btnSubType;
 		mapping.data.ButtonMapping.bCurrent = false;
+		mapping.data.ButtonMapping.bPressThisFrame = false;
+		mapping.data.ButtonMapping.bReleaseThisFrame = false;
+
 		callback(&mapping, val);
 		outMappings->arr[outMappings->size++] = mapping;
 		parent = parent->next;
@@ -749,5 +788,80 @@ void In_ActivateAxisBinding(struct AxisBinding binding, struct ActiveInputBindin
 		pMask->MouseScrollAxisMappings |= (1 << binding.index);
 		break;
 	}
+}
+
+void In_DeactivateButtonBinding(struct ButtonBinding binding, struct ActiveInputBindingsMask* pMask)
+{
+		EASSERT(binding.index <= 63);
+	switch (binding.type)
+	{
+	case MouseButton:
+		pMask->MouseButtonMappings &= ~(1 << binding.index);
+		break;
+	case KeyboardButton:
+		pMask->KeyboardButtonMappings &= ~(1 << binding.index);
+		break;
+	case GamepadButton:
+		pMask->GamepadButtonMappings &= ~(1 << binding.index);
+		break;
+	case MouseScrollButton:
+		pMask->MouseScrollButtonMappings &= ~(1 << binding.index);
+		break;
+	}
+
+}
+
+void In_DeactivateAxisBinding(struct AxisBinding binding, struct ActiveInputBindingsMask* pMask)
+{
+	EASSERT(binding.index <= 63);
+	switch (binding.type)
+	{
+	case MouseAxis:
+		pMask->MouseAxisMappings &= ~(1 << binding.index);
+		break;
+	case GamePadAxis:
+		pMask->ControllerAxisMappings &= ~(1 << binding.index);
+		break;
+	case MouseScrollAxis:
+		pMask->MouseScrollAxisMappings &= ~(1 << binding.index);
+		break;
+	}
+}
+
+
+bool In_GetButtonPressThisFrame(InputContext* context, struct ButtonBinding binding)
+{
+	EASSERT(binding.index > -1);
+	EASSERT(binding.type != UnknownButton);
+	switch (binding.type)
+	{
+	case MouseButton:
+		return context->buttonMappings.MouseButtonMappings.arr[binding.index].data.ButtonMapping.bPressThisFrame;
+	case KeyboardButton:
+		return context->buttonMappings.KeyboardButtonMappings.arr[binding.index].data.ButtonMapping.bPressThisFrame;
+	case GamepadButton:
+		return context->buttonMappings.GamepadMappings.arr[binding.index].data.ButtonMapping.bPressThisFrame;
+	case MouseScrollButton:
+		return context->buttonMappings.MouseScrollButtonMappings.arr[binding.index].data.ButtonMapping.bPressThisFrame;
+	}
+	return false;
+}
+
+bool In_GetButtonReleaseThisFrame(InputContext* context, struct ButtonBinding binding)
+{
+	EASSERT(binding.index > -1);
+	EASSERT(binding.type != UnknownButton);
+	switch (binding.type)
+	{
+	case MouseButton:
+		return context->buttonMappings.MouseButtonMappings.arr[binding.index].data.ButtonMapping.bReleaseThisFrame;
+	case KeyboardButton:
+		return context->buttonMappings.KeyboardButtonMappings.arr[binding.index].data.ButtonMapping.bReleaseThisFrame;
+	case GamepadButton:
+		return context->buttonMappings.GamepadMappings.arr[binding.index].data.ButtonMapping.bReleaseThisFrame;
+	case MouseScrollButton:
+		return context->buttonMappings.MouseScrollButtonMappings.arr[binding.index].data.ButtonMapping.bReleaseThisFrame;
+	}
+	return false;
 }
 

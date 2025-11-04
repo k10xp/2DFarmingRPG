@@ -65,6 +65,8 @@ typedef struct InputMapping
 		{
 			ButtonSubType type;
 			bool bCurrent;
+			bool bPressThisFrame;
+			bool bReleaseThisFrame;
 			union
 			{
 				struct
@@ -192,7 +194,8 @@ struct ButtonBinding In_FindButtonMapping(InputContext* context, const char* nam
 
 float In_GetAxisValue(InputContext* context, struct AxisBinding binding);
 bool In_GetButtonValue(InputContext* context, struct ButtonBinding binding);
-
+bool In_GetButtonPressThisFrame(InputContext* context, struct ButtonBinding binding);
+bool In_GetButtonReleaseThisFrame(InputContext* context, struct ButtonBinding binding);
 
 struct ActiveInputBindingsMask
 {
@@ -210,5 +213,7 @@ void In_GetMask(struct ActiveInputBindingsMask* pOutMask, InputContext* pCtx);
 void In_SetMask(struct ActiveInputBindingsMask* mask, InputContext* pCtx);
 void In_ActivateButtonBinding(struct ButtonBinding binding, struct ActiveInputBindingsMask* pMask);
 void In_ActivateAxisBinding(struct AxisBinding binding, struct ActiveInputBindingsMask* pMask);
+void In_DeactivateButtonBinding(struct ButtonBinding binding, struct ActiveInputBindingsMask* pMask);
+void In_DeactivateAxisBinding(struct AxisBinding binding, struct ActiveInputBindingsMask* pMask);
 
 #endif // !INPUTCONTEXT_H

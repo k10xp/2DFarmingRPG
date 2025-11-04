@@ -19,6 +19,16 @@
 InputContext gInputContext;
 DrawContext gDrawContext;
 
+DrawContext* GetDrawContext()
+{
+    return &gDrawContext;
+}
+
+InputContext* GetInputContext()
+{
+    return &gInputContext;
+}
+
 int Mn_GetScreenWidth()
 {
     return gDrawContext.screenWidth;

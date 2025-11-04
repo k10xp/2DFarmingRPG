@@ -9,6 +9,7 @@
 #include "AnimatedSprite.h"
 #include "Camera2D.h"
 #include "WfEntities.h"
+#include "WfUI.h"
 #include <string.h>
 
 #define WALKING_UP_MALE "walk-base-male-up"
@@ -21,11 +22,8 @@
 #define WALKING_LEFT_FEMALE "walk-base-female-left"
 #define WALKING_RIGHT_FEMALE "walk-base-female-right"
 
-#define PLAYER_SPRITE_COMPONENT_INDEX 0
-#define PLAYER_GROUND_COLLIDER_COMPONENT_INDEX 1
-
-#define PLAYER_SPRITE_COMP_INDEX 0
-#define PLAYER_COLLIDER_COMP_INDEX 1
+#define PLAYER_SPRITE_COMP_INDEX 1
+#define PLAYER_COLLIDER_COMP_INDEX 0
 
 struct WfPlayerEntData
 {
@@ -34,6 +32,7 @@ struct WfPlayerEntData
     struct ButtonBinding moveDownBinding;
     struct ButtonBinding moveLeftBinding;
     struct ButtonBinding moveRightBinding;
+    struct ButtonBinding settingsMenuBinding;
     struct ActiveInputBindingsMask playerControlsMask;
     /* value I set this to is NOT meters per second, TODO: fix */
     float metersPerSecondWalkSpeedBase;
@@ -64,10 +63,13 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
     pPlayerEntData->moveDownBinding  = In_FindButtonMapping(pInputCtx, "playerMoveDown");
     pPlayerEntData->moveLeftBinding  = In_FindButtonMapping(pInputCtx, "playerMoveLeft");
     pPlayerEntData->moveRightBinding = In_FindButtonMapping(pInputCtx, "playerMoveRight");
+    pPlayerEntData->settingsMenuBinding = In_FindButtonMapping(pInputCtx, "settings");
+    memset(&pPlayerEntData->playerControlsMask, 0, sizeof(struct ActiveInputBindingsMask));
     In_ActivateButtonBinding(pPlayerEntData->moveUpBinding, &pPlayerEntData->playerControlsMask);
     In_ActivateButtonBinding(pPlayerEntData->moveDownBinding, &pPlayerEntData->playerControlsMask);
     In_ActivateButtonBinding(pPlayerEntData->moveLeftBinding, &pPlayerEntData->playerControlsMask);
     In_ActivateButtonBinding(pPlayerEntData->moveRightBinding, &pPlayerEntData->playerControlsMask);
+    In_ActivateButtonBinding(pPlayerEntData->settingsMenuBinding, &pPlayerEntData->playerControlsMask);
     In_SetMask(&pPlayerEntData->playerControlsMask, pInputCtx);
     pPlayerEntData->bMovingThisFrame = false;
     pPlayerEntData->metersPerSecondWalkSpeedBase = 100.0f;
@@ -137,6 +139,8 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
     pPlayerEntData->movementVector[1] = 0.0f;
     pPlayerEntData->bMovingLastFrame = pPlayerEntData->bMovingThisFrame;
     pPlayerEntData->bMovingThisFrame = false;
+    struct GameLayer2DData* pLayerData = pLayer->userData;
+    
     if(In_GetButtonValue(context, pPlayerEntData->moveUpBinding))
     {
         vec2 add = {0.0f, -1.0f};
@@ -160,6 +164,11 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
         vec2 add = {1.0f, 0.0f};
         glm_vec2_add(pPlayerEntData->movementVector, add, pPlayerEntData->movementVector);   
         pPlayerEntData->bMovingThisFrame = true;
+    }
+    if(In_GetButtonPressThisFrame(context, pPlayerEntData->settingsMenuBinding))
+    {
+        GF_PopGameFrameworkLayer();
+        WfPushSettings(pLayerData->pDrawContext);
     }
     glm_vec2_normalize(pPlayerEntData->movementVector);
 }
@@ -201,18 +210,7 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     gPlayerEntDataPool[pEnt->user.hData].groundColliderCenter2EntTransform[1] = -60;
     pEnt->numComponents = 0;
     pEnt->type = WfEntityType_Player;
-    /*
-        Animated Sprite
-    */
-    struct Component2D* pComponent1 = &pEnt->components[pEnt->numComponents++];
-    pComponent1->type = ETE_SpriteAnimator;
-    struct AnimatedSprite* pAnimatedSprite = &pComponent1->data.spriteAnimator;
-    memset(pAnimatedSprite, 0, sizeof(struct AnimatedSprite));
-    pAnimatedSprite->animationName = WALKING_DOWN_MALE;
-    pAnimatedSprite->bRepeat = true;
-    pAnimatedSprite->transform.scale[0] = 1.0f;
-    pAnimatedSprite->transform.scale[1] = 1.0f;
-    pAnimatedSprite->bIsAnimating = false;
+    
 
     /*
         Ground Collider
@@ -227,6 +225,20 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     pComponent2->data.dynamicCollider.bGenerateSensorEvents = true;
     pComponent2->data.dynamicCollider.onSensorOverlapBegin = NULL;
     pComponent2->data.dynamicCollider.onSensorOverlapEnd = NULL;
+
+    /*
+        Animated Sprite
+    */
+    struct Component2D* pComponent1 = &pEnt->components[pEnt->numComponents++];
+    pComponent1->type = ETE_SpriteAnimator;
+    struct AnimatedSprite* pAnimatedSprite = &pComponent1->data.spriteAnimator;
+    memset(pAnimatedSprite, 0, sizeof(struct AnimatedSprite));
+    pAnimatedSprite->animationName = WALKING_DOWN_MALE;
+    pAnimatedSprite->bRepeat = true;
+    pAnimatedSprite->transform.scale[0] = 1.0f;
+    pAnimatedSprite->transform.scale[1] = 1.0f;
+    pAnimatedSprite->bIsAnimating = false;
+    
 
     glm_vec2_add(spawnAtGroundPos, gPlayerEntDataPool[pEnt->user.hData].groundColliderCenter2EntTransform, pEnt->transform.position);
     pEnt->transform.scale[0] = 1.0;

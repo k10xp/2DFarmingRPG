@@ -16,7 +16,8 @@
 #include "WfGame.h"
 #include "WfItem.h"
 #include "XMLUIGameLayer.h"
-#include "WfHUD.h"
+#include "WfUI.h"
+#include "WfScriptFunctions.h"
 
 
 void WfEngineInit()
@@ -33,7 +34,7 @@ void GameInit(InputContext* pIC, DrawContext* pDC)
     WfGameInit();
     WfEngineInit();
     WfInit();
-    WfRegisterItemScriptFunctions();
+    WfRegisterScriptFunctions();
     //WfInitWorldLevels(); /* temporary - a world will be loaded as part of a game file, to be implemented in WfGame.c */
     VECTOR(struct WfGameSave) pSaves = WfGameGetSaves();
     WfSetCurrentSaveGame(&pSaves[0]);

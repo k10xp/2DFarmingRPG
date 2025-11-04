@@ -62,6 +62,12 @@ function GetGameHUDViewModel()
             self._inventoryChangedListener = SubscribeGameFrameworkEvent("InventoryChanged", self, self.OnInventoryChanged)
             OnPropertyChanged(self, "InventoryChildren")
             FireGameFrameworkEvent({vm=self, type="basic"}, "onHUDLayerPushed")
-        end
+        end,
+
+        OnXMLUILayerPop = function(self)
+			print("HUD POP!")
+			UnsubscribeGameFrameworkEvent(self._inventoryChangedListener)
+		end
+
     }
 end

@@ -10,7 +10,10 @@
 #include "RootWidget.h"
 #include "AssertLib.h"
 #include "GameFrameworkEvent.h"
+#include "GameFramework.h"
 #include "DataNode.h"
+#include "main.h"
+#include "Game2DLayer.h"
 
 #define GAME_LUA_MINOR_VERSION 1
 
@@ -88,6 +91,7 @@ static int L_FireGameFrameworkEvent(lua_State* L)
 	}
 	if(lua_istable(L,-2))
 	{
+		EASSERT(gL == L);
 		lua_pop(gL, 1);
 		struct DataNode node;
 		DN_InitForLuaTableOnTopOfStack(&node);
@@ -198,6 +202,130 @@ static int L_OnPropertyChanged(lua_State* L)
 	return 0;
 }
 
+/* Game Framework */
+
+static int L_PopGameFrameworkLayer(lua_State* L)
+{
+	GF_PopGameFrameworkLayer();
+	return 0;
+}
+
+/* Input */
+
+static int L_GetButtonBinding(lua_State* L)
+{
+	int top = lua_gettop(L);
+	if(top != 1)
+	{
+		printf("L_GetButtonBinding Wrong number of args\n");
+		lua_pushlightuserdata(L, NULL);
+		return 1;
+	}
+	if(!lua_isstring(L,-1))
+	{
+		printf("L_GetButtonBinding Wrong type of arg, string expected\n");
+		lua_pushlightuserdata(L, NULL);
+		return 1;
+	}
+	InputContext* pCtx = GetInputContext();
+	const char* name = lua_tostring(L, -1);
+	struct ButtonBinding* p = malloc(sizeof(struct ButtonBinding));
+	*p = In_FindButtonMapping(pCtx, name);
+	lua_pushlightuserdata(L, p);
+	return 1;
+}
+
+static int L_FreeButtonBinding(lua_State* L)
+{
+	int top = lua_gettop(L);
+	if(top != 1)
+	{
+		printf("L_FreeButtonBinding Wrong number of args\n");
+		lua_pushlightuserdata(L, NULL);
+		return 1;
+	}
+	if(!lua_islightuserdata(L,-1))
+	{
+		printf("L_FreeButtonBinding Wrong type of arg, lightuserdata expected\n");
+		lua_pushlightuserdata(L, NULL);
+		return 1;
+	}
+	void* p = lua_touserdata(L, -1);
+	free(p);
+	return 1;
+}
+
+static int L_GetButtonPress(lua_State* L)
+{
+	int top = lua_gettop(L);
+	if(top != 1)
+	{
+		printf("L_GetButtonPress Wrong number of args\n");
+		lua_pushboolean(L, false);
+		return 1;
+	}
+	if(!lua_islightuserdata(L,-1))
+	{
+		printf("L_GetButtonPress Wrong type of arg, lightuserdata expected\n");
+		lua_pushboolean(L, false);
+		return 1;
+	}
+	InputContext* pCtx = GetInputContext();
+
+	struct ButtonBinding* p = lua_touserdata(L, -1);
+	bool bPress = In_GetButtonPressThisFrame(pCtx, *p);
+	lua_pushboolean(L, bPress);
+	return 1;
+}
+
+/* Game2DLayer */
+
+static int L_GetGamelayerZoom(lua_State* L)
+{
+	int top = lua_gettop(L);
+	if(top != 1)
+	{
+		printf("L_GetGamelayerZoom Wrong number of args\n");
+		lua_pushnumber(L, 1.0);
+		return 1;
+	}
+	if(!lua_islightuserdata(L,-1))
+	{
+		printf("L_GetGamelayerZoom Wrong type of arg, lightuserdata expected\n");
+		lua_pushnumber(L, 1.0);
+		return 1;
+	}
+	struct GameLayer2DData* pData = lua_touserdata(L, -1);
+	lua_pushnumber(L, (lua_Number)pData->camera.scale[0]);
+	return 1;
+}
+
+static int L_SetGamelayerZoom(lua_State* L)
+{
+	int top = lua_gettop(L);
+	if(top != 2)
+	{
+		printf("L_SetGamelayerZoom Wrong number of args\n");
+		return 0;
+	}
+	if(!lua_isnumber(L,1))
+	{
+		printf("L_SetGamelayerZoom Wrong type of arg, arg 1 number expected\n");
+		return 0;
+	}
+	if(!lua_islightuserdata(L,2))
+	{
+		printf("L_SetGamelayerZoom Wrong type of arg, arg 2 lightuserdata expected\n");
+		return 0;
+	}
+	double num = lua_tonumber(L, 1);
+	struct GameLayer2DData* pData = lua_touserdata(L, 2);
+	pData->camera.scale[0] = (float)num;
+	pData->camera.scale[1] = (float)num;
+	return 0;
+}
+
+
 void Sc_RegisterCFunction(const char* name, int(*fn)(lua_State*))
 {
 	lua_pushcfunction(gL, fn);
@@ -214,6 +342,13 @@ void Sc_InitScripting()
 	Sc_RegisterCFunction("SubscribeGameFrameworkEvent", &L_SubscribeToGameFrameworkEvent);
 	Sc_RegisterCFunction("UnsubscribeGameFrameworkEvent", &L_UnSubscribeToGameFrameworkEvent);
 	Sc_RegisterCFunction("FireGameFrameworkEvent", &L_FireGameFrameworkEvent);
+	Sc_RegisterCFunction("PopGameFrameworkLayer", &L_PopGameFrameworkLayer);
+	Sc_RegisterCFunction("GetButtonBinding", &L_GetButtonBinding);
+	Sc_RegisterCFunction("FreeButtonBinding", &L_FreeButtonBinding);
+	Sc_RegisterCFunction("GetButtonPress", &L_GetButtonPress);
+	Sc_RegisterCFunction("GetGameLayerZoom", &L_GetGamelayerZoom);
+	Sc_RegisterCFunction("SetGameLayerZoom", &L_SetGamelayerZoom);
+
 }
 
 void Sc_DeInitScripting()
@@ -337,7 +472,7 @@ void Sc_CallFuncInRegTableEntryTable(int regIndex, const char* funcName, struct 
 	{
 		lua_rawgeti(gL, LUA_REGISTRYINDEX, regIndex);
 		PushFunctionCallArgsOntoStack(pArgs, numArgs);
-		lua_pcall(gL, numArgs + 1, numReturnVals, 0);
+		lua_call(gL, numArgs + 1, numReturnVals);
 	}
 	else
 	{
@@ -568,6 +703,21 @@ void Sc_SetIntAtTableKey(const char* key, int val)
 	lua_pushinteger(gL, val);
 	lua_setfield(gL, -2, key);
 }
+
+void Sc_SetFloatAtTableKey(const char* key, float val)
+{
+	EASSERT(Sc_IsTable());
+	lua_pushnumber(gL, (lua_Number)val);
+	lua_setfield(gL, -2, key);
+}
+
+void Sc_SetPointerAtTableKey(const char* key, void* ptr)
+{
+	EASSERT(Sc_IsTable());
+	lua_pushlightuserdata(gL, ptr);
+	lua_setfield(gL, -2, key);
+}
+
 
 int Sc_RefTable()
 {

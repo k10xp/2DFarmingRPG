@@ -109,6 +109,8 @@ void Sc_RegisterCFunction(const char* name, int(*fn)(lua_State*));
 void Sc_NewTableOnStack(int arrayElementHint, int nonArrayElementHint);
 void Sc_SetIntAtTableIndex(int index, int value);
 void Sc_SetIntAtTableKey(const char* key, int val);
+void Sc_SetFloatAtTableKey(const char* key, float val);
+void Sc_SetPointerAtTableKey(const char* key, void* ptr);
 int Sc_RefTable();
 void Sc_UnRefTable(int ref);
 

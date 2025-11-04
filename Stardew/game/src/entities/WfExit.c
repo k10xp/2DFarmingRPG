@@ -8,7 +8,7 @@
 #include "Entities.h"
 #include "WfEntities.h"
 #include "WfWorld.h"
-#include "WfHUD.h"
+#include "WfUI.h"
 
 struct WfExitEntityData
 {

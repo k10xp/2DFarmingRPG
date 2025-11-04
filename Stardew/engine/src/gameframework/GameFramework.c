@@ -17,6 +17,7 @@ struct LayerChange
 static VECTOR(struct GameFrameworkLayer) gLayerStack = NULL;
 
 static VECTOR(struct LayerChange) gLayerChangeQueue = NULL;
+static bool gChangeLastFrame = false;
 static int gLayerPopCount = 0;
 
 static int gInputItrStart = 0;
@@ -27,6 +28,8 @@ static int gDrawItrStart = 0;
 void GF_InitGameFramework()
 {
 	gLayerStack = NEW_VECTOR(struct GameFrameworkLayer);
+	gLayerStack = VectorResize(gLayerStack, 32);
+	gLayerStack = VectorClear(gLayerStack);
 	gLayerChangeQueue = NEW_VECTOR(struct LayerChange);
 	Ev_Init();
 }
@@ -92,6 +95,7 @@ void GF_EndFrame(DrawContext* drawContext, InputContext* inputContext)
 				struct GameFrameworkLayer* pTop = VectorTop(gLayerStack);
 				pTop->onPush(pTop, drawContext, inputContext);
 			}
+			gChangeLastFrame = true;
 		}
 		else
 		{
@@ -114,6 +118,7 @@ void GF_EndFrame(DrawContext* drawContext, InputContext* inputContext)
 			}
 
 			VectorPop(gLayerStack);
+			gChangeLastFrame = true;
 		}
 		//VectorPop(gLayerChangeQueue);
 	}
@@ -144,6 +149,11 @@ void GF_InputGameFramework(InputContext* context)
 
 void GF_DrawGameFramework(DrawContext* context)
 {
+	// if(gChangeLastFrame)
+	// {
+	// 	gChangeLastFrame = false;
+	// 	return;
+	// }
 	int c = 0;
 	for (int i = gDrawItrStart; i < VectorSize(gLayerStack); i++)
 	{
