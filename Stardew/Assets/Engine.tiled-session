@@ -347,7 +347,7 @@
     },
     "last.exportedFilePath": "C:/Users/User1/source/repos/ReacherRPG/ReacherRPG/json",
     "last.externalTilesetPath": "C:/Users/User1/source/repos/TileMapRendererExperiments/Engine/Assets",
-    "last.imagePath": "/home/jimmarshall/Jim/TileMapRendererExperiments/Stardew/Assets/Image/LPC Submissions/Extensions",
+    "last.imagePath": "/home/jimmarshall/Jim/TileMapRendererExperiments/Stardew/Assets/Image",
     "map.fixedSize": true,
     "map.height": 12,
     "map.lastUsedExportFilter": "JSON map files (*.json)",
@@ -384,8 +384,8 @@
     "tileset.margin": 0,
     "tileset.spacing": 0,
     "tileset.tileSize": {
-        "height": 16,
-        "width": 16
+        "height": 64,
+        "width": 64
     },
     "tileset.transparentColor": "#000000",
     "tileset.type": 0,

@@ -101,4 +101,48 @@
 		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/male_walkcycle.png" top="192" left="448" width="64" height="64" name="walk-base-male-right7" />
 		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/male_walkcycle.png" top="192" left="512" width="64" height="64" name="walk-base-male-right8" />
 	</animation-frames>
+	<animation-frames name="walk-pickaxe-male-up" fps="10">
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="0" width="64" height="64" name="walk-pickaxe-male-up0" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="64" width="64" height="64" name="walk-pickaxe-male-up1" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="128" width="64" height="64" name="walk-pickaxe-male-up2" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="192" width="64" height="64" name="walk-pickaxe-male-up3" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="256" width="64" height="64" name="walk-pickaxe-male-up4" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="320" width="64" height="64" name="walk-pickaxe-male-up5" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="384" width="64" height="64" name="walk-pickaxe-male-up6" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="448" width="64" height="64" name="walk-pickaxe-male-up7" />
+		<sprite source="./Assets/Image/pickaxe.png" top="0" left="512" width="64" height="64" name="walk-pickaxe-male-up8" />
+	</animation-frames>
+	<animation-frames name="walk-pickaxe-male-left" fps="10">
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="0" width="64" height="64" name="walk-pickaxe-male-left0" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="64" width="64" height="64" name="walk-pickaxe-male-left1" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="128" width="64" height="64" name="walk-pickaxe-male-left2" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="192" width="64" height="64" name="walk-pickaxe-male-left3" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="256" width="64" height="64" name="walk-pickaxe-male-left4" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="320" width="64" height="64" name="walk-pickaxe-male-left5" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="384" width="64" height="64" name="walk-pickaxe-male-left6" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="448" width="64" height="64" name="walk-pickaxe-male-left7" />
+		<sprite source="./Assets/Image/pickaxe.png" top="64" left="512" width="64" height="64" name="walk-pickaxe-male-left8" />
+	</animation-frames>
+	<animation-frames name="walk-pickaxe-male-down" fps="10">
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="0" width="64" height="64" name="walk-pickaxe-male-down0" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="64" width="64" height="64" name="walk-pickaxe-male-down1" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="128" width="64" height="64" name="walk-pickaxe-male-down2" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="192" width="64" height="64" name="walk-pickaxe-male-down3" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="256" width="64" height="64" name="walk-pickaxe-male-down4" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="320" width="64" height="64" name="walk-pickaxe-male-down5" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="384" width="64" height="64" name="walk-pickaxe-male-down6" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="448" width="64" height="64" name="walk-pickaxe-male-down7" />
+		<sprite source="./Assets/Image/pickaxe.png" top="128" left="512" width="64" height="64" name="walk-pickaxe-male-down8" />
+	</animation-frames>
+	<animation-frames name="walk-pickaxe-male-right" fps="10">
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="0" width="64" height="64" name="walk-pickaxe-male-right0" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="64" width="64" height="64" name="walk-pickaxe-male-right1" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="128" width="64" height="64" name="walk-pickaxe-male-right2" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="192" width="64" height="64" name="walk-pickaxe-male-right3" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="256" width="64" height="64" name="walk-pickaxe-male-right4" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="320" width="64" height="64" name="walk-pickaxe-male-right5" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="384" width="64" height="64" name="walk-pickaxe-male-right6" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="448" width="64" height="64" name="walk-pickaxe-male-right7" />
+		<sprite source="./Assets/Image/pickaxe.png" top="192" left="512" width="64" height="64" name="walk-pickaxe-male-right8" />
+	</animation-frames>
 </atlas>

@@ -104,4 +104,48 @@
                 width="64"
                 height="64"
                 numFrames="9"/>
+    
+    <animation name="walk-pickaxe-male-up"
+                fps="10"
+                source="./Assets/Image/pickaxe.png"
+                startx="0"
+                starty="0"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-pickaxe-male-left"
+                fps="10"
+                source="./Assets/Image/pickaxe.png"
+                startx="0"
+                starty="64"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-pickaxe-male-down"
+                fps="10"
+                source="./Assets/Image/pickaxe.png"
+                startx="0"
+                starty="128"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-pickaxe-male-right"
+                fps="10"
+                source="./Assets/Image/pickaxe.png"
+                startx="0"
+                starty="192"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
 </atlas>

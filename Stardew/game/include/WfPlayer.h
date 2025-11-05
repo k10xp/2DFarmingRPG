@@ -34,6 +34,10 @@ struct WfAnimationSet
 
 void WfInitPlayer();
 
+struct WfAnimationSet* WfGetPlayerAnimationSet(struct Entity2D* pInPlayerEnt);
+
+void WfSetPlayerAnimationSet(struct Entity2D* pInPlayerEnt, const struct WfAnimationSet* pInSet);
+
 void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData);
 
 void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData);

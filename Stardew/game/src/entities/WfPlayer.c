@@ -133,6 +133,7 @@ static void SetPlayerOverlayAnimations(enum WfDirection dir, struct GameFramewor
     struct Component2D* pCompBaseAnimator = &pEnt->components[PLAYER_SPRITE_COMP_INDEX];
     struct AnimatedSprite* pBaseAnimatedSprite = &pCompBaseAnimator->data.spriteAnimator;
     EASSERT(pCompBaseAnimator->type == ETE_SpriteAnimator);
+    struct GameLayer2DData* pLayerData = pLayer->userData;
 
     for(int i=0; i<WfNumAnimationLayers; i++)
     {
@@ -141,8 +142,9 @@ static void SetPlayerOverlayAnimations(enum WfDirection dir, struct GameFramewor
             struct Component2D* pComp = &pEnt->components[PLAYER_SPRITE_COMP_INDEX + 1 + i];
             EASSERT(pComp->type == ETE_SpriteAnimator);
             struct AnimatedSprite* pOverlayAnimator = &pComp->data.spriteAnimator;
+            AnimatedSprite_SetAnimation(pLayer, pOverlayAnimator, pPlayerEntData->animationSet.layers[i].animationNames[dir], false, false);
             SyncAnimA2B(pBaseAnimatedSprite, pOverlayAnimator);
-            pOverlayAnimator->animationName = pPlayerEntData->animationSet.layers[i].animationNames[dir];
+            // pOverlayAnimator->fps *= pPlayerEntData->speedMultiplier;
         }
     }
 
@@ -153,29 +155,47 @@ static void SetPlayerAnimation(struct GameFrameworkLayer* pLayer, struct WfPlaye
     /* set the base animation */
     struct AnimatedSprite* pSprite = &pEnt->components[PLAYER_SPRITE_COMP_INDEX].data.spriteAnimator;
     pSprite->bIsAnimating = pPlayerEntData->bMovingThisFrame;
+    for(int i=0; i<WfNumAnimationLayers; i++)
+    {
+        if(pPlayerEntData->animationSet.layersMask & (1 << i))
+        {
+            pEnt->components[PLAYER_SPRITE_COMP_INDEX + 1 + i].data.spriteAnimator.bIsAnimating = pSprite->bIsAnimating;
+        }
+    }
     if(!pPlayerEntData->bMovingThisFrame && pPlayerEntData->bMovingLastFrame)
     {
         pSprite->onSprite = 0;
+        for(int i=0; i<WfNumAnimationLayers; i++)
+        {
+            if(pPlayerEntData->animationSet.layersMask & (1 << i))
+            {
+                pEnt->components[PLAYER_SPRITE_COMP_INDEX + 1 + i].data.spriteAnimator.onSprite = 0;
+            }
+        }
     }
     if(pPlayerEntData->movementVector[1] > 1e-5f)
     {
         // moving down
         SetBasePlayerAnimation(Down, pLayer, pPlayerEntData, pEnt);
+        SetPlayerOverlayAnimations(Down, pLayer, pPlayerEntData, pEnt);
     }
     else if(pPlayerEntData->movementVector[1] < -1e-5f)
     {
         // moving up
         SetBasePlayerAnimation(Up, pLayer, pPlayerEntData, pEnt);
+        SetPlayerOverlayAnimations(Up, pLayer, pPlayerEntData, pEnt);
     }
     else if(pPlayerEntData->movementVector[0] > 1e-5f)
     {
         // moving right
         SetBasePlayerAnimation(Right, pLayer, pPlayerEntData, pEnt);
+        SetPlayerOverlayAnimations(Right, pLayer, pPlayerEntData, pEnt);
     }
     else if(pPlayerEntData->movementVector[0] < -1e-5f)
     {
         // moving left
         SetBasePlayerAnimation(Left, pLayer, pPlayerEntData, pEnt);
+        SetPlayerOverlayAnimations(Left, pLayer, pPlayerEntData, pEnt);
     }
 }
 
@@ -337,4 +357,25 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     pEnt->bKeepInQuadtree = false;
     pEnt->bKeepInDynamicList = true;
     pEnt->bSerialize = false;
+
+    struct WfAnimationSet testAnimationSet;
+    memset(&testAnimationSet, 0, sizeof(struct WfAnimationSet));
+    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Up] = "walk-pickaxe-male-up";
+    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Down] = "walk-pickaxe-male-down";
+    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Left] = "walk-pickaxe-male-left";
+    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Right] = "walk-pickaxe-male-right";
+    testAnimationSet.layersMask |= (1 << WfToolAnimationLayer);
+    WfSetPlayerAnimationSet(pEnt, &testAnimationSet);
+}
+
+struct WfAnimationSet* WfGetPlayerAnimationSet(struct Entity2D* pInPlayerEnt)
+{
+    struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pInPlayerEnt->user.hData];
+    return &pEntData->animationSet;
+}
+
+void WfSetPlayerAnimationSet(struct Entity2D* pInPlayerEnt, const struct WfAnimationSet* pInSet)
+{
+    struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pInPlayerEnt->user.hData];
+    memcpy(&pEntData->animationSet, pInSet, sizeof(struct WfAnimationSet));
 }
