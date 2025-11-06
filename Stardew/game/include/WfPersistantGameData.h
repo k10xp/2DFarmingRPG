@@ -3,6 +3,10 @@
 
 #define VECTOR(a) a*
 
+#define WF_INVENTORY_ROW_SIZE 12
+#define WF_INVENTORY_SIZE_INITIAL WF_INVENTORY_ROW_SIZE
+
+
 struct WfInventoryItem
 {
     int itemIndex;

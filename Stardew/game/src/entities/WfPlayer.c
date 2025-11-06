@@ -4,14 +4,17 @@
 #include "Entities.h"
 #include "ObjectPool.h"
 #include "DrawContext.h"
-#include "InputContext.h"
 #include "GameFramework.h"
 #include "AnimatedSprite.h"
 #include "Camera2D.h"
 #include "WfEntities.h"
 #include "WfUI.h"
 #include "WfEnums.h"
+#include "WfItem.h"
 #include "AssertLib.h"
+#include "WfPersistantGameData.h"
+#include "GameFrameworkEvent.h"
+#include "Scripting.h"
 #include <string.h>
 
 #define WALKING_UP_MALE "walk-base-male-up"
@@ -27,31 +30,6 @@
 #define PLAYER_SPRITE_COMP_INDEX 1
 #define PLAYER_COLLIDER_COMP_INDEX 0
 
-
-
-
-struct WfPlayerEntData
-{
-    vec2 groundColliderCenter2EntTransform;
-    struct ButtonBinding moveUpBinding;
-    struct ButtonBinding moveDownBinding;
-    struct ButtonBinding moveLeftBinding;
-    struct ButtonBinding moveRightBinding;
-    struct ButtonBinding settingsMenuBinding;
-    struct ActiveInputBindingsMask playerControlsMask;
-    /* value I set this to is NOT meters per second, TODO: fix */
-    float metersPerSecondWalkSpeedBase;
-
-    float speedMultiplier;
-
-    vec2 movementVector;
-
-    struct WfAnimationSet animationSet;
-
-    /* flags section */
-    u32 bMovingThisFrame : 1;
-    u32 bMovingLastFrame : 1;
-};
 
 static OBJECT_POOL(struct WfPlayerEntData) gPlayerEntDataPool = NULL;
 
@@ -71,6 +49,10 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
     pPlayerEntData->moveDownBinding  = In_FindButtonMapping(pInputCtx, "playerMoveDown");
     pPlayerEntData->moveLeftBinding  = In_FindButtonMapping(pInputCtx, "playerMoveLeft");
     pPlayerEntData->moveRightBinding = In_FindButtonMapping(pInputCtx, "playerMoveRight");
+
+    pPlayerEntData->nextItemBinding = In_FindButtonMapping(pInputCtx, "nextItem");
+    pPlayerEntData->prevItemBinding = In_FindButtonMapping(pInputCtx, "prevItem");
+
     pPlayerEntData->settingsMenuBinding = In_FindButtonMapping(pInputCtx, "settings");
     memset(&pPlayerEntData->playerControlsMask, 0, sizeof(struct ActiveInputBindingsMask));
     In_ActivateButtonBinding(pPlayerEntData->moveUpBinding, &pPlayerEntData->playerControlsMask);
@@ -78,6 +60,9 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
     In_ActivateButtonBinding(pPlayerEntData->moveLeftBinding, &pPlayerEntData->playerControlsMask);
     In_ActivateButtonBinding(pPlayerEntData->moveRightBinding, &pPlayerEntData->playerControlsMask);
     In_ActivateButtonBinding(pPlayerEntData->settingsMenuBinding, &pPlayerEntData->playerControlsMask);
+    In_ActivateButtonBinding(pPlayerEntData->nextItemBinding, &pPlayerEntData->playerControlsMask);
+    In_ActivateButtonBinding(pPlayerEntData->prevItemBinding, &pPlayerEntData->playerControlsMask);
+
     In_SetMask(&pPlayerEntData->playerControlsMask, pInputCtx);
     pPlayerEntData->bMovingThisFrame = false;
     pPlayerEntData->metersPerSecondWalkSpeedBase = 100.0f;
@@ -144,7 +129,6 @@ static void SetPlayerOverlayAnimations(enum WfDirection dir, struct GameFramewor
             struct AnimatedSprite* pOverlayAnimator = &pComp->data.spriteAnimator;
             AnimatedSprite_SetAnimation(pLayer, pOverlayAnimator, pPlayerEntData->animationSet.layers[i].animationNames[dir], false, false);
             SyncAnimA2B(pBaseAnimatedSprite, pOverlayAnimator);
-            // pOverlayAnimator->fps *= pPlayerEntData->speedMultiplier;
         }
     }
 
@@ -213,6 +197,36 @@ static void OnUpdatePlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLa
     Entity2DUpdate(pEnt, pLayer, deltaT);
 }
 
+static void ChangeItem(struct GameFrameworkLayer* pLayer, struct Entity2D* pEnt, struct WfPlayerEntData* pPlayerEntData, int incr)
+{
+    int oldIndex = pPlayerEntData->selectedItem;
+    pPlayerEntData->selectedItem += incr;
+    if(pPlayerEntData->selectedItem >= WF_INVENTORY_ROW_SIZE)
+    {
+        pPlayerEntData->selectedItem = 0;
+    }
+    if(pPlayerEntData->selectedItem < 0)
+    {
+        pPlayerEntData->selectedItem = WF_INVENTORY_ROW_SIZE - 1;
+    }
+    struct ScriptCallArgument arg;
+    arg.type = SCA_int;
+    arg.val.i = pPlayerEntData->selectedItem;
+    struct LuaListenedEventArgs args = { .numArgs = 1, .args = &arg };
+    Ev_FireEvent("SelectedItemChanged", &args);
+    struct WfInventory* pInv = WfGetInventory();
+    struct WfItemDef* pOldItem = WfGetItemDef(pInv->pItems[oldIndex].itemIndex);
+    struct WfItemDef* pNewItem = WfGetItemDef(pInv->pItems[pPlayerEntData->selectedItem].itemIndex);
+    if(pOldItem)
+    {
+        pOldItem->onStopBeingCurrent(pEnt, pLayer);
+    }
+    if(pNewItem)
+    {
+        pNewItem->onMakeCurrent(pEnt, pLayer);
+    }
+}
+
 static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, InputContext* context)
 {
     Entity2DInput(pEnt, pLayer, context);
@@ -252,6 +266,15 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
         GF_PopGameFrameworkLayer();
         WfPushSettings(pLayerData->pDrawContext);
     }
+    if(In_GetButtonPressThisFrame(context, pPlayerEntData->nextItemBinding))
+    {
+        ChangeItem(pLayer, pEnt, pPlayerEntData, 1);
+    }
+    if(In_GetButtonPressThisFrame(context, pPlayerEntData->prevItemBinding))
+    {
+        ChangeItem(pLayer, pEnt, pPlayerEntData, -1);
+    }
+
     glm_vec2_normalize(pPlayerEntData->movementVector);
 }
 
@@ -292,6 +315,7 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     pEntData->groundColliderCenter2EntTransform[0] = -32;
     pEntData->groundColliderCenter2EntTransform[1] = -60;
     pEntData->animationSet.layersMask = 0;
+    pEntData->selectedItem = 0;
 
     pEnt->numComponents = 0;
     pEnt->type = WfEntityType_Player;
@@ -357,15 +381,6 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     pEnt->bKeepInQuadtree = false;
     pEnt->bKeepInDynamicList = true;
     pEnt->bSerialize = false;
-
-    struct WfAnimationSet testAnimationSet;
-    memset(&testAnimationSet, 0, sizeof(struct WfAnimationSet));
-    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Up] = "walk-pickaxe-male-up";
-    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Down] = "walk-pickaxe-male-down";
-    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Left] = "walk-pickaxe-male-left";
-    testAnimationSet.layers[WfToolAnimationLayer].animationNames[Right] = "walk-pickaxe-male-right";
-    testAnimationSet.layersMask |= (1 << WfToolAnimationLayer);
-    WfSetPlayerAnimationSet(pEnt, &testAnimationSet);
 }
 
 struct WfAnimationSet* WfGetPlayerAnimationSet(struct Entity2D* pInPlayerEnt)
@@ -378,4 +393,15 @@ void WfSetPlayerAnimationSet(struct Entity2D* pInPlayerEnt, const struct WfAnima
 {
     struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pInPlayerEnt->user.hData];
     memcpy(&pEntData->animationSet, pInSet, sizeof(struct WfAnimationSet));
+}
+
+struct WfPlayerEntData* WfGetPlayerEntData(struct Entity2D* pInEnt)
+{
+    return &gPlayerEntDataPool[pInEnt->user.hData];
+}
+
+
+struct Component2D* WfGetPlayerAnimationLayerComponent(struct Entity2D* pPlayer, enum WfAnimationLayerNames layer)
+{
+    return &pPlayer->components[PLAYER_SPRITE_COMP_INDEX + 1 + (int)layer];
 }

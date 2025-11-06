@@ -55,4 +55,6 @@ void WfInitItems();
 
 void WfRegisterItemScriptFunctions();
 
+const struct WfItemDef* WfGetItemDef(int itemIndex);
+
 #endif

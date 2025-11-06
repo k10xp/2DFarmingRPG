@@ -3,9 +3,12 @@
 
 #include <cglm/cglm.h>
 #include "WfEnums.h"
+#include "InputContext.h"
+
 
 struct BinarySerializer;
 struct Entity2D;
+struct Component2D;
 struct GameLayer2DData;
 
 #define NUM_ANIMATIONS NumDirections
@@ -32,6 +35,36 @@ struct WfAnimationSet
     unsigned int layersMask;
 };
 
+struct WfPlayerEntData
+{
+    vec2 groundColliderCenter2EntTransform;
+    struct ButtonBinding moveUpBinding;
+    struct ButtonBinding moveDownBinding;
+    struct ButtonBinding moveLeftBinding;
+    struct ButtonBinding moveRightBinding;
+
+    struct ButtonBinding nextItemBinding;
+    struct ButtonBinding prevItemBinding;
+
+
+    struct ButtonBinding settingsMenuBinding;
+    struct ActiveInputBindingsMask playerControlsMask;
+    /* value I set this to is NOT meters per second, TODO: fix */
+    float metersPerSecondWalkSpeedBase;
+
+    float speedMultiplier;
+
+    vec2 movementVector;
+
+    struct WfAnimationSet animationSet;
+
+    int selectedItem;
+
+    /* flags section */
+    u32 bMovingThisFrame : 1;
+    u32 bMovingLastFrame : 1;
+};
+
 void WfInitPlayer();
 
 struct WfAnimationSet* WfGetPlayerAnimationSet(struct Entity2D* pInPlayerEnt);
@@ -43,5 +76,9 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
 void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData);
 
 void WfMakeIntoPlayerEntity(struct Entity2D* pInEnt, struct GameLayer2DData* pData, vec2 spawnAtGroundPos);
+
+struct WfPlayerEntData* WfGetPlayerEntData(struct Entity2D* pInEnt);
+
+struct Component2D* WfGetPlayerAnimationLayerComponent(struct Entity2D* pPlayer, enum WfAnimationLayerNames layer);
 
 #endif

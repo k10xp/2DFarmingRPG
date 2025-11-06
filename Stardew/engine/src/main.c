@@ -221,6 +221,7 @@ int EngineStart(int argc, char** argv, GameInitFn init)
             GF_InputGameFramework(&gInputContext);
             GF_UpdateGameFramework((float)slice);
             In_EndFrame(&gInputContext);
+            GF_EndFrame(&gDrawContext, &gInputContext);
             accumulator -= slice;
         }
 
@@ -229,7 +230,7 @@ int EngineStart(int argc, char** argv, GameInitFn init)
 
         GF_DrawGameFramework(&gDrawContext);
         glfwSwapBuffers(window);
-        GF_EndFrame(&gDrawContext, &gInputContext);
+        
         frameTimeTotal += delta;
         onCount++;
         if(onCount == numCounts)

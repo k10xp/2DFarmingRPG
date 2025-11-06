@@ -4,7 +4,6 @@
 #include "BinarySerializer.h"
 #include "AssertLib.h"
 
-#define WF_INVENTORY_SIZE_INITIAL 12
 
 
 struct WfPersistantData

@@ -14,7 +14,9 @@ end
 function GetGameHUDViewModel()
     return {
         _inventoryChangedListener = nil,
+        _selectedItemChangedListener = nil,
         _items = { },--0, 1, 2, 3, 4, 5, 6, -1, -1, -1, -1, -1 },
+        _selectedItemIndex = 1,
         widgetChildren = {},
         InventoryChildren = function(self)
             self.widgetChildren = {}
@@ -23,10 +25,14 @@ function GetGameHUDViewModel()
                 if item.item >= 0 then
                     spriteName = WfGetItemSpriteName(item.item)
                 end
+                local backgroundBoxSpriteName = "fantasy_9Panel"
+                if self._selectedItemIndex == index then
+                    backgroundBoxSpriteName = "fantasy_9Panel_selected"
+                end
                 table.insert(self.widgetChildren, 
                 {
                     type = "backgroundbox",
-                    sprite="fantasy_9Panel",
+                    sprite = backgroundBoxSpriteName,
                     scaleX="1.2,",
                     scaleY="1.2",
                     paddingBottom="32",
@@ -52,21 +58,25 @@ function GetGameHUDViewModel()
             return self.widgetChildren
         end,
         OnInventoryChanged = function(self, msg)
-            --print(dump(msg))
 			self._items = msg
 			OnPropertyChanged(self, "InventoryChildren")
 		end,
 
+        OnSelectedItemChanged = function(self, newIndexZeroBased)
+            self._selectedItemIndex = newIndexZeroBased + 1
+            OnPropertyChanged(self, "InventoryChildren")
+        end,
+
         OnXMLUILayerPush = function(self)
-            print("ONPUSHXML")
             self._inventoryChangedListener = SubscribeGameFrameworkEvent("InventoryChanged", self, self.OnInventoryChanged)
+            self._selectedItemChangedListener = SubscribeGameFrameworkEvent("SelectedItemChanged", self, self.OnSelectedItemChanged)
             OnPropertyChanged(self, "InventoryChildren")
             FireGameFrameworkEvent({vm=self, type="basic"}, "onHUDLayerPushed")
         end,
 
         OnXMLUILayerPop = function(self)
-			print("HUD POP!")
 			UnsubscribeGameFrameworkEvent(self._inventoryChangedListener)
+            UnsubscribeGameFrameworkEvent(self._selectedItemChangedListener)
 		end
 
     }

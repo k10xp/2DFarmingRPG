@@ -43,7 +43,6 @@ int l_GetItemUISpriteName(lua_State* L)
 	if(lua_isinteger(L, -1))
     {
         int arg = lua_tointeger(L, -1);
-        volatile int sz = VectorSize(gItemDefs);
         if(arg < VectorSize(gItemDefs) && arg >= 0)
         {
             lua_pushstring(L, gItemDefs[arg].UISpriteName);
@@ -64,6 +63,14 @@ int l_GetItemUISpriteName(lua_State* L)
 
 void WfRegisterItemScriptFunctions()
 {
-    //void Sc_RegisterCFunction(const char* name, int(*fn)(lua_State*));
     Sc_RegisterCFunction("WfGetItemSpriteName", &l_GetItemUISpriteName);
+}
+
+const struct WfItemDef* WfGetItemDef(int itemIndex)
+{
+    if(itemIndex < 0)
+    {
+        return NULL;
+    }
+    return &gItemDefs[itemIndex];
 }
