@@ -203,24 +203,25 @@ static void OnUpdatePlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLa
 
 static void ChangeItem(struct GameFrameworkLayer* pLayer, struct Entity2D* pEnt, struct WfPlayerEntData* pPlayerEntData, int incr)
 {
-    int oldIndex = pPlayerEntData->selectedItem;
-    pPlayerEntData->selectedItem += incr;
-    if(pPlayerEntData->selectedItem >= WF_INVENTORY_ROW_SIZE)
+    struct WfInventory* pInv = WfGetInventory();
+
+    int oldIndex = pInv->selectedItem;
+    pInv->selectedItem += incr;
+    if(pInv->selectedItem >= WF_INVENTORY_ROW_SIZE)
     {
-        pPlayerEntData->selectedItem = 0;
+        pInv->selectedItem = 0;
     }
-    if(pPlayerEntData->selectedItem < 0)
+    if(pInv->selectedItem < 0)
     {
-        pPlayerEntData->selectedItem = WF_INVENTORY_ROW_SIZE - 1;
+        pInv->selectedItem = WF_INVENTORY_ROW_SIZE - 1;
     }
     struct ScriptCallArgument arg;
     arg.type = SCA_int;
-    arg.val.i = pPlayerEntData->selectedItem;
+    arg.val.i = pInv->selectedItem;
     struct LuaListenedEventArgs args = { .numArgs = 1, .args = &arg };
     Ev_FireEvent("SelectedItemChanged", &args);
-    struct WfInventory* pInv = WfGetInventory();
     struct WfItemDef* pOldItem = WfGetItemDef(pInv->pItems[oldIndex].itemIndex);
-    struct WfItemDef* pNewItem = WfGetItemDef(pInv->pItems[pPlayerEntData->selectedItem].itemIndex);
+    struct WfItemDef* pNewItem = WfGetItemDef(pInv->pItems[pInv->selectedItem].itemIndex);
     if(pOldItem)
     {
         pOldItem->onStopBeingCurrent(pEnt, pLayer);
@@ -310,8 +311,9 @@ void WfPlayerPostPhys(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, 
     CenterCameraAt(pixelsPos[0], pixelsPos[1], &pLayerData->camera, pLayerData->windowW, pLayerData->windowH);
 }
 
-void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData, vec2 spawnAtGroundPos)
+void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos)
 {
+    struct GameLayer2DData* pData = pLayer->userData;
     pEnt->nextSibling = NULL_HANDLE;
     pEnt->previousSibling = NULL_HANDLE;
     gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pEnt->user.hData);
@@ -320,7 +322,6 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     pEntData->groundColliderCenter2EntTransform[0] = -32;
     pEntData->groundColliderCenter2EntTransform[1] = -60;
     pEntData->animationSet.layersMask = 0;
-    pEntData->selectedItem = 0;
 
     pEnt->numComponents = 0;
     pEnt->type = WfEntityType_Player;
@@ -386,6 +387,14 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     pEnt->bKeepInQuadtree = false;
     pEnt->bKeepInDynamicList = true;
     pEnt->bSerialize = false;
+
+    struct WfInventory* pInv = WfGetInventory();
+    struct WfInventoryItem* pItem = &pInv->pItems[pInv->selectedItem];
+    if(pItem->itemIndex >= 0)
+    {
+        struct WfItemDef* pDef = WfGetItemDef(pItem->itemIndex);
+        pDef->onMakeCurrent(pEnt, pLayer);
+    }
 }
 
 struct WfAnimationSet* WfGetPlayerAnimationSet(struct Entity2D* pInPlayerEnt)

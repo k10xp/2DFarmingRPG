@@ -40,6 +40,16 @@ static void WfPublishInventoryChangedEvent()
     Sc_UnRefTable(tableRef);
 }
 
+void WfPublishSelectedItemChangedEvent()
+{
+    struct WfInventory* pInv = WfGetInventory();
+    struct ScriptCallArgument arg;
+    arg.type = SCA_int;
+    arg.val.i = pInv->selectedItem;
+    struct LuaListenedEventArgs args = { .numArgs = 1, .args = &arg };
+    Ev_FireEvent("SelectedItemChanged", &args);
+}
+
 static void WfPublishInitSettingsEvent(struct GameFrameworkLayer* pLayer)
 {
     struct GameLayer2DData* pEngineLayer = pLayer->userData;
@@ -53,6 +63,7 @@ static void WfPublishInitSettingsEvent(struct GameFrameworkLayer* pLayer)
 static void WfOnHUDLayerPushed(void* pUserData, void* pEventData)
 {
     WfPublishInventoryChangedEvent();
+    WfPublishSelectedItemChangedEvent();
 }
 
 static void WfOnSettingsLayerPushed(void* pUserData, void* pEventData)
@@ -102,5 +113,8 @@ void WfPushGameLayer(DrawContext* pDC, const char* lvlFilePath)
     struct GameLayer2DData* pEngineLayer = testLayer.userData;
     pEngineLayer->preFirstInitCallback = &WfPreFirstInit;
     testLayer.flags |= (EnableOnPop | EnableOnPush | EnableUpdateFn | EnableDrawFn | EnableInputFn);
+    struct WfPlayerPreferences* pPrefs = WfGetPreferences();
+    pEngineLayer->camera.scale[0] = pPrefs->zoomLevel;
+    pEngineLayer->camera.scale[1] = pPrefs->zoomLevel;
     GF_PushGameFrameworkLayer(&testLayer);
 }

@@ -59,8 +59,6 @@ struct WfPlayerEntData
 
     struct WfAnimationSet animationSet;
 
-    int selectedItem;
-
     enum WfDirection directionFacing;
 
     /* flags section */
@@ -78,7 +76,7 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
 
 void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData);
 
-void WfMakeIntoPlayerEntity(struct Entity2D* pInEnt, struct GameLayer2DData* pData, vec2 spawnAtGroundPos);
+void WfMakeIntoPlayerEntity(struct Entity2D* pInEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos);
 
 struct WfPlayerEntData* WfGetPlayerEntData(struct Entity2D* pInEnt);
 

@@ -13,50 +13,6 @@
 	<sprite source="./Assets/Image/LPC Submissions/Outside Objects.png" top="224" left="288" width="96" height="96" name="decid_tree_aut_top_2" />
 	<sprite source="./Assets/Image/LPC Submissions/Outside Objects.png" top="320" left="192" width="96" height="96" name="conif_tree_aut_top_1" />
 	<sprite source="./Assets/Image/LPC Submissions/Outside Objects.png" top="320" left="288" width="96" height="128" name="conif_tree_aut_top_2" />
-	<animation-frames name="walk-base-female-up" fps="10.0">
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="0" width="64" height="64" name="walk-base-female-up0" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="64" width="64" height="64" name="walk-base-female-up1" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="128" width="64" height="64" name="walk-base-female-up2" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="192" width="64" height="64" name="walk-base-female-up3" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="256" width="64" height="64" name="walk-base-female-up4" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="320" width="64" height="64" name="walk-base-female-up5" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="384" width="64" height="64" name="walk-base-female-up6" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="448" width="64" height="64" name="walk-base-female-up7" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="0" left="512" width="64" height="64" name="walk-base-female-up8" />
-	</animation-frames>
-	<animation-frames name="walk-base-female-down" fps="10.0">
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="0" width="64" height="64" name="walk-base-female-down0" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="64" width="64" height="64" name="walk-base-female-down1" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="128" width="64" height="64" name="walk-base-female-down2" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="192" width="64" height="64" name="walk-base-female-down3" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="256" width="64" height="64" name="walk-base-female-down4" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="320" width="64" height="64" name="walk-base-female-down5" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="384" width="64" height="64" name="walk-base-female-down6" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="448" width="64" height="64" name="walk-base-female-down7" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="512" width="64" height="64" name="walk-base-female-down8" />
-	</animation-frames>
-	<animation-frames name="walk-base-female-left" fps="10.0">
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="0" width="64" height="64" name="walk-base-female-left0" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="64" width="64" height="64" name="walk-base-female-left1" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="128" width="64" height="64" name="walk-base-female-left2" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="192" width="64" height="64" name="walk-base-female-left3" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="256" width="64" height="64" name="walk-base-female-left4" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="320" width="64" height="64" name="walk-base-female-left5" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="384" width="64" height="64" name="walk-base-female-left6" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="448" width="64" height="64" name="walk-base-female-left7" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="64" left="512" width="64" height="64" name="walk-base-female-left8" />
-	</animation-frames>
-	<animation-frames name="walk-base-female-right" fps="10.0">
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="0" width="64" height="64" name="walk-base-female-right0" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="64" width="64" height="64" name="walk-base-female-right1" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="128" width="64" height="64" name="walk-base-female-right2" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="192" width="64" height="64" name="walk-base-female-right3" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="256" width="64" height="64" name="walk-base-female-right4" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="320" width="64" height="64" name="walk-base-female-right5" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="384" width="64" height="64" name="walk-base-female-right6" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="448" width="64" height="64" name="walk-base-female-right7" />
-		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="192" left="512" width="64" height="64" name="walk-base-female-right8" />
-	</animation-frames>
 	<animation-frames name="walk-base-male-up" fps="10.0">
 		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/male_walkcycle.png" top="0" left="0" width="64" height="64" name="walk-base-male-up0" />
 		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/male_walkcycle.png" top="0" left="64" width="64" height="64" name="walk-base-male-up1" />
@@ -101,6 +57,70 @@
 		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/male_walkcycle.png" top="192" left="448" width="64" height="64" name="walk-base-male-right7" />
 		<sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/male_walkcycle.png" top="192" left="512" width="64" height="64" name="walk-base-male-right8" />
 	</animation-frames>
+	<animation-frames name="slash-base-male-up" fps="10.0">
+		<sprite source="./Assets/Image/slash.png" top="0" left="0" width="64" height="64" name="slash-base-male-up0" />
+		<sprite source="./Assets/Image/slash.png" top="0" left="64" width="64" height="64" name="slash-base-male-up1" />
+		<sprite source="./Assets/Image/slash.png" top="0" left="128" width="64" height="64" name="slash-base-male-up2" />
+		<sprite source="./Assets/Image/slash.png" top="0" left="192" width="64" height="64" name="slash-base-male-up3" />
+		<sprite source="./Assets/Image/slash.png" top="0" left="256" width="64" height="64" name="slash-base-male-up4" />
+		<sprite source="./Assets/Image/slash.png" top="0" left="320" width="64" height="64" name="slash-base-male-up5" />
+	</animation-frames>
+	<animation-frames name="slash-base-male-left" fps="10.0">
+		<sprite source="./Assets/Image/slash.png" top="64" left="0" width="64" height="64" name="slash-base-male-left0" />
+		<sprite source="./Assets/Image/slash.png" top="64" left="64" width="64" height="64" name="slash-base-male-left1" />
+		<sprite source="./Assets/Image/slash.png" top="64" left="128" width="64" height="64" name="slash-base-male-left2" />
+		<sprite source="./Assets/Image/slash.png" top="64" left="192" width="64" height="64" name="slash-base-male-left3" />
+		<sprite source="./Assets/Image/slash.png" top="64" left="256" width="64" height="64" name="slash-base-male-left4" />
+		<sprite source="./Assets/Image/slash.png" top="64" left="320" width="64" height="64" name="slash-base-male-left5" />
+	</animation-frames>
+	<animation-frames name="slash-base-male-down" fps="10.0">
+		<sprite source="./Assets/Image/slash.png" top="128" left="0" width="64" height="64" name="slash-base-male-down0" />
+		<sprite source="./Assets/Image/slash.png" top="128" left="64" width="64" height="64" name="slash-base-male-down1" />
+		<sprite source="./Assets/Image/slash.png" top="128" left="128" width="64" height="64" name="slash-base-male-down2" />
+		<sprite source="./Assets/Image/slash.png" top="128" left="192" width="64" height="64" name="slash-base-male-down3" />
+		<sprite source="./Assets/Image/slash.png" top="128" left="256" width="64" height="64" name="slash-base-male-down4" />
+		<sprite source="./Assets/Image/slash.png" top="128" left="320" width="64" height="64" name="slash-base-male-down5" />
+	</animation-frames>
+	<animation-frames name="slash-base-male-right" fps="10.0">
+		<sprite source="./Assets/Image/slash.png" top="192" left="0" width="64" height="64" name="slash-base-male-right0" />
+		<sprite source="./Assets/Image/slash.png" top="192" left="64" width="64" height="64" name="slash-base-male-right1" />
+		<sprite source="./Assets/Image/slash.png" top="192" left="128" width="64" height="64" name="slash-base-male-right2" />
+		<sprite source="./Assets/Image/slash.png" top="192" left="192" width="64" height="64" name="slash-base-male-right3" />
+		<sprite source="./Assets/Image/slash.png" top="192" left="256" width="64" height="64" name="slash-base-male-right4" />
+		<sprite source="./Assets/Image/slash.png" top="192" left="320" width="64" height="64" name="slash-base-male-right5" />
+	</animation-frames>
+	<animation-frames name="thrust-base-male-up" fps="10.0">
+		<sprite source="./Assets/Image/thrust.png" top="0" left="0" width="64" height="64" name="thrust-base-male-up0" />
+		<sprite source="./Assets/Image/thrust.png" top="0" left="64" width="64" height="64" name="thrust-base-male-up1" />
+		<sprite source="./Assets/Image/thrust.png" top="0" left="128" width="64" height="64" name="thrust-base-male-up2" />
+		<sprite source="./Assets/Image/thrust.png" top="0" left="192" width="64" height="64" name="thrust-base-male-up3" />
+		<sprite source="./Assets/Image/thrust.png" top="0" left="256" width="64" height="64" name="thrust-base-male-up4" />
+		<sprite source="./Assets/Image/thrust.png" top="0" left="320" width="64" height="64" name="thrust-base-male-up5" />
+	</animation-frames>
+	<animation-frames name="thrust-base-male-left" fps="10.0">
+		<sprite source="./Assets/Image/thrust.png" top="64" left="0" width="64" height="64" name="thrust-base-male-left0" />
+		<sprite source="./Assets/Image/thrust.png" top="64" left="64" width="64" height="64" name="thrust-base-male-left1" />
+		<sprite source="./Assets/Image/thrust.png" top="64" left="128" width="64" height="64" name="thrust-base-male-left2" />
+		<sprite source="./Assets/Image/thrust.png" top="64" left="192" width="64" height="64" name="thrust-base-male-left3" />
+		<sprite source="./Assets/Image/thrust.png" top="64" left="256" width="64" height="64" name="thrust-base-male-left4" />
+		<sprite source="./Assets/Image/thrust.png" top="64" left="320" width="64" height="64" name="thrust-base-male-left5" />
+	</animation-frames>
+	<animation-frames name="thrust-base-male-down" fps="10.0">
+		<sprite source="./Assets/Image/thrust.png" top="128" left="0" width="64" height="64" name="thrust-base-male-down0" />
+		<sprite source="./Assets/Image/thrust.png" top="128" left="64" width="64" height="64" name="thrust-base-male-down1" />
+		<sprite source="./Assets/Image/thrust.png" top="128" left="128" width="64" height="64" name="thrust-base-male-down2" />
+		<sprite source="./Assets/Image/thrust.png" top="128" left="192" width="64" height="64" name="thrust-base-male-down3" />
+		<sprite source="./Assets/Image/thrust.png" top="128" left="256" width="64" height="64" name="thrust-base-male-down4" />
+		<sprite source="./Assets/Image/thrust.png" top="128" left="320" width="64" height="64" name="thrust-base-male-down5" />
+	</animation-frames>
+	<animation-frames name="thrust-base-male-right" fps="10.0">
+		<sprite source="./Assets/Image/thrust.png" top="192" left="0" width="64" height="64" name="thrust-base-male-right0" />
+		<sprite source="./Assets/Image/thrust.png" top="192" left="64" width="64" height="64" name="thrust-base-male-right1" />
+		<sprite source="./Assets/Image/thrust.png" top="192" left="128" width="64" height="64" name="thrust-base-male-right2" />
+		<sprite source="./Assets/Image/thrust.png" top="192" left="192" width="64" height="64" name="thrust-base-male-right3" />
+		<sprite source="./Assets/Image/thrust.png" top="192" left="256" width="64" height="64" name="thrust-base-male-right4" />
+		<sprite source="./Assets/Image/thrust.png" top="192" left="320" width="64" height="64" name="thrust-base-male-right5" />
+	</animation-frames>
 	<animation-frames name="walk-pickaxe-male-up" fps="10">
 		<sprite source="./Assets/Image/pickaxe.png" top="0" left="0" width="64" height="64" name="walk-pickaxe-male-up0" />
 		<sprite source="./Assets/Image/pickaxe.png" top="0" left="64" width="64" height="64" name="walk-pickaxe-male-up1" />
@@ -144,5 +164,93 @@
 		<sprite source="./Assets/Image/pickaxe.png" top="192" left="384" width="64" height="64" name="walk-pickaxe-male-right6" />
 		<sprite source="./Assets/Image/pickaxe.png" top="192" left="448" width="64" height="64" name="walk-pickaxe-male-right7" />
 		<sprite source="./Assets/Image/pickaxe.png" top="192" left="512" width="64" height="64" name="walk-pickaxe-male-right8" />
+	</animation-frames>
+	<animation-frames name="walk-axe-male-up" fps="10">
+		<sprite source="./Assets/Image/axe.png" top="0" left="0" width="64" height="64" name="walk-axe-male-up0" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="64" width="64" height="64" name="walk-axe-male-up1" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="128" width="64" height="64" name="walk-axe-male-up2" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="192" width="64" height="64" name="walk-axe-male-up3" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="256" width="64" height="64" name="walk-axe-male-up4" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="320" width="64" height="64" name="walk-axe-male-up5" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="384" width="64" height="64" name="walk-axe-male-up6" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="448" width="64" height="64" name="walk-axe-male-up7" />
+		<sprite source="./Assets/Image/axe.png" top="0" left="512" width="64" height="64" name="walk-axe-male-up8" />
+	</animation-frames>
+	<animation-frames name="walk-axe-male-left" fps="10">
+		<sprite source="./Assets/Image/axe.png" top="64" left="0" width="64" height="64" name="walk-axe-male-left0" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="64" width="64" height="64" name="walk-axe-male-left1" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="128" width="64" height="64" name="walk-axe-male-left2" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="192" width="64" height="64" name="walk-axe-male-left3" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="256" width="64" height="64" name="walk-axe-male-left4" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="320" width="64" height="64" name="walk-axe-male-left5" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="384" width="64" height="64" name="walk-axe-male-left6" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="448" width="64" height="64" name="walk-axe-male-left7" />
+		<sprite source="./Assets/Image/axe.png" top="64" left="512" width="64" height="64" name="walk-axe-male-left8" />
+	</animation-frames>
+	<animation-frames name="walk-axe-male-down" fps="10">
+		<sprite source="./Assets/Image/axe.png" top="128" left="0" width="64" height="64" name="walk-axe-male-down0" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="64" width="64" height="64" name="walk-axe-male-down1" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="128" width="64" height="64" name="walk-axe-male-down2" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="192" width="64" height="64" name="walk-axe-male-down3" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="256" width="64" height="64" name="walk-axe-male-down4" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="320" width="64" height="64" name="walk-axe-male-down5" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="384" width="64" height="64" name="walk-axe-male-down6" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="448" width="64" height="64" name="walk-axe-male-down7" />
+		<sprite source="./Assets/Image/axe.png" top="128" left="512" width="64" height="64" name="walk-axe-male-down8" />
+	</animation-frames>
+	<animation-frames name="walk-axe-male-right" fps="10">
+		<sprite source="./Assets/Image/axe.png" top="192" left="0" width="64" height="64" name="walk-axe-male-right0" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="64" width="64" height="64" name="walk-axe-male-right1" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="128" width="64" height="64" name="walk-axe-male-right2" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="192" width="64" height="64" name="walk-axe-male-right3" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="256" width="64" height="64" name="walk-axe-male-right4" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="320" width="64" height="64" name="walk-axe-male-right5" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="384" width="64" height="64" name="walk-axe-male-right6" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="448" width="64" height="64" name="walk-axe-male-right7" />
+		<sprite source="./Assets/Image/axe.png" top="192" left="512" width="64" height="64" name="walk-axe-male-right8" />
+	</animation-frames>
+	<animation-frames name="walk-hoe-male-up" fps="10">
+		<sprite source="./Assets/Image/hoe.png" top="0" left="0" width="64" height="64" name="walk-hoe-male-up0" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="64" width="64" height="64" name="walk-hoe-male-up1" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="128" width="64" height="64" name="walk-hoe-male-up2" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="192" width="64" height="64" name="walk-hoe-male-up3" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="256" width="64" height="64" name="walk-hoe-male-up4" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="320" width="64" height="64" name="walk-hoe-male-up5" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="384" width="64" height="64" name="walk-hoe-male-up6" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="448" width="64" height="64" name="walk-hoe-male-up7" />
+		<sprite source="./Assets/Image/hoe.png" top="0" left="512" width="64" height="64" name="walk-hoe-male-up8" />
+	</animation-frames>
+	<animation-frames name="walk-hoe-male-left" fps="10">
+		<sprite source="./Assets/Image/hoe.png" top="64" left="0" width="64" height="64" name="walk-hoe-male-left0" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="64" width="64" height="64" name="walk-hoe-male-left1" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="128" width="64" height="64" name="walk-hoe-male-left2" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="192" width="64" height="64" name="walk-hoe-male-left3" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="256" width="64" height="64" name="walk-hoe-male-left4" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="320" width="64" height="64" name="walk-hoe-male-left5" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="384" width="64" height="64" name="walk-hoe-male-left6" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="448" width="64" height="64" name="walk-hoe-male-left7" />
+		<sprite source="./Assets/Image/hoe.png" top="64" left="512" width="64" height="64" name="walk-hoe-male-left8" />
+	</animation-frames>
+	<animation-frames name="walk-hoe-male-down" fps="10">
+		<sprite source="./Assets/Image/hoe.png" top="128" left="0" width="64" height="64" name="walk-hoe-male-down0" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="64" width="64" height="64" name="walk-hoe-male-down1" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="128" width="64" height="64" name="walk-hoe-male-down2" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="192" width="64" height="64" name="walk-hoe-male-down3" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="256" width="64" height="64" name="walk-hoe-male-down4" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="320" width="64" height="64" name="walk-hoe-male-down5" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="384" width="64" height="64" name="walk-hoe-male-down6" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="448" width="64" height="64" name="walk-hoe-male-down7" />
+		<sprite source="./Assets/Image/hoe.png" top="128" left="512" width="64" height="64" name="walk-hoe-male-down8" />
+	</animation-frames>
+	<animation-frames name="walk-hoe-male-right" fps="10">
+		<sprite source="./Assets/Image/hoe.png" top="192" left="0" width="64" height="64" name="walk-hoe-male-right0" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="64" width="64" height="64" name="walk-hoe-male-right1" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="128" width="64" height="64" name="walk-hoe-male-right2" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="192" width="64" height="64" name="walk-hoe-male-right3" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="256" width="64" height="64" name="walk-hoe-male-right4" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="320" width="64" height="64" name="walk-hoe-male-right5" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="384" width="64" height="64" name="walk-hoe-male-right6" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="448" width="64" height="64" name="walk-hoe-male-right7" />
+		<sprite source="./Assets/Image/hoe.png" top="192" left="512" width="64" height="64" name="walk-hoe-male-right8" />
 	</animation-frames>
 </atlas>

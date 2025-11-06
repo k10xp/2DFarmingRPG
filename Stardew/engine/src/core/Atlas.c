@@ -493,7 +493,6 @@ struct AtlasRect* MergeFreeSpace(struct AtlasRect* pFreeSpace, struct Bitfield2D
 	DestoryVector(runs[0]);
 	DestoryVector(runs[1]);
 	int sz = VectorSize(newFreeSpace);
-	printf("%i\n", sz);
 	return newFreeSpace;
 }
 

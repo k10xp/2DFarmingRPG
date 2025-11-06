@@ -30,7 +30,7 @@ void WfPlayerStartEntityOnInit(struct Entity2D* pEnt, struct GameFrameworkLayer*
     {
         
         struct Entity2D ent;
-        WfMakeIntoPlayerEntity(&ent, pLayer->userData, pEnt->transform.position);
+        WfMakeIntoPlayerEntity(&ent, pLayer, pEnt->transform.position);
         Et2D_AddEntity(&pLayerData->entities, &ent);
         WfWorld_SetCurrentLocationName(gPlayerStartDataPool[pEnt->user.hData].thisLocation);
     }

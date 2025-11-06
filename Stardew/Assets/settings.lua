@@ -29,6 +29,7 @@ function GetSettingsViewModel()
 			print(val)
 			self._zoomVal = val
             SetGameLayerZoom(self._zoomVal, self._pGamelayer)
+            WfSavePreferences(self._pGamelayer) -- save to the persistant game data object 
 		end,
 
 		OnInitSettings = function(self, pGamelayer)
@@ -36,7 +37,7 @@ function GetSettingsViewModel()
             self._zoomVal = GetGameLayerZoom(pGamelayer)
             self.Set_ZoomVal(self, self._zoomVal)
             OnPropertyChanged(self,"ZoomVal")
-
+            
 		end,
 
         OnInput = function(self)

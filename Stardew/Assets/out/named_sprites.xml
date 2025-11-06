@@ -17,50 +17,6 @@
     <sprite source="./Assets/Image/LPC Submissions/Outside Objects.png" top="320" left="192" width="96" height="96" name="conif_tree_aut_top_1"/>
     <sprite source="./Assets/Image/LPC Submissions/Outside Objects.png" top="320" left="288" width="96" height="128" name="conif_tree_aut_top_2"/>
 
-    <animation name="walk-base-female-up"
-                fps="10.0"
-                source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png"
-                startx="0"
-                starty="0"
-                incx="64"
-                incy="0"
-                width="64"
-                height="64"
-                numFrames="9"/>
-
-    <animation name="walk-base-female-down"
-                fps="10.0"
-                source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png"
-                startx="0"
-                starty="128"
-                incx="64"
-                incy="0"
-                width="64"
-                height="64"
-                numFrames="9"/>
-    
-    <animation name="walk-base-female-left"
-                fps="10.0"
-                source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png"
-                startx="0"
-                starty="64"
-                incx="64"
-                incy="0"
-                width="64"
-                height="64"
-                numFrames="9"/>
-    
-    <animation name="walk-base-female-right"
-                fps="10.0"
-                source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png"
-                startx="0"
-                starty="192"
-                incx="64"
-                incy="0"
-                width="64"
-                height="64"
-                numFrames="9"/>
-
     <animation name="walk-base-male-up"
                 fps="10.0"
                 source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/male_walkcycle.png"
@@ -104,6 +60,99 @@
                 width="64"
                 height="64"
                 numFrames="9"/>
+
+                <!-- slash -->
+    <animation name="slash-base-male-up"
+                fps="10.0"
+                source="./Assets/Image/slash.png"
+                startx="0"
+                starty="0"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+        
+    <animation name="slash-base-male-left"
+                fps="10.0"
+                source="./Assets/Image/slash.png"
+                startx="0"
+                starty="64"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+        
+    <animation name="slash-base-male-down"
+                fps="10.0"
+                source="./Assets/Image/slash.png"
+                startx="0"
+                starty="128"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+
+    <animation name="slash-base-male-right"
+                fps="10.0"
+                source="./Assets/Image/slash.png"
+                startx="0"
+                starty="192"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+
+                <!-- Thrust -->
+    <animation name="thrust-base-male-up"
+                fps="10.0"
+                source="./Assets/Image/thrust.png"
+                startx="0"
+                starty="0"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+        
+    <animation name="thrust-base-male-left"
+                fps="10.0"
+                source="./Assets/Image/thrust.png"
+                startx="0"
+                starty="64"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+        
+    <animation name="thrust-base-male-down"
+                fps="10.0"
+                source="./Assets/Image/thrust.png"
+                startx="0"
+                starty="128"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+
+    <animation name="thrust-base-male-right"
+                fps="10.0"
+                source="./Assets/Image/thrust.png"
+                startx="0"
+                starty="192"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="6"/>
+
+                <!-- Pickaxe -->
+
     
     <animation name="walk-pickaxe-male-up"
                 fps="10"
@@ -148,4 +197,103 @@
                 width="64"
                 height="64"
                 numFrames="9"/>
+
+                <!-- Axe -->
+
+    
+    <animation name="walk-axe-male-up"
+                fps="10"
+                source="./Assets/Image/axe.png"
+                startx="0"
+                starty="0"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-axe-male-left"
+                fps="10"
+                source="./Assets/Image/axe.png"
+                startx="0"
+                starty="64"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-axe-male-down"
+                fps="10"
+                source="./Assets/Image/axe.png"
+                startx="0"
+                starty="128"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-axe-male-right"
+                fps="10"
+                source="./Assets/Image/axe.png"
+                startx="0"
+                starty="192"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+
+
+
+                <!-- Hoe -->
+
+
+
+    <animation name="walk-hoe-male-up"
+                fps="10"
+                source="./Assets/Image/hoe.png"
+                startx="0"
+                starty="0"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-hoe-male-left"
+                fps="10"
+                source="./Assets/Image/hoe.png"
+                startx="0"
+                starty="64"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-hoe-male-down"
+                fps="10"
+                source="./Assets/Image/hoe.png"
+                startx="0"
+                starty="128"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
+    <animation name="walk-hoe-male-right"
+                fps="10"
+                source="./Assets/Image/hoe.png"
+                startx="0"
+                starty="192"
+                incx="64"
+                incy="0"
+                width="64"
+                height="64"
+                numFrames="9"/>
+
 </atlas>
