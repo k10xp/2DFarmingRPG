@@ -16,6 +16,8 @@ static void OnMakeCurrentItem(struct Entity2D* pPlayer, struct GameFrameworkLaye
     pEntData->animationSet.layers[WfToolAnimationLayer].animationNames[Right] = "walk-pickaxe-male-right";
 
     struct Component2D* pComp = WfGetPlayerAnimationLayerComponent(pPlayer, WfToolAnimationLayer);
+    WfSetPlayerOverlayAnimations(pEntData->directionFacing, pLayer, pEntData, pPlayer);
+    pComp->data.spriteAnimator.onSprite = 0;
     //pComp->data.spriteAnimator.bDraw = true;
 
 }

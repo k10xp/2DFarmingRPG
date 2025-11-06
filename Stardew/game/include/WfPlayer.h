@@ -10,6 +10,7 @@ struct BinarySerializer;
 struct Entity2D;
 struct Component2D;
 struct GameLayer2DData;
+struct GameFrameworkLayer;
 
 #define NUM_ANIMATIONS NumDirections
 
@@ -60,6 +61,8 @@ struct WfPlayerEntData
 
     int selectedItem;
 
+    enum WfDirection directionFacing;
+
     /* flags section */
     u32 bMovingThisFrame : 1;
     u32 bMovingLastFrame : 1;
@@ -80,5 +83,7 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pInEnt, struct GameLayer2DData* pDa
 struct WfPlayerEntData* WfGetPlayerEntData(struct Entity2D* pInEnt);
 
 struct Component2D* WfGetPlayerAnimationLayerComponent(struct Entity2D* pPlayer, enum WfAnimationLayerNames layer);
+
+void WfSetPlayerOverlayAnimations(enum WfDirection dir, struct GameFrameworkLayer* pLayer, struct WfPlayerEntData* pPlayerEntData, struct Entity2D* pEnt);
 
 #endif

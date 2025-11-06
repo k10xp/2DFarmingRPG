@@ -113,7 +113,7 @@ static void SyncAnimA2B(struct AnimatedSprite* pA, struct AnimatedSprite* pB)
     pB->timer = pA->timer;
 }
 
-static void SetPlayerOverlayAnimations(enum WfDirection dir, struct GameFrameworkLayer* pLayer, struct WfPlayerEntData* pPlayerEntData, struct Entity2D* pEnt)
+void WfSetPlayerOverlayAnimations(enum WfDirection dir, struct GameFrameworkLayer* pLayer, struct WfPlayerEntData* pPlayerEntData, struct Entity2D* pEnt)
 {
     struct Component2D* pCompBaseAnimator = &pEnt->components[PLAYER_SPRITE_COMP_INDEX];
     struct AnimatedSprite* pBaseAnimatedSprite = &pCompBaseAnimator->data.spriteAnimator;
@@ -161,25 +161,29 @@ static void SetPlayerAnimation(struct GameFrameworkLayer* pLayer, struct WfPlaye
     {
         // moving down
         SetBasePlayerAnimation(Down, pLayer, pPlayerEntData, pEnt);
-        SetPlayerOverlayAnimations(Down, pLayer, pPlayerEntData, pEnt);
+        WfSetPlayerOverlayAnimations(Down, pLayer, pPlayerEntData, pEnt);
+        pPlayerEntData->directionFacing = Down;
     }
     else if(pPlayerEntData->movementVector[1] < -1e-5f)
     {
         // moving up
         SetBasePlayerAnimation(Up, pLayer, pPlayerEntData, pEnt);
-        SetPlayerOverlayAnimations(Up, pLayer, pPlayerEntData, pEnt);
+        WfSetPlayerOverlayAnimations(Up, pLayer, pPlayerEntData, pEnt);
+        pPlayerEntData->directionFacing = Up;
     }
     else if(pPlayerEntData->movementVector[0] > 1e-5f)
     {
         // moving right
         SetBasePlayerAnimation(Right, pLayer, pPlayerEntData, pEnt);
-        SetPlayerOverlayAnimations(Right, pLayer, pPlayerEntData, pEnt);
+        WfSetPlayerOverlayAnimations(Right, pLayer, pPlayerEntData, pEnt);
+        pPlayerEntData->directionFacing = Right;
     }
     else if(pPlayerEntData->movementVector[0] < -1e-5f)
     {
         // moving left
         SetBasePlayerAnimation(Left, pLayer, pPlayerEntData, pEnt);
-        SetPlayerOverlayAnimations(Left, pLayer, pPlayerEntData, pEnt);
+        WfSetPlayerOverlayAnimations(Left, pLayer, pPlayerEntData, pEnt);
+        pPlayerEntData->directionFacing = Left;
     }
 }
 
@@ -312,6 +316,7 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameLayer2DData* pData
     pEnt->previousSibling = NULL_HANDLE;
     gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pEnt->user.hData);
     struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pEnt->user.hData];
+    pEntData->directionFacing = Down;
     pEntData->groundColliderCenter2EntTransform[0] = -32;
     pEntData->groundColliderCenter2EntTransform[1] = -60;
     pEntData->animationSet.layersMask = 0;
