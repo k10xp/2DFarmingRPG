@@ -447,6 +447,12 @@ static void OutputVertices(
 static void Draw(struct GameFrameworkLayer* pLayer, DrawContext* context)
 {
 	struct GameLayer2DData* pData = pLayer->userData;
+
+	if(pData->bSkipDraw)
+	{
+		pData->bSkipDraw = false;
+		return;
+	}
 	At_SetCurrent(pData->hAtlas, context);
 	pData->pWorldspaceVertices = VectorClear(pData->pWorldspaceVertices);
 	pData->pWorldspaceIndices = VectorClear(pData->pWorldspaceIndices);
@@ -574,6 +580,8 @@ void Game2DLayer_Get(struct GameFrameworkLayer* pLayer, struct Game2DLayerOption
 	pLayer->userData = malloc(sizeof(struct GameLayer2DData));
 	memset(pLayer->userData, 0, sizeof(struct GameLayer2DData));
 	struct GameLayer2DData* pData = pLayer->userData;
+
+	pData->bSkipDraw = true;
 
 	pData->pLayer = pLayer;
 	pData->cameraClampedToTilemapLayer = -1;

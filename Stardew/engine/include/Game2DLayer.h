@@ -172,9 +172,15 @@ struct GameLayer2DData
 
 	/*
 		HACK:
-		todo sort out the availabilty of these draw and input contexts
+		todo: sort out the availabilty of these draw and input contexts
+		todo: use global getter for draw context
 	*/
 	DrawContext* pDrawContext;
+
+	/*
+		
+	*/
+	bool bSkipDraw;
 };
 
 struct Game2DLayerOptions
