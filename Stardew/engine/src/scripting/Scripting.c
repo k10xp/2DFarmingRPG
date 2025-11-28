@@ -718,7 +718,6 @@ void Sc_SetPointerAtTableKey(const char* key, void* ptr)
 	lua_setfield(gL, -2, key);
 }
 
-
 int Sc_RefTable()
 {
 	return luaL_ref(gL, LUA_REGISTRYINDEX);

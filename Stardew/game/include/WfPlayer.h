@@ -36,6 +36,13 @@ struct WfAnimationSet
     unsigned int layersMask;
 };
 
+enum WfPlayerState
+{
+    WfWalking,
+    WfAttacking,
+    WfNumPlayerStates
+};
+
 struct WfPlayerEntData
 {
     vec2 groundColliderCenter2EntTransform;
@@ -60,6 +67,8 @@ struct WfPlayerEntData
     struct WfAnimationSet animationSet;
 
     enum WfDirection directionFacing;
+
+    enum WfPlayerState state;
 
     /* flags section */
     u32 bMovingThisFrame : 1;

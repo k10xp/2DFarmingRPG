@@ -131,7 +131,6 @@ void WfSetPlayerOverlayAnimations(enum WfDirection dir, struct GameFrameworkLaye
             SyncAnimA2B(pBaseAnimatedSprite, pOverlayAnimator);
         }
     }
-
 }
 
 static void SetPlayerAnimation(struct GameFrameworkLayer* pLayer, struct WfPlayerEntData* pPlayerEntData, struct Entity2D* pEnt)
@@ -190,14 +189,37 @@ static void SetPlayerAnimation(struct GameFrameworkLayer* pLayer, struct WfPlaye
 static void OnUpdatePlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, float deltaT)
 {
     struct WfPlayerEntData* pPlayerEntData = &gPlayerEntDataPool[pEnt->user.hData];
-    vec2 scaledMovement;
-    scaledMovement[0] = pPlayerEntData->movementVector[0] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
-    scaledMovement[1] = pPlayerEntData->movementVector[1] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
-    Ph_SetDynamicBodyVelocity(
-        pEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider.id,
-        scaledMovement
-    );
-    SetPlayerAnimation(pLayer, pPlayerEntData, pEnt);
+    switch (pPlayerEntData->state)
+    {
+    case WfWalking:
+        {
+            vec2 scaledMovement;
+            scaledMovement[0] = pPlayerEntData->movementVector[0] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
+            scaledMovement[1] = pPlayerEntData->movementVector[1] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
+            Ph_SetDynamicBodyVelocity(
+                pEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider.id,
+                scaledMovement
+            );
+            SetPlayerAnimation(pLayer, pPlayerEntData, pEnt);
+        }
+        
+        break;
+    case WfAttacking:
+        {
+            struct AnimatedSprite* pSprite = &pEnt->components[PLAYER_SPRITE_COMP_INDEX].data.spriteAnimator;
+            if(!pSprite->bIsAnimating)
+            {
+                pPlayerEntData->state = WfWalking;
+                pPlayerEntData->bMovingThisFrame = true;
+                SetBasePlayerAnimation(pPlayerEntData->directionFacing, pLayer, pPlayerEntData, pEnt);
+                WfSetPlayerOverlayAnimations(pPlayerEntData->directionFacing, pLayer, pPlayerEntData, pEnt);
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    
     Entity2DUpdate(pEnt, pLayer, deltaT);
 }
 
@@ -322,6 +344,7 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameFrameworkLayer* pL
     pEntData->groundColliderCenter2EntTransform[0] = -32;
     pEntData->groundColliderCenter2EntTransform[1] = -60;
     pEntData->animationSet.layersMask = 0;
+    pEntData->state = WfWalking;
 
     pEnt->numComponents = 0;
     pEnt->type = WfEntityType_Player;
