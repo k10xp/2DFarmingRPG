@@ -1,8 +1,10 @@
 #ifndef  MAIN_H
+#define MAIN_H
 
 #include "DrawContext.h"
 #include "InputContext.h"
 #include "Network.h"
+#include <stdbool.h>
 
 int Mn_GetScreenWidth();
 int Mn_GetScreenHeight();
@@ -24,6 +26,9 @@ struct CommandLineArgs
     enum GameRole role;
     char* serverAddress;
     char* clientAddress;
+    bool bLogTextColoured;
+    bool bIncludeLogTimeStamps;
+    const char* logfilePath;
 };
 
 extern struct CommandLineArgs gCmdArgs;

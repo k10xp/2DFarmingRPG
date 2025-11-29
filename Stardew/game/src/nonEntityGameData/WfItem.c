@@ -50,12 +50,12 @@ int l_GetItemUISpriteName(lua_State* L)
         }
         else
         {
-            printf("l_GetItemUISpriteName ARGUMENT OUT OF RANGE: %i. Itemdefs size: %i\n", arg, VectorSize(gItemDefs));
+            Log_Error("l_GetItemUISpriteName ARGUMENT OUT OF RANGE: %i. Itemdefs size: %i\n", arg, VectorSize(gItemDefs));
         }
     }
     else
     {
-        printf("l_GetItemUISpriteName BAD ARGS, expected int\n");
+        Log_Error("l_GetItemUISpriteName BAD ARGS, expected int\n");
     }
     lua_pushstring(L, "no-item");
     return 1;

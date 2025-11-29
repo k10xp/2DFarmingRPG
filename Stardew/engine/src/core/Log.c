@@ -1,19 +1,31 @@
 #include "Log.h"
-#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "Thread.h"
+#include "ANSIColourCodes.h"
+#include "main.h"
 
 static CrossPlatformMutex gLogMtx;
 static enum LogLvl gLogLevel = LogLvl_Verbose;
+static FILE* gLogFile = NULL;
 
 char* gLogLevelNames[LogLvl_NumLevels] = 
 {
     "[Verbose] ",
-    "[Info] ",
+    "[Info]    ",
     "[Warning] ",
-    "[Error] ",
+    "[Error]   ",
 };
+
+char* gColouredLogLevelNames[LogLvl_NumLevels] = 
+{
+    BHCYN"[Verbose]"CRESET" ",
+    BHGRN"[Info]"CRESET"    ",
+    BHYEL"[Warning]"CRESET" ",
+    BHRED"[Error]"CRESET"   ",
+};
+
 
 void Log_SetLevel(enum LogLvl lvl)
 {
@@ -23,27 +35,51 @@ void Log_SetLevel(enum LogLvl lvl)
 int Log_Init()
 {
     InitMutex(&gLogMtx);
+    if(gCmdArgs.logfilePath)
+    {
+        gLogFile = fopen(gCmdArgs.logfilePath, "w");
+    }
 }
 
 void Log_DeInit()
 {
     DestroyMutex(&gLogMtx);
+    if(gLogFile)
+    {
+        fclose(gLogFile);
+    }
 }
 
-static int vLog_Fmt(const char* fmt, enum LogLvl lvl, va_list args)
+int vLog_Fmt(const char* fmt, enum LogLvl lvl, va_list args)
 {
     if(lvl < gLogLevel)
     {
         return 0;
     }
     char gLogBuffer[512];
-    snprintf(gLogBuffer, 512, gLogLevelNames[lvl]);
-    int namelen = strlen(gLogLevelNames[lvl]);
+    char** levelNames = gCmdArgs.bLogTextColoured ? gColouredLogLevelNames : gLogLevelNames;
+    snprintf(gLogBuffer, 512, levelNames[lvl]);
+    int namelen = strlen(levelNames[lvl]);
     char* start = gLogBuffer + namelen;
+    if(gCmdArgs.bIncludeLogTimeStamps)
+    {
+        const char* timeFmtString = gCmdArgs.bLogTextColoured ? UWHT"%02d:%02d:%02d"CRESET" " : "%02d:%02d:%02d ";
+        time_t rawtime;
+        struct tm *info;
+        time( &rawtime );
+        info = localtime( &rawtime );
+        snprintf(start, 512 - namelen, timeFmtString, info->tm_hour, info->tm_min, info->tm_sec);
+        namelen = strlen(gLogBuffer);
+        start = gLogBuffer + namelen;
+    }
     vsnprintf(start, 512 - namelen, fmt, args);
 
     LockMutex(&gLogMtx);
     int r = printf("%s\n", gLogBuffer);
+    if(gLogFile)
+    {
+        fprintf(gLogFile, "%s\n", gLogBuffer);
+    }
     UnlockMutex(&gLogMtx);
     return r;
 }

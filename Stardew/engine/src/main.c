@@ -107,6 +107,9 @@ static void ParseCmdArgs(int argc, char** argv)
     gCmdArgs.role = GR_Singleplayer;
     gCmdArgs.serverAddress = "127.0.0.1:40000";
     gCmdArgs.clientAddress = "0.0.0.0";
+    gCmdArgs.bLogTextColoured = true;
+    gCmdArgs.bIncludeLogTimeStamps = true;
+    gCmdArgs.logfilePath = NULL;
     if(argc > 1)
     {
         for(int i=1; i <argc; i++)
@@ -141,6 +144,43 @@ static void ParseCmdArgs(int argc, char** argv)
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
                 gCmdArgs.serverAddress = argv[i];
             }
+            else if(strcmp(argv[i], "--log_level") == 0 || strcmp(argv[i], "-l") == 0)
+            {
+                assert(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                if(strcmp(argv[i], "verbose") == 0 || strcmp(argv[i], "v") == 0)
+                {
+                    Log_SetLevel(LogLvl_Verbose);
+                }
+                else if(strcmp(argv[i], "info") == 0 || strcmp(argv[i], "i") == 0)
+                {
+                    Log_SetLevel(LogLvl_Info);
+                }
+                else if(strcmp(argv[i], "warning") == 0 || strcmp(argv[i], "w") == 0)
+                {
+                    Log_SetLevel(LogLvl_Warning);
+                }
+                else if(strcmp(argv[i], "error") == 0 || strcmp(argv[i], "e") == 0)
+                {
+                    Log_SetLevel(LogLvl_Error);
+                }
+            }
+            else if(strcmp(argv[i], "--disable_log_colour") == 0)
+            {
+                gCmdArgs.bLogTextColoured = false;
+            }
+            else if(strcmp(argv[i], "--disable_log_timestamp") == 0)
+            {
+                gCmdArgs.bIncludeLogTimeStamps = false;
+            }
+            else if(strcmp(argv[i], "--logfile") == 0 || strcmp(argv[i], "--lf"))
+            {
+                assert(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                gCmdArgs.logfilePath = argv[i];
+            }
         }
     }
 }
@@ -148,9 +188,9 @@ static void ParseCmdArgs(int argc, char** argv)
 int EngineStart(int argc, char** argv, GameInitFn init)
 {
     ParseCmdArgs(argc, argv);
-
-    NW_Init();
     Log_Init();
+    NW_Init();
+    
 
     Log_Verbose("testing libxml version...\n");
     LIBXML_TEST_VERSION

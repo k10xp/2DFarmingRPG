@@ -1,1 +1,1 @@
-./build/game/WarFarmer -r c -s 127.0.0.1:666
+./build/game/WarFarmer -r c -s 127.0.0.1:666 -l i

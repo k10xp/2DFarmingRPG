@@ -18,12 +18,13 @@
 #include "XMLUIGameLayer.h"
 #include "WfUI.h"
 #include "WfScriptFunctions.h"
+#include "Log.h"
 
 
 void WfEngineInit()
 {
     unsigned int seed = Ra_SeedFromTime();
-    printf("seed: %u\n", seed);
+    Log_Info("seed: %u\n", seed);
     Ph_Init();
     InitEntity2DQuadtreeSystem();
     Et2D_Init(&WfRegisterEntityTypes);
@@ -41,7 +42,7 @@ void GameInit(InputContext* pIC, DrawContext* pDC)
     WfWorld_LoadLocation("House", pDC);
     WfPushHUD(pDC);
 
-    printf("done\n");
+    Log_Verbose("done\n");
 }
 
 enum WfExeMode

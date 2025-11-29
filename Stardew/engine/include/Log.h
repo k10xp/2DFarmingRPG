@@ -1,6 +1,8 @@
 #ifndef STARDEW_LOG_H
 #define STARDEW_LOG_H
 
+#include <stdarg.h>
+
 enum LogLvl
 {
     LogLvl_Verbose,
@@ -9,6 +11,8 @@ enum LogLvl
     LogLvl_Error,
     LogLvl_NumLevels
 };
+
+int vLog_Fmt(const char* fmt, enum LogLvl lvl, va_list args);
 
 int Log_Fmt(const char* fmt, enum LogLvl lvl, ...);
 

@@ -7,6 +7,7 @@
 #include "main.h"
 #include "Game2DLayer.h"
 #include "WfPersistantGameData.h"
+#include "Log.h"
 
 static int L_PushHUDLayer(lua_State* L)
 {
@@ -19,7 +20,7 @@ static int L_SavePreferences(lua_State* L)
 {
     if(lua_gettop(L) != 1)
     {
-        printf("L_SavePreferences ERROR\n");
+        Log_Error("L_SavePreferences ERROR\n");
     }
     else if(lua_islightuserdata(L, -1))
     {
@@ -29,7 +30,7 @@ static int L_SavePreferences(lua_State* L)
     }
     else
     {
-        printf("L_SavePreferences ERROR\n");
+        Log_Error("L_SavePreferences ERROR\n");
     }
     return 0;
 }

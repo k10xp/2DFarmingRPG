@@ -1051,44 +1051,44 @@ static hSprite LoadAtlasSprite(xmlNode* pChild, int onChild)
 	}
 	if (!bPathSet)
 	{
-		printf("%s atlas child %i path not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i path not set\n", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bNameset)
 	{
-		printf("%s atlas child %i name not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i name not set\n", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bTopSet)
 	{
-		printf("%s atlas child %i top not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i top not set\n", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bLeftSet)
 	{
-		printf("%s atlas child %i left not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i left not set\n", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bWidthSet)
 	{
-		printf("%s atlas child %i top not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i top not set\n", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bHeightSet)
 	{
-		printf("%s atlas child %i left not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i left not set\n", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (bAllSet)
 	{
-		printf("adding sprite %s\n", spritePath);
+		Log_Verbose("adding sprite %s\n", spritePath);
 		rVal = At_AddSprite(spritePath, left, top, width, height, spriteName);
 		EASSERT(spritePath);
 		EASSERT(spriteName);
 		xmlFree(spritePath);
 		xmlFree(spriteName);
 
-		printf("done\n");
+		Log_Verbose("done\n");
 	}
 	return rVal;
 }
@@ -1195,9 +1195,9 @@ static void LoadAtlasFont(xmlNode* pChild)
 			}
 		}
 	}
-	printf("adding font %s\n", faas.path);
+	Log_Verbose("adding font %s\n", faas.path);
 	At_AddFont(&faas);
-	printf("done\n");
+	Log_Verbose("done\n");
 }
 
 hAtlas At_LoadAtlas(xmlNode* child0, DrawContext* pDC)
@@ -1207,7 +1207,7 @@ hAtlas At_LoadAtlas(xmlNode* child0, DrawContext* pDC)
 
 hAtlas At_LoadAtlasEx(xmlNode* child0, DrawContext* pDC, struct EndAtlasOptions* pOptions)
 {
-	printf("loading atlas\n");
+	Log_Verbose("loading atlas\n");
 	xmlChar* attribute = NULL;
 	if (attribute = xmlGetProp(child0, "binary"))
 	{
@@ -1494,7 +1494,7 @@ void At_SerializeAtlas(struct BinarySerializer* pSerializer, hAtlas* atlas, stru
 			*atlas = DeserializeAtlasV1(pSerializer, pDC);
 			break;
 		default:
-			printf("Unknown atlas binary file version number %ui\n", version);
+			Log_Error("Unknown atlas binary file version number %ui\n", version);
 		}
 	}
 }

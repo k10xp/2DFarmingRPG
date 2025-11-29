@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <string.h>
+#include "main.h"
+#include "ANSIColourCodes.h"
 
 enum GameRole gRole;
 
@@ -22,9 +24,24 @@ static uint8_t private_key[NETCODE_KEY_BYTES] = { 0x60, 0x6a, 0xbe, 0x6e, 0xc9, 
                                                   0x6b, 0x3c, 0x60, 0xf4, 0xb7, 0x15, 0xab, 0xa1 };
 
 
+static int NetcodeLog(const char* fmt, ...)
+{
+    static char* netcodeLogTagString = "[Netcode] ";
+    static char* netcodeColouredLogTagString = BHBLU"[Netcode]"CRESET" ";
+    char buf[512];
+    va_list args;
+    va_start(args, fmt);
+    
+    sprintf(buf, gCmdArgs.bLogTextColoured ? netcodeColouredLogTagString : netcodeLogTagString);
+    int len = strlen(buf);
+    vsnprintf(buf + len, 512 - len, fmt, args);
+    Log_Info(buf);
+    va_end(args);
+}
+
 DECLARE_THREAD_PROC(ClientThread, arg)
 {
-    netcode_set_printf_function(&Log_Info);
+    netcode_set_printf_function(&NetcodeLog);
     if ( netcode_init() != NETCODE_OK )
     {
         Log_Error( "error: failed to initialize netcode\n" );
@@ -112,7 +129,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
 DECLARE_THREAD_PROC(ClientServerThread, arg)
 {
-    netcode_set_printf_function(&Log_Info);
+    netcode_set_printf_function(&NetcodeLog);
     if ( netcode_init() != NETCODE_OK )
     {
         Log_Error( "failed to initialize netcode\n" );
