@@ -18,6 +18,7 @@
 #include "BinarySerializer.h"
 #include "BitField2D.h"
 #include "StringKeyHashMap.h"
+#include "Log.h"
 
 FT_Library  gFTLib;
 static int gSpriteId = 1;
@@ -94,7 +95,7 @@ void At_Init()
 	if (error)
 	{
 		//... an error occurred during library initialization ...
-		printf("Error initialising freetype!!!\n");
+		Log_Error("Error initialising freetype!!!");
 		return;
 	}
 }
@@ -218,14 +219,14 @@ HFont At_AddFont(const struct FontAtlasAdditionSpec* pFontSpec)
 	{
 		/*... the font file could be opened and read, but it appears
 			... that its font format is unsupported*/
-		printf("the font file '%s' could be opened and read, but it appears... that its font format is unsupported\n", pFontSpec->path);
+		Log_Warning("the font file '%s' could be opened and read, but it appears... that its font format is unsupported", pFontSpec->path);
 		return NULL_HANDLE;
 	}
 	else if (error)
 	{
 		/*... another error code means that the font file could not
 			... be opened or read, or that it is broken...*/
-		printf("font file '%s' another error code means that the font file could not... be opened or read, or that it is broken. error code %i\n", pFontSpec->path, error);
+		Log_Warning("font file '%s' another error code means that the font file could not... be opened or read, or that it is broken. error code %i", pFontSpec->path, error);
 		return NULL_HANDLE;
 	}
 	for (int i = 0; i < pFontSpec->numFontSizes; i++)
@@ -248,7 +249,7 @@ HFont At_AddFont(const struct FontAtlasAdditionSpec* pFontSpec)
 			dpi);   /* vertical device resolution    */
 		if (error)
 		{
-			printf("FT_Set_Char_Size error");
+			Log_Warning("FT_Set_Char_Size error");
 			return NULL_HANDLE;
 		}
 		struct AtlasFont font;
@@ -270,14 +271,14 @@ HFont At_AddFont(const struct FontAtlasAdditionSpec* pFontSpec)
 				FT_LOAD_DEFAULT);  /* load flags, see below */
 			if (error)
 			{
-				printf("FT_Load_Glyph error\n");
+				Log_Warning("FT_Load_Glyph error");
 				continue;
 			}
 			error = FT_Render_Glyph((*face)->glyph,   /* glyph slot  */
 				FT_RENDER_MODE_NORMAL); /* render mode */
 			if (error)
 			{
-				printf("FT_Render_Glyph error\n");
+				Log_Warning("FT_Render_Glyph error");
 				continue;
 			}
 			
@@ -559,13 +560,9 @@ static VECTOR(struct AtlasRect) NestSingleSprite(int* outW, int* outH, AtlasSpri
 	}
 	else
 	{
-		printf("resizing...\n");
+		Log_Info("resizing...");
 		int sz = VectorSize(freeSpace);
-		printf("%i\n", sz);
-		for(int i=0; i<sz; i++)
-		{
-			printf("x: %i y: %i w: %i h: %i taken: %i\n", freeSpace[i].x, freeSpace[i].y, freeSpace[i].w, freeSpace[i].h, freeSpace[i].bTaken);
-		}
+		
 		freeSpace = AddNewFreeSpace(freeSpace, outW, outH);
 #ifdef MERGE_FREE_SPACES
 		Bf2D_ResizeAndClearBitField(pBF, *outW, *outH);
@@ -877,7 +874,7 @@ hAtlas At_EndAtlasEx(struct DrawContext* pDC, struct EndAtlasOptions* pOptions)
 {\
 bool bAtlasHandleBoundsValid = atlas < VectorSize(gAtlases) && atlas >= 0;\
 if(!bAtlasHandleBoundsValid){\
-	printf("function '%s' invalid bounds handle %i", __FUNCTION__, atlas);\
+	Log_Error("function '%s' invalid bounds handle %i", __FUNCTION__, atlas);\
 	return;\
 }\
 }\
@@ -886,7 +883,7 @@ if(!bAtlasHandleBoundsValid){\
 {\
 bool bAtlasHandleBoundsValid = atlas < VectorSize(gAtlases) && atlas >= 0;\
 if(!bAtlasHandleBoundsValid){\
-	printf("function '%s' invalid bounds handle %i", __FUNCTION__, atlas);\
+	Log_Error("function '%s' invalid bounds handle %i", __FUNCTION__, atlas);\
 	return rVal;\
 }\
 }
@@ -896,7 +893,7 @@ if(!bAtlasHandleBoundsValid){\
 Atlas* pAtlas = &gAtlases[hAtlas];\
 bool bAtlasHandleBoundsValid = hFont < VectorSize(pAtlas->fonts) && hFont >= 0;\
 if(!bAtlasHandleBoundsValid){\
-	printf("function '%s' invalid bounds font handle %i", __FUNCTION__, hFont);\
+	Log_Error("function '%s' invalid bounds font handle %i", __FUNCTION__, hFont);\
 	return rVal;\
 }\
 }
@@ -982,7 +979,7 @@ AtlasSprite* At_GetSprite(hSprite sprite, hAtlas atlas)
 	Atlas* pAtlas = &gAtlases[atlas];
 	if (sprite < 0 || sprite >= VectorSize(pAtlas->sprites))
 	{
-		printf("function '%s' invalid sprite bounds handle %i", __FUNCTION__, sprite);
+		Log_Error("function '%s' invalid sprite bounds handle %i", __FUNCTION__, sprite);
 		return NULL;
 	}
 	return &pAtlas->sprites[sprite];
@@ -1050,44 +1047,44 @@ static hSprite LoadAtlasSprite(xmlNode* pChild, int onChild)
 	}
 	if (!bPathSet)
 	{
-		printf("%s atlas child %i path not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i path not set", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bNameset)
 	{
-		printf("%s atlas child %i name not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i name not set", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bTopSet)
 	{
-		printf("%s atlas child %i top not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i top not set", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bLeftSet)
 	{
-		printf("%s atlas child %i left not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i left not set", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bWidthSet)
 	{
-		printf("%s atlas child %i top not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i top not set", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (!bHeightSet)
 	{
-		printf("%s atlas child %i left not set\n", __FUNCTION__, onChild);
+		Log_Error("%s atlas child %i left not set", __FUNCTION__, onChild);
 		bAllSet = false;
 	}
 	if (bAllSet)
 	{
-		printf("adding sprite %s\n", spritePath);
+		Log_Verbose("adding sprite %s", spritePath);
 		rVal = At_AddSprite(spritePath, left, top, width, height, spriteName);
 		EASSERT(spritePath);
 		EASSERT(spriteName);
 		xmlFree(spritePath);
 		xmlFree(spriteName);
 
-		printf("done\n");
+		Log_Verbose("done");
 	}
 	return rVal;
 }
@@ -1194,9 +1191,9 @@ static void LoadAtlasFont(xmlNode* pChild)
 			}
 		}
 	}
-	printf("adding font %s\n", faas.path);
+	Log_Verbose("adding font %s", faas.path);
 	At_AddFont(&faas);
-	printf("done\n");
+	Log_Verbose("done");
 }
 
 hAtlas At_LoadAtlas(xmlNode* child0, DrawContext* pDC)
@@ -1206,7 +1203,7 @@ hAtlas At_LoadAtlas(xmlNode* child0, DrawContext* pDC)
 
 hAtlas At_LoadAtlasEx(xmlNode* child0, DrawContext* pDC, struct EndAtlasOptions* pOptions)
 {
-	printf("loading atlas\n");
+	Log_Verbose("loading atlas");
 	xmlChar* attribute = NULL;
 	if (attribute = xmlGetProp(child0, "binary"))
 	{
@@ -1493,7 +1490,7 @@ void At_SerializeAtlas(struct BinarySerializer* pSerializer, hAtlas* atlas, stru
 			*atlas = DeserializeAtlasV1(pSerializer, pDC);
 			break;
 		default:
-			printf("Unknown atlas binary file version number %ui\n", version);
+			Log_Error("Unknown atlas binary file version number %ui", version);
 		}
 	}
 }
@@ -1650,15 +1647,14 @@ void At_BeginTileset(int beginI)
 {
 	Atlas* pAtlas = GetCurrentAtlas();
 	pAtlas->tilesetIndexBegin = beginI;
-	printf("beginning tileset %i\n", pAtlas->tilesetIndexBegin);
+	Log_Info("beginning tileset %i", pAtlas->tilesetIndexBegin);
 }
 
 void At_EndTileset(int endI)
 {
 	Atlas* pAtlas = GetCurrentAtlas();
 	pAtlas->tilesetIndexEnd = endI;
-	printf("ending tileset %i\n", pAtlas->tilesetIndexBegin);
-
+	Log_Info("ending tileset %i", pAtlas->tilesetIndexBegin);
 }
 
 struct AtlasAnimation* At_FindAnim(hAtlas atlas, const char* name)

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "AssertLib.h"
+#include "Log.h"
 
 static bool ContainsChar(const char* str, char c)
 {
@@ -108,7 +109,7 @@ static bool GetBool_XML(struct DataNode* pNode, const char* propName)
     }
     else
     {
-        printf("GetBool_XML: property %s value %s is not true or false\n", propName, (const char*)prop);
+        Log_Error("GetBool_XML: property %s value %s is not true or false", propName, (const char*)prop);
     }
     xmlFree(prop);
     return false;
@@ -294,7 +295,7 @@ static bool StrCmp_Lua(struct DataNode* pNode, const char* propName, const char*
     Sc_TableGet(propName);
     if (!Sc_IsString())
     {
-        printf("StrCmp_Lua: property %s is not a string\n", propName);
+        Log_Error("StrCmp_Lua: property %s is not a string", propName);
         Sc_Pop();
         return false;
     }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "StringKeyHashMap.h"
 #include "AssertLib.h"
+#include "Log.h"
 
 #define EVENT_MAX_NAME_LEN 64
 
@@ -52,7 +53,7 @@ static struct GameFrameworkEventListener* AddListener(struct GameFrameworkEvent*
 
 struct GameFrameworkEventListener* Ev_SubscribeEvent(char* eventName, EventListenerFn listenerFn, void* pUser)
 {
-	printf("SUBSCRIBING TO EVENT %s\n", eventName);
+	Log_Info("SUBSCRIBING TO EVENT %s", eventName);
 	EASSERT(strlen(eventName) < EVENT_MAX_NAME_LEN);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, eventName);
 	if (pEvent == NULL)
@@ -66,7 +67,7 @@ struct GameFrameworkEventListener* Ev_SubscribeEvent(char* eventName, EventListe
 
 bool Ev_UnsubscribeEvent(struct GameFrameworkEventListener* pListener)
 {
-	printf("UNSUBSCRIBING TO EVENT %s\n", pListener->eventName);
+	Log_Info("UNSUBSCRIBING TO EVENT %s", pListener->eventName);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, pListener->eventName);
 	if (pEvent)
 	{
@@ -91,7 +92,7 @@ bool Ev_UnsubscribeEvent(struct GameFrameworkEventListener* pListener)
 	}
 	else
 	{
-		printf("Ev_UnsubscribeEvent failed. Event name '%s'", pListener->eventName);
+		Log_Warning("Ev_UnsubscribeEvent failed. Event name '%s'", pListener->eventName);
 	}
 	return false;
 }
@@ -99,7 +100,7 @@ bool Ev_UnsubscribeEvent(struct GameFrameworkEventListener* pListener)
 void Ev_FireEvent(char* eventName, void* eventArgs)
 {
 	int i = 0;
-	printf("FIRING EVENT %s\n", eventName);
+	Log_Info("FIRING EVENT %s", eventName);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, eventName);
 	if (pEvent)
 	{
@@ -108,7 +109,7 @@ void Ev_FireEvent(char* eventName, void* eventArgs)
 		{
 			pListener->eventFn(pListener->userData, eventArgs);
 			pListener = pListener->pNext;
-			printf("%s DEBUG COUNT %i\n", eventName, i++);
+			Log_Verbose("%s DEBUG COUNT %i", eventName, i++);
 		}
 	}
 }

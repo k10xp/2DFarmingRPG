@@ -12,6 +12,7 @@
 #include "WidgetVertexOutputHelpers.h"
 #include "RootWidget.h"
 #include "Scripting.h"
+#include "Log.h"
 
 
 float SliderWidget_GetWidth(struct SliderData* pData, struct WidgetPadding* pPadding)
@@ -318,7 +319,7 @@ static void ParseBindingEspressionAttribute(char* attribName, char* attribConten
 	}
 	else
 	{
-		printf("invalid property binding: %s\n", attribContent);
+		Log_Error("invalid property binding: %s", attribContent);
 	}
 
 }
@@ -345,7 +346,7 @@ static void MakeSliderFromXML(struct UIWidget* pWidget, struct SliderData* pData
 		}
 		else
 		{
-			printf("invalid slider orientation\n");
+			Log_Warning("invalid slider orientation");
 		}
 	}
 	if(pXMLNode->fnGetPropType(pXMLNode, "val") == DN_String)

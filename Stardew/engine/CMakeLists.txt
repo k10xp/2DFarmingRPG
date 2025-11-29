@@ -44,6 +44,16 @@ add_subdirectory(lib/cglm-0.9.6 EXCLUDE_FROM_ALL)
 
 target_include_directories(StardewEngine  PUBLIC include)
 target_include_directories(StardewEngine  PRIVATE lib/glad/include)
+target_include_directories(StardewEngine  PRIVATE src/vendor/netcode-1.2.3)
+target_include_directories(StardewEngine  PRIVATE src/vendor/netcode-1.2.3/sodium)
+
+set_property(TARGET StardewEngine PROPERTY C_STANDARD 11)
+
+target_include_directories(NetcodeExampleServer  PRIVATE src/vendor/netcode-1.2.3)
+target_include_directories(NetcodeExampleServer  PRIVATE src/vendor/netcode-1.2.3/sodium)
+
+target_include_directories(NetcodeExampleClient  PRIVATE src/vendor/netcode-1.2.3)
+target_include_directories(NetcodeExampleClient  PRIVATE src/vendor/netcode-1.2.3/sodium)
 
 if(WIN32)
 else()

@@ -2,6 +2,8 @@
 #include "GameFramework.h"
 #include "XMLUIGameLayer.h"
 #include "DrawContext.h"
+#include "Log.h"
+#include <string.h>
 
 void WfPushHUD(DrawContext* pDC)
 {
@@ -11,10 +13,10 @@ void WfPushHUD(DrawContext* pDC)
     options.xmlPath = "./Assets/GameHUD.xml";
     options.pDc = pDC;
     testLayer.flags |= (EnableOnPush | EnableOnPop);
-    printf("making xml ui layer\n");
+    Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);
-    printf("done\n");
-    printf("pushing framework layer\n");
+    Log_Verbose("done");
+    Log_Verbose("pushing framework layer");
     GF_PushGameFrameworkLayer(&testLayer);
 }
 
@@ -25,11 +27,11 @@ void WfPushSettings(DrawContext* pDC)
     struct XMLUIGameLayerOptions options;
     options.xmlPath = "./Assets/Settings.xml";
     options.pDc = pDC;
-    printf("making xml ui layer\n");
+    Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);
     testLayer.flags |= ( MasksUpdate | MasksInput );
 
-    printf("done\n");
-    printf("pushing framework layer\n");
+    Log_Verbose("done");
+    Log_Verbose("pushing framework layer");
     GF_PushGameFrameworkLayer(&testLayer);
 }

@@ -1,3 +1,4 @@
+#include "main.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
@@ -11,6 +12,8 @@
 #include <string.h>
 #include "PlatformDefs.h"
 #include <libxml/parser.h>
+#include "Log.h"
+#include "Network.h"
 
 #define SCR_WIDTH 640
 #define SCR_HEIGHT 480
@@ -18,6 +21,7 @@
 
 InputContext gInputContext;
 DrawContext gDrawContext;
+struct CommandLineArgs gCmdArgs;
 
 DrawContext* GetDrawContext()
 {
@@ -98,15 +102,108 @@ static void GLAPIENTRY MessageCallback(GLenum source,
 
 typedef void(*GameInitFn)(InputContext*,DrawContext*);
 
+static void ParseCmdArgs(int argc, char** argv)
+{
+    gCmdArgs.role = GR_Singleplayer;
+    gCmdArgs.serverAddress = "127.0.0.1:40000";
+    gCmdArgs.clientAddress = "0.0.0.0";
+    gCmdArgs.bLogTextColoured = true;
+    gCmdArgs.bIncludeLogTimeStamps = true;
+    gCmdArgs.bLogTIDs = true;
+    gCmdArgs.logfilePath = NULL;
+    if(argc > 1)
+    {
+        for(int i=1; i <argc; i++)
+        {
+            
+            Log_Info("Cmd arg %i: %s", i, argv[i]);
+            if(strcmp(argv[i], "--role") == 0 || strcmp(argv[i], "-r") == 0)
+            {
+                assert(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                if(strcmp(argv[i], "server") == 0 || strcmp(argv[i], "s") == 0)
+                {
+                    gCmdArgs.role = GR_ClientServer;
+                }
+                else if(strcmp(argv[i], "client") == 0 || strcmp(argv[i], "c") == 0)
+                {
+                    gCmdArgs.role = GR_Client;
+                }
+            }
+            else if(strcmp(argv[i], "--server_address") == 0 || strcmp(argv[i], "-s") == 0)
+            {
+                assert(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                gCmdArgs.serverAddress = argv[i];
+            }
+            else if(strcmp(argv[i], "--client_address") == 0 || strcmp(argv[i], "-c") == 0)
+            {
+                assert(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                gCmdArgs.serverAddress = argv[i];
+            }
+            else if(strcmp(argv[i], "--log_level") == 0 || strcmp(argv[i], "-l") == 0)
+            {
+                assert(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                if(strcmp(argv[i], "verbose") == 0 || strcmp(argv[i], "v") == 0)
+                {
+                    Log_SetLevel(LogLvl_Verbose);
+                }
+                else if(strcmp(argv[i], "info") == 0 || strcmp(argv[i], "i") == 0)
+                {
+                    Log_SetLevel(LogLvl_Info);
+                }
+                else if(strcmp(argv[i], "warning") == 0 || strcmp(argv[i], "w") == 0)
+                {
+                    Log_SetLevel(LogLvl_Warning);
+                }
+                else if(strcmp(argv[i], "error") == 0 || strcmp(argv[i], "e") == 0)
+                {
+                    Log_SetLevel(LogLvl_Error);
+                }
+            }
+            else if(strcmp(argv[i], "--disable_log_colour") == 0)
+            {
+                gCmdArgs.bLogTextColoured = false;
+            }
+            else if(strcmp(argv[i], "--disable_log_timestamp") == 0)
+            {
+                gCmdArgs.bIncludeLogTimeStamps = false;
+            }
+            else if(strcmp(argv[i], "--logfile") == 0 || strcmp(argv[i], "--lf"))
+            {
+                assert(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                gCmdArgs.logfilePath = argv[i];
+            }
+            else if(strcmp(argv[i], "--disable_log_tid") == 0)
+            {
+
+            }
+        }
+    }
+}
+
 int EngineStart(int argc, char** argv, GameInitFn init)
 {
-    printf("testing libxml version...\n");
+    ParseCmdArgs(argc, argv);
+    Log_Init();
+    NW_Init();
+    
+
+    Log_Verbose("testing libxml version...");
     LIBXML_TEST_VERSION
-    printf("hello world\n");
+    Log_Verbose("hello world");
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
-    printf("glfwInit\n");
+    Log_Verbose("glfwInit");
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -117,11 +214,11 @@ int EngineStart(int argc, char** argv, GameInitFn init)
 #endif
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Arkanoids 3D", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stardew Engine", NULL, NULL);
     if (window == NULL)
     {
         /*std::cout << "Failed to create GLFW window" << std::endl;*/
-        printf("Failed to create GLFW window");
+        Log_Error("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
@@ -143,17 +240,17 @@ int EngineStart(int argc, char** argv, GameInitFn init)
     // glad: load all OpenGL function pointers
     // ---------------------------------------
 #if GAME_GL_API_TYPE == GAME_GL_API_TYPE_CORE
-    printf("loading Opengl procs\n");
+    Log_Verbose("loading Opengl procs\n");
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        printf("Failed to initialize GLAD");
+        Log_Verbose("Failed to initialize GLAD");
         return -1;
     }
 #elif GAME_GL_API_TYPE == GAME_GL_API_TYPE_ES
-    printf("loading Opengl ES procs\n");
+    Log_Verbose("loading Opengl ES procs");
     if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
     {
-        printf("Failed to initialize GLAD");
+        Log_Verbose("Failed to initialize GLAD");
         return -1;
     }
 #endif
@@ -161,7 +258,7 @@ int EngineStart(int argc, char** argv, GameInitFn init)
 
     // configure global opengl state
     // -----------------------------
-    printf("configuring global opengl state\n");
+    Log_Verbose("configuring global opengl state");
     //glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
@@ -173,36 +270,36 @@ int EngineStart(int argc, char** argv, GameInitFn init)
 #if GAME_GL_API_TYPE == GAME_GL_API_TYPE_CORE
     glDebugMessageCallback(MessageCallback, 0);
 #endif
-    printf("done\n");
+    Log_Verbose("done");
 
     double accumulator = 0;
     double lastUpdate = 0;
     double slice = 1.0 / TARGET_FPS;
 
-    printf("initialising draw context\n");
+    Log_Verbose("initialising draw context");
     gDrawContext = Dr_InitDrawContext();
-    printf("done\n");
-    printf("initial screen dims change\n");
+    Log_Verbose("done");
+    Log_Verbose("initial screen dims change");
     Dr_OnScreenDimsChange(&gDrawContext, SCR_WIDTH, SCR_HEIGHT);
-    printf("done\n");
-    printf("initialising input context\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising input context");
     gInputContext = In_InitInputContext();
-    printf("done\n");
-    printf("Initialising game framework\n");
+    Log_Verbose("done");
+    Log_Verbose("Initialising game framework");
     GF_InitGameFramework();
-    printf("done\n");
-    printf("initialising image registry\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising image registry");
     IR_InitImageRegistry(NULL);
-    printf("done\n");
-    printf("initialising atlas\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising atlas");
     At_Init();
-    printf("done\n");
-    printf("initialising UI\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising UI");
     UI_Init();
-    printf("done\n");
-    printf("initialising scripting\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising scripting");
     Sc_InitScripting();
-    printf("done\n");
+    Log_Verbose("done");
 
     init(&gInputContext, &gDrawContext);
     
@@ -246,7 +343,10 @@ int EngineStart(int argc, char** argv, GameInitFn init)
     GF_DestroyGameFramework();
 
     glfwTerminate();
+    Log_DeInit();
 }
+
+
 
 void GameInit(InputContext* pIC, DrawContext* pDC)
 {
@@ -256,10 +356,10 @@ void GameInit(InputContext* pIC, DrawContext* pDC)
     options.bLoadImmediately = true;
     options.xmlPath = "./Assets/test.xml";
     options.pDc = pDC;
-    printf("making xml ui layer\n");
+    Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);
-    printf("done\n");
-    printf("pushing framework layer\n");
+    Log_Verbose("done");
+    Log_Verbose("pushing framework layer");
     GF_PushGameFrameworkLayer(&testLayer);
-    printf("done\n");
+    Log_Verbose("done");
 }

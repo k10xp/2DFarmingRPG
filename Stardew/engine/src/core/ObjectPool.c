@@ -5,7 +5,7 @@
 #include <string.h>
 #include <assert.h>
 #include "IntTypes.h"
-
+#include "Log.h"
 
 void* InitObjectPool(int objectSize, int poolInitialSize)
 {
@@ -63,14 +63,14 @@ void FreeObjectPoolIndex(void* pObjectPool, int indexToFree)
 	struct ObjectPoolData* pData = ((struct ObjectPoolData*)pObjectPool) - 1;
 	if (indexToFree < 0 || indexToFree >= pData->capacity)
 	{
-		printf("index '%i' out of range", indexToFree);
+		Log_Error("object pool %p index '%i' out of range", pObjectPool, indexToFree);
 		return;
 	}
 	for (int i = 0; i < pData->freeObjectsArraySize; i++)
 	{
 		if (pData->freeObjectIndicessArray[i] == indexToFree)
 		{
-			printf("index '%i' already free!\n", indexToFree);
+			Log_Error("object pool %p index '%i' already free!", pObjectPool, indexToFree);
 			return;
 		}
 	}

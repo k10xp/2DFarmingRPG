@@ -6,6 +6,7 @@
 #include <string.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include "Log.h"
 
 struct Args
 {
@@ -35,10 +36,11 @@ void PrintHelpMsg()
 
 int ParseArgs(int argc, char** argv)
 {
+
 	memset(&args, 0, sizeof(struct Args));
 	if (argc < 2)
 	{
-		printf("At least one arg expected\n");
+		Log_Error("At least one arg expected");
 		return 1;
 	}
 	args.xmlPath = argv[1];
@@ -85,9 +87,10 @@ static hTexture UploadTextureMock(void* src, int channels, int pxWidth, int pxHe
 
 int main(int argc, char** argv)
 {
+	Log_Init();
 	int r = ParseArgs(argc, argv);
-	printf("input file: %s\n", args.xmlPath);
-	printf("output file: %s\n", args.outPath);
+	Log_Info("input file: %s", args.xmlPath);
+	Log_Info("output file: %s", args.outPath);
 	fflush(stdout);
 	if (r)
 	{
