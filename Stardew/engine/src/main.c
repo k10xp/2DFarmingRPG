@@ -13,6 +13,7 @@
 #include "PlatformDefs.h"
 #include <libxml/parser.h>
 #include "Log.h"
+#include "Network.h"
 
 #define SCR_WIDTH 640
 #define SCR_HEIGHT 480
@@ -108,32 +109,37 @@ static void ParseCmdArgs(int argc, char** argv)
     gCmdArgs.clientAddress = "0.0.0.0";
     if(argc > 1)
     {
-        for(int i=0; i <argc; i++)
+        for(int i=1; i <argc; i++)
         {
+            
+            Log_Info("Cmd arg %i: %s", i, argv[i]);
             if(strcmp(argv[i], "--role") == 0 || strcmp(argv[i], "-r") == 0)
             {
                 assert(i + 1 < argc);
                 i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
                 if(strcmp(argv[i], "server") == 0 || strcmp(argv[i], "s") == 0)
                 {
                     gCmdArgs.role = GR_ClientServer;
                 }
-                if(strcmp(argv[i], "client") == 0 || strcmp(argv[i], "c") == 0)
+                else if(strcmp(argv[i], "client") == 0 || strcmp(argv[i], "c") == 0)
                 {
                     gCmdArgs.role = GR_Client;
                 }
             }
-            else if(strcmp(argv[i], "--server_address" == 0) || strcmp(argv[i], "-s" == 0))
+            else if(strcmp(argv[i], "--server_address") == 0 || strcmp(argv[i], "-s") == 0)
             {
                 assert(i + 1 < argc);
                 i++;
-                gCmdArgs.serverAddress = argv[i + 1];
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                gCmdArgs.serverAddress = argv[i];
             }
-            else if(strcmp(argv[i], "--client_address" == 0) || strcmp(argv[i], "-c" == 0))
+            else if(strcmp(argv[i], "--client_address") == 0 || strcmp(argv[i], "-c") == 0)
             {
                 assert(i + 1 < argc);
                 i++;
-                gCmdArgs.serverAddress = argv[i + 1];
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                gCmdArgs.serverAddress = argv[i];
             }
         }
     }
@@ -141,6 +147,9 @@ static void ParseCmdArgs(int argc, char** argv)
 
 int EngineStart(int argc, char** argv, GameInitFn init)
 {
+    ParseCmdArgs(argc, argv);
+
+    NW_Init();
     Log_Init();
 
     Log_Verbose("testing libxml version...\n");
