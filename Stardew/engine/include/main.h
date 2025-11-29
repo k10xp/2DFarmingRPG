@@ -28,6 +28,7 @@ struct CommandLineArgs
     char* clientAddress;
     bool bLogTextColoured;
     bool bIncludeLogTimeStamps;
+    bool bLogTIDs;
     const char* logfilePath;
 };
 

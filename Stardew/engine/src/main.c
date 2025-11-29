@@ -109,6 +109,7 @@ static void ParseCmdArgs(int argc, char** argv)
     gCmdArgs.clientAddress = "0.0.0.0";
     gCmdArgs.bLogTextColoured = true;
     gCmdArgs.bIncludeLogTimeStamps = true;
+    gCmdArgs.bLogTIDs = true;
     gCmdArgs.logfilePath = NULL;
     if(argc > 1)
     {
@@ -180,6 +181,10 @@ static void ParseCmdArgs(int argc, char** argv)
                 i++;
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
                 gCmdArgs.logfilePath = argv[i];
+            }
+            else if(strcmp(argv[i], "--disable_log_tid") == 0)
+            {
+
             }
         }
     }

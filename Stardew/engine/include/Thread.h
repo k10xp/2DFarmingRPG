@@ -12,9 +12,15 @@ typedef DWORD(*ThreadFn)(void*);
 
 typedef CRITICAL_SECTION CrossPlatformMutex;
 
+typedef DWORD CrossPlatformThreadID;
+
 #else
 
 #include <pthread.h>
+#define _GNU_SOURCE
+#include <unistd.h>
+#include <sys/types.h>
+
 typedef void*(*ThreadFn)(void*);
 
 typedef pthread_t CrossPlatformThread;
@@ -22,6 +28,8 @@ typedef pthread_t CrossPlatformThread;
 #define DECLARE_THREAD_PROC(name, argName) void* name (void* argName)
 
 typedef pthread_mutex_t CrossPlatformMutex;
+
+typedef pid_t CrossPlatformThreadID;
 
 #endif
 
@@ -48,5 +56,7 @@ void DestroyMutex(CrossPlatformMutex* pMtx);
 void LockMutex(CrossPlatformMutex* pMtx);
 
 void UnlockMutex(CrossPlatformMutex* pMtx);
+
+CrossPlatformThreadID GetThisThreadsID();
 
 #endif

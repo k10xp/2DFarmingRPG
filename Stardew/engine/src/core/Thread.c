@@ -43,6 +43,12 @@ void UnlockMutex(CrossPlatformMutex* pMtx)
     LeaveCriticalSection(pMtx);
 }
 
+CrossPlatformThreadID GetThisThreadsID()
+{
+    HANDLE hThis = GetCurrentThread();
+    return GetThreadId(hThis);
+}
+
 #else
 
 
@@ -86,5 +92,10 @@ void UnlockMutex(CrossPlatformMutex* pMtx)
     pthread_mutex_unlock(pMtx);
 }
 
+CrossPlatformThreadID GetThisThreadsID()
+{
+    CrossPlatformThreadID id = gettid();
+    return id; 
+}
 
 #endif

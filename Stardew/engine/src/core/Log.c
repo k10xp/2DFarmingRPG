@@ -56,7 +56,7 @@ int vLog_Fmt(const char* fmt, enum LogLvl lvl, va_list args)
     {
         return 0;
     }
-    char gLogBuffer[512];
+    char gLogBuffer[1024];
     char** levelNames = gCmdArgs.bLogTextColoured ? gColouredLogLevelNames : gLogLevelNames;
     snprintf(gLogBuffer, 512, levelNames[lvl]);
     int namelen = strlen(levelNames[lvl]);
@@ -72,6 +72,17 @@ int vLog_Fmt(const char* fmt, enum LogLvl lvl, va_list args)
         namelen = strlen(gLogBuffer);
         start = gLogBuffer + namelen;
     }
+    if(gCmdArgs.bLogTIDs)
+    {
+        static_assert(sizeof(CrossPlatformThreadID) == sizeof(u32));
+        CrossPlatformThreadID tid = GetThisThreadsID();
+        const char* tidFmt = gCmdArgs.bLogTextColoured ? " "BHMAG"TID: 0x%08x"CRESET" " : "TID: %08x ";
+        snprintf(start, 512 - namelen, tidFmt, (u32)tid);
+
+        namelen = strlen(gLogBuffer);
+        start = gLogBuffer + namelen;
+    }
+
     vsnprintf(start, 512 - namelen, fmt, args);
 
     LockMutex(&gLogMtx);
