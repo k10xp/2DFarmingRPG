@@ -307,7 +307,7 @@ void TextWidget_FromXML(struct UIWidget* pWidget, struct TextWidgetData* pData, 
 		HFont font = Fo_FindFont(pUILayerData->atlas, fontName, pData->fSizePts);
 		if (font == NULL_HANDLE)
 		{
-			Log_Error("TextWidget_FromXML: can't find font %s size %f pts\n", fontName, pData->fSizePts);
+			Log_Error("TextWidget_FromXML: can't find font %s size %f pts", fontName, pData->fSizePts);
 			EASSERT(false);
 		}
 		pData->font = font;

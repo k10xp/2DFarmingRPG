@@ -184,22 +184,20 @@ struct KVP* InsertKVPIntoNewAlloc(struct HashMap* pMap, struct KVP* pKVPsrc, cha
 
 void HashmapPrintEntries(struct HashMap* pMap, const char* hashMapName)
 {
-	Log_Info("HASHMAP: '%s' current size: %i current capacity: %i\n\n", hashMapName, pMap->size, pMap->capacity);
+	Log_Info("HASHMAP: '%s' current size: %i current capacity: %i", hashMapName, pMap->size, pMap->capacity);
 	struct KVP* pKVP = pMap->pHead;
 	while (pKVP)
 	{
 		EASSERT(pKVP->pKey);
-		Log_Info("Key: %s hash: %u\n", pKVP->pKey, pKVP->keyHash);
+		Log_Info("Key: %s hash: %u", pKVP->pKey, pKVP->keyHash);
 		pKVP = pKVP->pNext;
 	}
-	Log_Info("\n");
 }
 
 void HashmapResize(struct HashMap* pMap)
 {
-	//printf("RESIZING: current size: %i current capacity: %i\n\n", pMap->size, pMap->capacity);
+	//printf("RESIZING: current size: %i current capacity: %i", pMap->size, pMap->capacity);
 	//PrintEntries(pMap);
-	//printf("\n");
 	int newAllocSize = (pMap->capacity * (pMap->valueSize + sizeof(struct KVP))) * 2;
 	char* pNewAlloc = malloc(newAllocSize);
 	memset(pNewAlloc, 0, newAllocSize);

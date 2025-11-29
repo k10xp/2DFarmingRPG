@@ -306,7 +306,7 @@ static void MakeWidgetIntoTextEntryWidget(HWidget hWidget, struct DataNode* pDat
 		{
 			char* errorMsgName = malloc(nameLen + 1);
 			pDataNode->fnGetStrcpy(pDataNode, "onEnter", errorMsgName);
-			Log_Error("TextWidget: onEnter callback name '%s' too long. 31 chars max, name was %i\n", errorMsgName, nameLen);
+			Log_Error("TextWidget: onEnter callback name '%s' too long. 31 chars max, name was %i", errorMsgName, nameLen);
 			free(errorMsgName);
 		}
 	}

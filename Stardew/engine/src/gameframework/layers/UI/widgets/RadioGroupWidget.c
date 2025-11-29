@@ -113,7 +113,7 @@ static void ParseBindingEspressionAttribute(char* attribName, char* attribConten
 	}
 	else
 	{
-		Log_Warning("invalid property binding: %s\n", attribContent);
+		Log_Warning("invalid property binding: %s", attribContent);
 	}
 }
 

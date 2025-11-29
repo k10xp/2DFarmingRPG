@@ -179,7 +179,7 @@ void UI_ParseWidgetDimsAttribute(const char* attributeContent, struct WidgetDim*
 		}
 		break;
 	default:
-		Log_Error("invalid widget dim value %s\n", attributeContent);
+		Log_Error("invalid widget dim value %s", attributeContent);
 		EASSERT(false);
 		break;
 	}
@@ -822,7 +822,7 @@ void UI_AddIntPropertyBinding(struct UIWidget* pWidget, char* inBoundPropertyNam
 {
 	if (pWidget->numBindings >= MAX_NUM_BINDINGS)
 	{
-		Log_Error("MAX_NUM_BINDINGS exceeded\n");
+		Log_Error("MAX_NUM_BINDINGS exceeded");
 		EASSERT(false);
 		return;
 	}
@@ -843,7 +843,7 @@ void UI_AddFloatPropertyBinding(struct UIWidget* pWidget, char* inBoundPropertyN
 {
 	if (pWidget->numBindings >= MAX_NUM_BINDINGS)
 	{
-		Log_Error("MAX_NUM_BINDINGS exceeded\n");
+		Log_Error("MAX_NUM_BINDINGS exceeded");
 		EASSERT(false);
 		return;
 	}

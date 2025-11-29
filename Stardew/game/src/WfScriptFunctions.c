@@ -20,7 +20,7 @@ static int L_SavePreferences(lua_State* L)
 {
     if(lua_gettop(L) != 1)
     {
-        Log_Error("L_SavePreferences ERROR\n");
+        Log_Error("L_SavePreferences ERROR");
     }
     else if(lua_islightuserdata(L, -1))
     {
@@ -30,7 +30,7 @@ static int L_SavePreferences(lua_State* L)
     }
     else
     {
-        Log_Error("L_SavePreferences ERROR\n");
+        Log_Error("L_SavePreferences ERROR");
     }
     return 0;
 }

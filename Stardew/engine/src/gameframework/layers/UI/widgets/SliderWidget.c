@@ -319,7 +319,7 @@ static void ParseBindingEspressionAttribute(char* attribName, char* attribConten
 	}
 	else
 	{
-		Log_Error("invalid property binding: %s\n", attribContent);
+		Log_Error("invalid property binding: %s", attribContent);
 	}
 
 }
@@ -346,7 +346,7 @@ static void MakeSliderFromXML(struct UIWidget* pWidget, struct SliderData* pData
 		}
 		else
 		{
-			Log_Warning("invalid slider orientation\n");
+			Log_Warning("invalid slider orientation");
 		}
 	}
 	if(pXMLNode->fnGetPropType(pXMLNode, "val") == DN_String)

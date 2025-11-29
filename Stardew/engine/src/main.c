@@ -197,13 +197,13 @@ int EngineStart(int argc, char** argv, GameInitFn init)
     NW_Init();
     
 
-    Log_Verbose("testing libxml version...\n");
+    Log_Verbose("testing libxml version...");
     LIBXML_TEST_VERSION
-    Log_Verbose("hello world\n");
+    Log_Verbose("hello world");
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
-    Log_Verbose("glfwInit\n");
+    Log_Verbose("glfwInit");
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -247,7 +247,7 @@ int EngineStart(int argc, char** argv, GameInitFn init)
         return -1;
     }
 #elif GAME_GL_API_TYPE == GAME_GL_API_TYPE_ES
-    Log_Verbose("loading Opengl ES procs\n");
+    Log_Verbose("loading Opengl ES procs");
     if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
     {
         Log_Verbose("Failed to initialize GLAD");
@@ -258,7 +258,7 @@ int EngineStart(int argc, char** argv, GameInitFn init)
 
     // configure global opengl state
     // -----------------------------
-    Log_Verbose("configuring global opengl state\n");
+    Log_Verbose("configuring global opengl state");
     //glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
@@ -270,36 +270,36 @@ int EngineStart(int argc, char** argv, GameInitFn init)
 #if GAME_GL_API_TYPE == GAME_GL_API_TYPE_CORE
     glDebugMessageCallback(MessageCallback, 0);
 #endif
-    Log_Verbose("done\n");
+    Log_Verbose("done");
 
     double accumulator = 0;
     double lastUpdate = 0;
     double slice = 1.0 / TARGET_FPS;
 
-    Log_Verbose("initialising draw context\n");
+    Log_Verbose("initialising draw context");
     gDrawContext = Dr_InitDrawContext();
-    Log_Verbose("done\n");
-    Log_Verbose("initial screen dims change\n");
+    Log_Verbose("done");
+    Log_Verbose("initial screen dims change");
     Dr_OnScreenDimsChange(&gDrawContext, SCR_WIDTH, SCR_HEIGHT);
-    Log_Verbose("done\n");
-    Log_Verbose("initialising input context\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising input context");
     gInputContext = In_InitInputContext();
-    Log_Verbose("done\n");
-    Log_Verbose("Initialising game framework\n");
+    Log_Verbose("done");
+    Log_Verbose("Initialising game framework");
     GF_InitGameFramework();
-    Log_Verbose("done\n");
-    Log_Verbose("initialising image registry\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising image registry");
     IR_InitImageRegistry(NULL);
-    Log_Verbose("done\n");
-    Log_Verbose("initialising atlas\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising atlas");
     At_Init();
-    Log_Verbose("done\n");
-    Log_Verbose("initialising UI\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising UI");
     UI_Init();
-    Log_Verbose("done\n");
-    Log_Verbose("initialising scripting\n");
+    Log_Verbose("done");
+    Log_Verbose("initialising scripting");
     Sc_InitScripting();
-    Log_Verbose("done\n");
+    Log_Verbose("done");
 
     init(&gInputContext, &gDrawContext);
     
@@ -356,10 +356,10 @@ void GameInit(InputContext* pIC, DrawContext* pDC)
     options.bLoadImmediately = true;
     options.xmlPath = "./Assets/test.xml";
     options.pDc = pDC;
-    Log_Verbose("making xml ui layer\n");
+    Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);
-    Log_Verbose("done\n");
-    Log_Verbose("pushing framework layer\n");
+    Log_Verbose("done");
+    Log_Verbose("pushing framework layer");
     GF_PushGameFrameworkLayer(&testLayer);
-    Log_Verbose("done\n");
+    Log_Verbose("done");
 }

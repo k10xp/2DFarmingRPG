@@ -53,7 +53,7 @@ void WfWoodedAreaEntityOnInit(struct Entity2D* pEnt, struct GameFrameworkLayer* 
     float mHeight = pData->heightPx / pixelsPerMeter;
     float areaSquareMeters = mWidth * mHeight;
     int numTrees = (int)(areaSquareMeters * pData->density);
-    Log_Verbose("Wooded Area Area: %.2f, Num Trees: %i\n", areaSquareMeters, numTrees);
+    Log_Verbose("Wooded Area Area: %.2f, Num Trees: %i", areaSquareMeters, numTrees);
 
     struct WfTreeDef treeDef;
     for(int i = 0; i < numTrees; i++)

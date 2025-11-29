@@ -148,7 +148,7 @@ static void AddLuaTableSubTree(XMLUIData* pData, HWidget hParent)
 	}
 	else
 	{
-		Log_Error("error: child node in children table is not a string or is empty\n");
+		Log_Error("error: child node in children table is not a string or is empty");
 		Sc_Pop();
 	}
 }
@@ -189,7 +189,7 @@ static void Update(struct GameFrameworkLayer* pLayer, float deltaT)
 		}
 		else
 		{
-			Log_Error("error: function %s did not return a table\n", pReq->funcName);
+			Log_Error("error: function %s did not return a table", pReq->funcName);
 		}
 	}
 	for (int i = 0; i < VectorSize(pData->pChildrenChangeRequests); i++)
@@ -217,7 +217,7 @@ static void Draw(struct GameFrameworkLayer* pLayer, DrawContext* dc)
 	struct UIWidget* pRootWidget = UI_GetWidget(pData->rootWidget);
 	if (!pRootWidget)
 	{
-		Log_Error("something wrong\n");
+		Log_Error("something wrong");
 		return;
 	}
 
@@ -531,7 +531,7 @@ void AddNodeChildren(HWidget widget, xmlNode* pNode, XMLUIData* pUIData)
 		if (!pCtor)
 		{
 			// log error
-			Log_Error("error occured\n");
+			Log_Error("error occured");
 			return;
 		}
 		HWidget childWidget = pCtor(widget, &dataNode, pUIData);
@@ -574,17 +574,17 @@ static bool TryLoadViewModel(XMLUIData* pUIData, xmlNode* pScreenNode)
 
 	if (bVMFileSet && bVMFunctionSet)
 	{
-		Log_Verbose("opening viewmodel file %s\n", pFilePath);
+		Log_Verbose("opening viewmodel file %s", pFilePath);
 		// instantiate viewmodel lua object and store in registry
 		Sc_OpenFile(pFilePath);
-		Log_Verbose("done\n");
+		Log_Verbose("done");
 		pUIData->hViewModel = Sc_CallGlobalFuncReturningTableAndStoreResultInReg(pFnName, NULL, 0);
 		// tag the viewmodel table with a ptr to the XMLUIDataPtr so it can set the widget tree flag to dirty
 		Sc_AddLightUserDataValueToTable(pUIData->hViewModel, "XMLUIDataPtr", pUIData);
 	}
 	else
 	{
-		Log_Error("TryLoadViewModel, either file or function (or both) not set. file: %i function name: %i\n", bVMFileSet, bVMFunctionSet);
+		Log_Error("TryLoadViewModel, either file or function (or both) not set. file: %i function name: %i", bVMFileSet, bVMFunctionSet);
 	}
 
 	if (pFnName)
@@ -652,12 +652,12 @@ static void LoadUIData(XMLUIData* pUIData, DrawContext* pDC)
 
 	if (pXMLDoc)
 	{
-		Log_Verbose("pXMLDoc is valid\n");
+		Log_Verbose("pXMLDoc is valid");
 		xmlNode* root = xmlDocGetRootElement(pXMLDoc);
 		unsigned long numchildren = xmlChildElementCount(root);
 		if (numchildren != 2)
 		{
-			Log_Error("%s root should have 2 kids\n", __FUNCTION__);
+			Log_Error("%s root should have 2 kids", __FUNCTION__);
 			xmlFreeDoc(pXMLDoc);
 			return;
 		}
@@ -692,7 +692,7 @@ static void LoadUIData(XMLUIData* pUIData, DrawContext* pDC)
 		}
 		if (!bDoneAtlas || !bDoneScreen)
 		{
-			Log_Error("%s ui xml file doesn't have both screen and atlas components\n", __FUNCTION__);
+			Log_Error("%s ui xml file doesn't have both screen and atlas components", __FUNCTION__);
 		}
 
 		xmlFreeDoc(pXMLDoc);
@@ -755,9 +755,9 @@ void XMLUI_PushGameFrameworkLayer(const char* xmlPath)
 	options.xmlPath = xmlPath;
 	options.pDc = NULL;
 	testLayer.flags |= (EnableOnPush | EnableOnPop);
-	Log_Verbose("making xml ui layer\n");
+	Log_Verbose("making xml ui layer");
 	XMLUIGameLayer_Get(&testLayer, &options);
-	Log_Verbose("done\n");
-	Log_Verbose("pushing framework layer\n");
+	Log_Verbose("done");
+	Log_Verbose("pushing framework layer");
 	GF_PushGameFrameworkLayer(&testLayer);
 }

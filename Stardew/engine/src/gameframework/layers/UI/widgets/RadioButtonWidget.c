@@ -279,7 +279,7 @@ static void RadioButtonWidget_MakeFromXML(struct DataNode* pDataNode, struct Rad
 		{
 			char* val = malloc(pDataNode->fnGetStrlen(pDataNode, "btnPlacement") + 1);
 			pDataNode->fnGetStrcpy(pDataNode, "btnPlacement", val);
-			Log_Error("Invlaid RadioBtnPlacement val '%s' \n", val);
+			Log_Error("Invlaid RadioBtnPlacement val '%s'", val);
 			free(val);
 		}
 	}

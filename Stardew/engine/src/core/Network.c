@@ -35,6 +35,12 @@ static int NetcodeLog(const char* fmt, ...)
     sprintf(buf, gCmdArgs.bLogTextColoured ? netcodeColouredLogTagString : netcodeLogTagString);
     int len = strlen(buf);
     vsnprintf(buf + len, 512 - len, fmt, args);
+    len = strlen(buf);
+    while(buf[len - 1] == '\n' || buf[len - 1] == '\r')
+    {
+        buf[--len] = '\0';
+    }
+    
     Log_Info(buf);
     va_end(args);
 }
@@ -44,7 +50,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
     netcode_set_printf_function(&NetcodeLog);
     if ( netcode_init() != NETCODE_OK )
     {
-        Log_Error( "error: failed to initialize netcode\n" );
+        Log_Error( "error: failed to initialize netcode" );
         return (void*)1;
     }
 
@@ -53,7 +59,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
     double time = 0.0;
     double delta_time = 1.0 / 60.0;
 
-    Log_Info( "[client]\n" );
+    Log_Info( "client" );
 
     struct netcode_client_config_t client_config;
     netcode_default_client_config( &client_config );
@@ -61,7 +67,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     if ( !client )
     {
-        Log_Error( "error: failed to create client\n" );
+        Log_Error( "error: failed to create client" );
         return (void*)1;
     }
 
@@ -69,7 +75,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     uint64_t client_id = 0;
     netcode_random_bytes( (uint8_t*) &client_id, 8 );
-    Log_Info( "client id is %.16" PRIx64 "\n", client_id );
+    Log_Info( "client id is %.16" PRIx64 , client_id );
 
     uint8_t user_data[NETCODE_USER_DATA_BYTES];
     netcode_random_bytes(user_data, NETCODE_USER_DATA_BYTES);
@@ -78,7 +84,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     if ( netcode_generate_connect_token( 1, &server_address, &server_address, CONNECT_TOKEN_EXPIRY, CONNECT_TOKEN_TIMEOUT, client_id, GAME_PROTOCOL_ID, private_key, user_data, connect_token ) != NETCODE_OK )
     {
-        Log_Error( "error: failed to generate connect token\n" );
+        Log_Error( "error: failed to generate connect token" );
         return (void*)1;
     }
 
@@ -118,7 +124,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     if ( quit )
     {
-        Log_Info( "shutting netcode thread down\n" );
+        Log_Info( "shutting netcode thread down" );
     }
 
     netcode_client_destroy( client );
@@ -132,7 +138,7 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     netcode_set_printf_function(&NetcodeLog);
     if ( netcode_init() != NETCODE_OK )
     {
-        Log_Error( "failed to initialize netcode\n" );
+        Log_Error( "failed to initialize netcode" );
         return (void*)1;
     }
 
@@ -141,7 +147,7 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     double time = 0.0;
     double delta_time = 1.0 / 60.0;
 
-    Log_Info( "[server]\n" );
+    Log_Info( "[server]" );
 
     NETCODE_CONST char* server_address = gCmdArgs.serverAddress;
     struct netcode_server_config_t server_config;
@@ -153,7 +159,7 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
 
     if ( !server )
     {
-        Log_Info( "error: failed to create server\n" );
+        Log_Info( "error: failed to create server" );
         return (void*)1;
     }
 
@@ -192,7 +198,7 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
 
     if ( quit )
     {
-        Log_Info( "shutting netcode thread down\n" );
+        Log_Info( "shutting netcode thread down" );
     }
 
     netcode_server_destroy( server );

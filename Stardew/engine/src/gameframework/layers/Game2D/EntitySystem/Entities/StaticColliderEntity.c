@@ -98,13 +98,13 @@ void Serialize2DRectStaticColliderEntity(struct BinarySerializer* bs, struct Ent
     if(pInEnt->numComponents != 1)
     {
         EASSERT(false);
-        Log_Error("SerializeStaticColliderEntity, collider doesn't have exactly 1 component\n");
+        Log_Error("SerializeStaticColliderEntity, collider doesn't have exactly 1 component");
         return;
     }
     if(pInEnt->components[0].type != ETE_StaticCollider)
     {
         EASSERT(false);
-        Log_Error("SerializeStaticColliderEntity, component isn't of type static collider\n");
+        Log_Error("SerializeStaticColliderEntity, component isn't of type static collider");
         return;
     }
     //struct PhysicsShape2D* pShape = Ph_GetStaticBodyShape2D(pInEnt->components[0].data.staticCollider.id);
@@ -168,13 +168,13 @@ void Serialize2DCircleStaticColliderEntity(struct BinarySerializer* bs, struct E
     if(pInEnt->numComponents != 1)
     {
         EASSERT(false);
-        Log_Error("SerializeStaticColliderEntity, collider doesn't have exactly 1 component\n");
+        Log_Error("SerializeStaticColliderEntity, collider doesn't have exactly 1 component");
         return;
     }
     if(pInEnt->components[0].type != ETE_StaticCollider)
     {
         EASSERT(false);
-        Log_Error("SerializeStaticColliderEntity, component isn't of type static collider\n");
+        Log_Error("SerializeStaticColliderEntity, component isn't of type static collider");
         return;
     }
     float r = pInEnt->components[0].data.staticCollider.shape.data.circle.radius;

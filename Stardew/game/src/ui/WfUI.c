@@ -13,10 +13,10 @@ void WfPushHUD(DrawContext* pDC)
     options.xmlPath = "./Assets/GameHUD.xml";
     options.pDc = pDC;
     testLayer.flags |= (EnableOnPush | EnableOnPop);
-    Log_Verbose("making xml ui layer\n");
+    Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);
-    Log_Verbose("done\n");
-    Log_Verbose("pushing framework layer\n");
+    Log_Verbose("done");
+    Log_Verbose("pushing framework layer");
     GF_PushGameFrameworkLayer(&testLayer);
 }
 
@@ -27,11 +27,11 @@ void WfPushSettings(DrawContext* pDC)
     struct XMLUIGameLayerOptions options;
     options.xmlPath = "./Assets/Settings.xml";
     options.pDc = pDC;
-    Log_Verbose("making xml ui layer\n");
+    Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);
     testLayer.flags |= ( MasksUpdate | MasksInput );
 
-    Log_Verbose("done\n");
-    Log_Verbose("pushing framework layer\n");
+    Log_Verbose("done");
+    Log_Verbose("pushing framework layer");
     GF_PushGameFrameworkLayer(&testLayer);
 }

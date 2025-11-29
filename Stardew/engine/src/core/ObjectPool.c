@@ -70,7 +70,7 @@ void FreeObjectPoolIndex(void* pObjectPool, int indexToFree)
 	{
 		if (pData->freeObjectIndicessArray[i] == indexToFree)
 		{
-			Log_Error("object pool %p index '%i' already free!\n", pObjectPool, indexToFree);
+			Log_Error("object pool %p index '%i' already free!", pObjectPool, indexToFree);
 			return;
 		}
 	}

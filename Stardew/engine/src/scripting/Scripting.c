@@ -22,7 +22,7 @@ static lua_State* gL = NULL;
 
 static void OnPropertyChangedInternal(XMLUIData* pUIData, HWidget hWidget, const char* pChangedPropName)
 {
-	//printf("OnPropertyChangedInternal. pChangedPropName: %s\n", pChangedPropName);
+	//printf("OnPropertyChangedInternal. pChangedPropName: %s", pChangedPropName);
 
 	while (hWidget != NULL_HWIDGET)
 	{
@@ -34,7 +34,7 @@ static void OnPropertyChangedInternal(XMLUIData* pUIData, HWidget hWidget, const
 			{
 				if(strcmp(pBinding->boundPropertyName, "childrenBinding") == 0)
 				{
-					Log_Verbose("childrenBinding changed. pChangedPropName: %s\n", pChangedPropName);
+					Log_Verbose("childrenBinding changed. pChangedPropName: %s", pChangedPropName);
 					char* pStr = malloc(strlen(pChangedPropName) + 1);
 
 					strcpy(pStr, pChangedPropName);
@@ -44,11 +44,11 @@ static void OnPropertyChangedInternal(XMLUIData* pUIData, HWidget hWidget, const
 						pStr,
 						hWidget
 					};
-					Log_Verbose("pUIData->pChildrenChangeRequests: %p\n", pUIData->pChildrenChangeRequests);
+					Log_Verbose("pUIData->pChildrenChangeRequests: %p", pUIData->pChildrenChangeRequests);
 					volatile VectorData* pDbg = VectorData_DEBUG(pUIData->pChildrenChangeRequests);
 					pUIData->pChildrenChangeRequests = VectorPush(pUIData->pChildrenChangeRequests, &r);
 					pDbg = VectorData_DEBUG(pUIData->pChildrenChangeRequests);
-					Log_Verbose("pushed request\n");
+					Log_Verbose("pushed request");
 
 				}
 				else if (pWidget->fnOnBoundPropertyChanged)
@@ -86,7 +86,7 @@ static int L_FireGameFrameworkEvent(lua_State* L)
 	}
 	else
 	{
-		Log_Error("FireGameFrameworkEvent. First argument wrong type should be string\n");
+		Log_Error("FireGameFrameworkEvent. First argument wrong type should be string");
 	}
 	if(lua_istable(L,-2))
 	{
@@ -100,7 +100,7 @@ static int L_FireGameFrameworkEvent(lua_State* L)
 	}
 	else
 	{
-		Log_Error("FireGameFrameworkEvent. 2nd argument wrong type should be table\n");
+		Log_Error("FireGameFrameworkEvent. 2nd argument wrong type should be table");
 	}
 	return 0;
 }
@@ -122,7 +122,7 @@ static int L_UnSubscribeToGameFrameworkEvent(lua_State* L)
 	}
 	else
 	{
-		Log_Error("UnsubscribeFromGameFrameworkEvent - argument wrong type\n");
+		Log_Error("UnsubscribeFromGameFrameworkEvent - argument wrong type");
 		lua_settop(L, 0);
 		lua_pushboolean(L, false);
 		return 1;
@@ -144,7 +144,7 @@ static int L_SubscribeToGameFrameworkEvent(lua_State* L)
 	}
 	else
 	{
-		Log_Error("SubscribeGameFrameworkEvent arg 3 wrong type. Is type. Needs to be string\n");
+		Log_Error("SubscribeGameFrameworkEvent arg 3 wrong type. Is type. Needs to be string");
 		lua_settop(L, 0);
 		lua_pushnil(L);
 		free(ud);
@@ -157,7 +157,7 @@ static int L_SubscribeToGameFrameworkEvent(lua_State* L)
 	}
 	else
 	{
-		Log_Error("SubscribeGameFrameworkEvent arg 3 wrong type. Is type. Needs to be string\n");
+		Log_Error("SubscribeGameFrameworkEvent arg 3 wrong type. Is type. Needs to be string");
 		lua_settop(L, 0);
 		lua_pushnil(L);
 		free(ud);
@@ -173,7 +173,7 @@ static int L_SubscribeToGameFrameworkEvent(lua_State* L)
 	}
 	else
 	{
-		Log_Error("SubscribeGameFrameworkEvent arg 3 wrong type. Is type. Needs to be string\n");
+		Log_Error("SubscribeGameFrameworkEvent arg 3 wrong type. Is type. Needs to be string");
 		lua_settop(L, 0);
 		lua_pushnil(L);
 		free(ud);
@@ -216,13 +216,13 @@ static int L_GetButtonBinding(lua_State* L)
 	int top = lua_gettop(L);
 	if(top != 1)
 	{
-		Log_Error("L_GetButtonBinding Wrong number of args\n");
+		Log_Error("L_GetButtonBinding Wrong number of args");
 		lua_pushlightuserdata(L, NULL);
 		return 1;
 	}
 	if(!lua_isstring(L,-1))
 	{
-		Log_Error("L_GetButtonBinding Wrong type of arg, string expected\n");
+		Log_Error("L_GetButtonBinding Wrong type of arg, string expected");
 		lua_pushlightuserdata(L, NULL);
 		return 1;
 	}
@@ -239,13 +239,13 @@ static int L_FreeButtonBinding(lua_State* L)
 	int top = lua_gettop(L);
 	if(top != 1)
 	{
-		Log_Error("L_FreeButtonBinding Wrong number of args\n");
+		Log_Error("L_FreeButtonBinding Wrong number of args");
 		lua_pushlightuserdata(L, NULL);
 		return 1;
 	}
 	if(!lua_islightuserdata(L,-1))
 	{
-		Log_Error("L_FreeButtonBinding Wrong type of arg, lightuserdata expected\n");
+		Log_Error("L_FreeButtonBinding Wrong type of arg, lightuserdata expected");
 		lua_pushlightuserdata(L, NULL);
 		return 1;
 	}
@@ -259,13 +259,13 @@ static int L_GetButtonPress(lua_State* L)
 	int top = lua_gettop(L);
 	if(top != 1)
 	{
-		Log_Error("L_GetButtonPress Wrong number of args\n");
+		Log_Error("L_GetButtonPress Wrong number of args");
 		lua_pushboolean(L, false);
 		return 1;
 	}
 	if(!lua_islightuserdata(L,-1))
 	{
-		Log_Error("L_GetButtonPress Wrong type of arg, lightuserdata expected\n");
+		Log_Error("L_GetButtonPress Wrong type of arg, lightuserdata expected");
 		lua_pushboolean(L, false);
 		return 1;
 	}
@@ -284,13 +284,13 @@ static int L_GetGamelayerZoom(lua_State* L)
 	int top = lua_gettop(L);
 	if(top != 1)
 	{
-		Log_Error("L_GetGamelayerZoom Wrong number of args\n");
+		Log_Error("L_GetGamelayerZoom Wrong number of args");
 		lua_pushnumber(L, 1.0);
 		return 1;
 	}
 	if(!lua_islightuserdata(L,-1))
 	{
-		Log_Error("L_GetGamelayerZoom Wrong type of arg, lightuserdata expected\n");
+		Log_Error("L_GetGamelayerZoom Wrong type of arg, lightuserdata expected");
 		lua_pushnumber(L, 1.0);
 		return 1;
 	}
@@ -304,17 +304,17 @@ static int L_SetGamelayerZoom(lua_State* L)
 	int top = lua_gettop(L);
 	if(top != 2)
 	{
-		Log_Error("L_SetGamelayerZoom Wrong number of args\n");
+		Log_Error("L_SetGamelayerZoom Wrong number of args");
 		return 0;
 	}
 	if(!lua_isnumber(L,1))
 	{
-		Log_Error("L_SetGamelayerZoom Wrong type of arg, arg 1 number expected\n");
+		Log_Error("L_SetGamelayerZoom Wrong type of arg, arg 1 number expected");
 		return 0;
 	}
 	if(!lua_islightuserdata(L,2))
 	{
-		Log_Error("L_SetGamelayerZoom Wrong type of arg, arg 2 lightuserdata expected\n");
+		Log_Error("L_SetGamelayerZoom Wrong type of arg, arg 2 lightuserdata expected");
 		return 0;
 	}
 	double num = lua_tonumber(L, 1);
@@ -362,7 +362,7 @@ bool Sc_OpenFile(const char* path)
 	{
 		/* If something went wrong, error message is at the top of */
 		/* the stack */
-		Log_Error("Couldn't load file: %s\n", lua_tostring(gL, -1));
+		Log_Error("Couldn't load file: %s", lua_tostring(gL, -1));
 		return false;
 	}
 	lua_pcall(gL, 0, LUA_MULTRET, 0);
@@ -449,7 +449,7 @@ int Sc_CallGlobalFuncReturningTableAndStoreResultInReg(const char* funcName, str
 	}
 	else
 	{
-		Log_Error("Sc_CallGlobalFuncReturningTableAndStoreResultInReg funcName '%s' was not a function, it was type '%s'\n", funcName, GetTypeOnTopOfStack());
+		Log_Error("Sc_CallGlobalFuncReturningTableAndStoreResultInReg funcName '%s' was not a function, it was type '%s'", funcName, GetTypeOnTopOfStack());
 	}
 	lua_settop(gL, 0);
 	return rVal;
@@ -461,7 +461,7 @@ void Sc_CallFuncInRegTableEntryTable(int regIndex, const char* funcName, struct 
 	bool bIstable = lua_istable(gL, -1);
 	if (!bIstable)
 	{
-		Log_Error("Sc_CallFuncInRegTableEntryTable. Reg table entry %i is not a table, but %s\n", regIndex, GetTypeOnTopOfStack());
+		Log_Error("Sc_CallFuncInRegTableEntryTable. Reg table entry %i is not a table, but %s", regIndex, GetTypeOnTopOfStack());
 		lua_settop(gL, 0);
 		return;
 	}
@@ -475,7 +475,7 @@ void Sc_CallFuncInRegTableEntryTable(int regIndex, const char* funcName, struct 
 	}
 	else
 	{
-		Log_Error("object at key '%s' not a function but type %s \n", funcName, GetTypeOnTopOfStack());
+		Log_Error("object at key '%s' not a function but type %s ", funcName, GetTypeOnTopOfStack());
 	}
 	//lua_settop(gL, 0);
 }
@@ -486,7 +486,7 @@ void Sc_CallFuncInRegTableEntry(int regIndex, struct ScriptCallArgument* pArgs, 
 	bool bIsFunc = lua_isfunction(gL, -1);
 	if (!bIsFunc)
 	{
-		Log_Error("Sc_CallFuncInRegTableEntry. Reg table entry %i is not a function, but %s\n", regIndex, GetTypeOnTopOfStack());
+		Log_Error("Sc_CallFuncInRegTableEntry. Reg table entry %i is not a function, but %s", regIndex, GetTypeOnTopOfStack());
 		lua_settop(gL, 0);
 		return ;
 	}
@@ -504,7 +504,7 @@ void Sc_AddLightUserDataValueToTable(int regIndex, const char* userDataKey, void
 	bool bIstable = lua_istable(gL, -1);
 	if (!bIstable)
 	{
-		Log_Error("Sc_CallFuncInRegTableEntryTable. Reg table entry %i is not a table, but %s\n", regIndex, GetTypeOnTopOfStack());
+		Log_Error("Sc_CallFuncInRegTableEntryTable. Reg table entry %i is not a table, but %s", regIndex, GetTypeOnTopOfStack());
 		lua_settop(gL, 0);
 		return;
 	}
@@ -519,7 +519,7 @@ bool Sc_FunctionPresentInTable(int regIndex, const char* funcName)
 	bool bIstable = lua_istable(gL, -1);
 	if (!bIstable)
 	{
-		Log_Error("Sc_FunctionPresentInTable. Reg table entry %i is not a table, but %s\n", regIndex, GetTypeOnTopOfStack());
+		Log_Error("Sc_FunctionPresentInTable. Reg table entry %i is not a table, but %s", regIndex, GetTypeOnTopOfStack());
 		lua_settop(gL, 0);
 		return;
 	}
@@ -538,19 +538,19 @@ void Sc_DumpStack()
 		switch (lua_type(gL, i)) 
 		{
 		case LUA_TNUMBER:
-			Log_Info("%g\n", lua_tonumber(gL, i));
+			Log_Info("%g", lua_tonumber(gL, i));
 			break;
 		case LUA_TSTRING:
-			Log_Info("%s\n", lua_tostring(gL, i));
+			Log_Info("%s", lua_tostring(gL, i));
 			break;
 		case LUA_TBOOLEAN:
-			Log_Info("%s\n", (lua_toboolean(gL, i) ? "true" : "false"));
+			Log_Info("%s", (lua_toboolean(gL, i) ? "true" : "false"));
 			break;
 		case LUA_TNIL:
-			Log_Info("%s\n", "nil");
+			Log_Info("%s", "nil");
 			break;
 		default:
-			Log_Info("%p\n", lua_topointer(gL, i));
+			Log_Info("%p", lua_topointer(gL, i));
 			break;
 		}
 	}

@@ -40,7 +40,7 @@ int ParseArgs(int argc, char** argv)
 	memset(&args, 0, sizeof(struct Args));
 	if (argc < 2)
 	{
-		Log_Error("At least one arg expected\n");
+		Log_Error("At least one arg expected");
 		return 1;
 	}
 	args.xmlPath = argv[1];
@@ -89,8 +89,8 @@ int main(int argc, char** argv)
 {
 	Log_Init();
 	int r = ParseArgs(argc, argv);
-	Log_Info("input file: %s\n", args.xmlPath);
-	Log_Info("output file: %s\n", args.outPath);
+	Log_Info("input file: %s", args.xmlPath);
+	Log_Info("output file: %s", args.outPath);
 	fflush(stdout);
 	if (r)
 	{
