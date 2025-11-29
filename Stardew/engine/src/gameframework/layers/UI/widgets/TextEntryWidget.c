@@ -13,6 +13,7 @@
 #include "RootWidget.h"
 #include "TimerPool.h"
 #include "Scripting.h"
+#include "Log.h"
 
 struct TextEntryWidgetData
 {
@@ -182,7 +183,6 @@ static void RecieveKeystrokeCallback(struct UIWidget* pWidget, int keystroke)
 		return;
 	default:
 		DoEnterChar(pData, (char)keystroke, pWidget);
-		printf("%c\n",(char)keystroke);
 		break;
 	}
 	SetRootWidgetIsDirty(pData->pLayerData->rootWidget, true);
@@ -239,7 +239,6 @@ static bool OnCaretBlinkTimerElapsed(struct SDTimer* pTimer)
 	pData->bCaretBlinkState = ! pData->bCaretBlinkState;
 	SetRootWidgetIsDirty(pData->pLayerData->rootWidget, true);
 	static int r = 0;
-	printf("val: %i\n", r);
 	return false;
 }
 
@@ -307,7 +306,7 @@ static void MakeWidgetIntoTextEntryWidget(HWidget hWidget, struct DataNode* pDat
 		{
 			char* errorMsgName = malloc(nameLen + 1);
 			pDataNode->fnGetStrcpy(pDataNode, "onEnter", errorMsgName);
-			printf("TextWidget: onEnter callback name '%s' too long. 31 chars max, name was %i\n", errorMsgName, nameLen);
+			Log_Error("TextWidget: onEnter callback name '%s' too long. 31 chars max, name was %i\n", errorMsgName, nameLen);
 			free(errorMsgName);
 		}
 	}

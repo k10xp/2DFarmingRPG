@@ -87,7 +87,7 @@ static void LoadLevelDataV1(struct TileMap* pTileMap, struct BinarySerializer* p
 				LoadTilesUncompressedV1(&layer, pBS);
 				break;
 			default:
-				printf("unexpected value for compression enum %i\n", compression);
+				Log_Error("unexpected value for compression enum %i\n", compression);
 				break;
 			}
 			break;
@@ -132,7 +132,7 @@ static void LoadLevelData(struct TileMap* pTileMap, const char* tilemapFilePath,
 		LoadLevelDataV1(pTileMap, &bs, pData);
 		break;
 	default:
-		printf("Unexpected tilemap file version %u\n", version);
+		Log_Error("Unexpected tilemap file version %u\n", version);
 		break;
 	}
 	BS_Finish(&bs);

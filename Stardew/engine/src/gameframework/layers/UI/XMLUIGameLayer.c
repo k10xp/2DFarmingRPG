@@ -32,6 +32,7 @@
 #include "GameFrameworkEvent.h"
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include "Log.h"
 
 static struct HashMap gNodeNameMap;
 static bool gInitialisedNodeNameMap = false;
@@ -147,7 +148,7 @@ static void AddLuaTableSubTree(XMLUIData* pData, HWidget hParent)
 	}
 	else
 	{
-		printf("error: child node in children table is not a string or is empty\n");
+		Log_Error("error: child node in children table is not a string or is empty\n");
 		Sc_Pop();
 	}
 }
@@ -162,7 +163,6 @@ static void Update(struct GameFrameworkLayer* pLayer, float deltaT)
 		FreeWidgetChildren(pReq->hWidget);
 		Sc_CallFuncInRegTableEntryTable(pReq->regIndex, pReq->funcName, NULL, 0, 1);
 		int t = Sc_Type();
-		printf("%i\n", t);
 		if (Sc_IsTable())
 		{
 			for (int i = 1; i <= Sc_TableLen(); i++)
@@ -189,7 +189,7 @@ static void Update(struct GameFrameworkLayer* pLayer, float deltaT)
 		}
 		else
 		{
-			printf("error: function %s did not return a table\n", pReq->funcName);
+			Log_Error("error: function %s did not return a table\n", pReq->funcName);
 		}
 	}
 	for (int i = 0; i < VectorSize(pData->pChildrenChangeRequests); i++)
@@ -217,7 +217,7 @@ static void Draw(struct GameFrameworkLayer* pLayer, DrawContext* dc)
 	struct UIWidget* pRootWidget = UI_GetWidget(pData->rootWidget);
 	if (!pRootWidget)
 	{
-		printf("something wrong\n");
+		Log_Error("something wrong\n");
 		return;
 	}
 
@@ -531,7 +531,7 @@ void AddNodeChildren(HWidget widget, xmlNode* pNode, XMLUIData* pUIData)
 		if (!pCtor)
 		{
 			// log error
-			printf("error occured\n");
+			Log_Error("error occured\n");
 			return;
 		}
 		HWidget childWidget = pCtor(widget, &dataNode, pUIData);
@@ -574,17 +574,17 @@ static bool TryLoadViewModel(XMLUIData* pUIData, xmlNode* pScreenNode)
 
 	if (bVMFileSet && bVMFunctionSet)
 	{
-		printf("opening viewmodel file %s\n", pFilePath);
+		Log_Verbose("opening viewmodel file %s\n", pFilePath);
 		// instantiate viewmodel lua object and store in registry
 		Sc_OpenFile(pFilePath);
-		printf("done\n");
+		Log_Verbose("done\n");
 		pUIData->hViewModel = Sc_CallGlobalFuncReturningTableAndStoreResultInReg(pFnName, NULL, 0);
 		// tag the viewmodel table with a ptr to the XMLUIDataPtr so it can set the widget tree flag to dirty
 		Sc_AddLightUserDataValueToTable(pUIData->hViewModel, "XMLUIDataPtr", pUIData);
 	}
 	else
 	{
-		printf("TryLoadViewModel, either file or function (or both) not set. file: %i function name: %i\n", bVMFileSet, bVMFunctionSet);
+		Log_Error("TryLoadViewModel, either file or function (or both) not set. file: %i function name: %i\n", bVMFileSet, bVMFunctionSet);
 	}
 
 	if (pFnName)
@@ -652,12 +652,12 @@ static void LoadUIData(XMLUIData* pUIData, DrawContext* pDC)
 
 	if (pXMLDoc)
 	{
-		printf("pXMLDoc is valid\n");
+		Log_Verbose("pXMLDoc is valid\n");
 		xmlNode* root = xmlDocGetRootElement(pXMLDoc);
 		unsigned long numchildren = xmlChildElementCount(root);
 		if (numchildren != 2)
 		{
-			printf("%s root should have 2 kids\n", __FUNCTION__);
+			Log_Error("%s root should have 2 kids\n", __FUNCTION__);
 			xmlFreeDoc(pXMLDoc);
 			return;
 		}
@@ -692,7 +692,7 @@ static void LoadUIData(XMLUIData* pUIData, DrawContext* pDC)
 		}
 		if (!bDoneAtlas || !bDoneScreen)
 		{
-			printf("%s ui xml file doesn't have both screen and atlas components\n", __FUNCTION__);
+			Log_Error("%s ui xml file doesn't have both screen and atlas components\n", __FUNCTION__);
 		}
 
 		xmlFreeDoc(pXMLDoc);
@@ -720,7 +720,7 @@ static void OnWindowSizeChanged(struct GameFrameworkLayer* pLayer, int newW, int
 void XMLUIGameLayer_Get(struct GameFrameworkLayer* pLayer, struct XMLUIGameLayerOptions* pOptions)
 {
 	pLayer->userData = malloc(sizeof(XMLUIData));
-	if (!pLayer->userData) { printf("XMLUIGameLayer_Get: no memory"); return; }
+	if (!pLayer->userData) { Log_Error("XMLUIGameLayer_Get: no memory"); return; }
 	XMLUIData* pUIData = (XMLUIData*)pLayer->userData;
 
 	memset(pLayer->userData, 0, sizeof(XMLUIData));
@@ -755,9 +755,9 @@ void XMLUI_PushGameFrameworkLayer(const char* xmlPath)
 	options.xmlPath = xmlPath;
 	options.pDc = NULL;
 	testLayer.flags |= (EnableOnPush | EnableOnPop);
-	printf("making xml ui layer\n");
+	Log_Verbose("making xml ui layer\n");
 	XMLUIGameLayer_Get(&testLayer, &options);
-	printf("done\n");
-	printf("pushing framework layer\n");
+	Log_Verbose("done\n");
+	Log_Verbose("pushing framework layer\n");
 	GF_PushGameFrameworkLayer(&testLayer);
 }

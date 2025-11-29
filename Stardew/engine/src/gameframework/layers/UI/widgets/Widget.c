@@ -6,6 +6,7 @@
 #include "AssertLib.h"
 #include "DataNode.h"
 #include "DrawContext.h"
+#include "Log.h"
 
 OBJECT_POOL(struct UIWidget) gWidgetPool = NULL;
 HWidget gScratchWidget = NULL_HANDLE; 
@@ -138,7 +139,7 @@ void UI_DestroyWidget(HWidget widget)
 	}
 	else
 	{
-		printf("DestroyWidget: widget %i out of range", widget);
+		Log_Error("DestroyWidget: widget %i out of range", widget);
 	}
 }
 
@@ -178,7 +179,7 @@ void UI_ParseWidgetDimsAttribute(const char* attributeContent, struct WidgetDim*
 		}
 		break;
 	default:
-		printf("invalid widget dim value %s\n", attributeContent);
+		Log_Error("invalid widget dim value %s\n", attributeContent);
 		EASSERT(false);
 		break;
 	}
@@ -821,7 +822,7 @@ void UI_AddIntPropertyBinding(struct UIWidget* pWidget, char* inBoundPropertyNam
 {
 	if (pWidget->numBindings >= MAX_NUM_BINDINGS)
 	{
-		printf("MAX_NUM_BINDINGS exceeded\n");
+		Log_Error("MAX_NUM_BINDINGS exceeded\n");
 		EASSERT(false);
 		return;
 	}
@@ -842,7 +843,7 @@ void UI_AddFloatPropertyBinding(struct UIWidget* pWidget, char* inBoundPropertyN
 {
 	if (pWidget->numBindings >= MAX_NUM_BINDINGS)
 	{
-		printf("MAX_NUM_BINDINGS exceeded\n");
+		Log_Error("MAX_NUM_BINDINGS exceeded\n");
 		EASSERT(false);
 		return;
 	}

@@ -18,6 +18,9 @@ core/StringKeyHashMap.c
 core/Bitfield2D.c
 core/Random.c
 core/SharedLib.c
+core/Thread.c
+core/Network.c
+core/Log.c
 gameframework/GameFramework.c
 gameframework/GameFrameworkEvent.c
 gameframework/layers/UI/XMLUIGameLayer.c
@@ -57,5 +60,17 @@ input/InputContext.c
 main.c
 vendor/netcode-1.2.3/netcode.c
 ${SODIUM_SRC}
+)
+
+add_executable( NetcodeExampleServer
+    vendor/netcode-1.2.3/netcode.c
+    vendor/netcode-1.2.3/server.c
+    ${SODIUM_SRC}
+)
+
+add_executable( NetcodeExampleClient
+    vendor/netcode-1.2.3/netcode.c
+    vendor/netcode-1.2.3/client.c
+    ${SODIUM_SRC}
 )
 

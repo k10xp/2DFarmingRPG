@@ -4,6 +4,7 @@
 #include <string.h>
 #include "cJSON.h"
 #include "FileHelpers.h"
+#include "Log.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -19,7 +20,7 @@ HImage IR_RegisterImagePath(const char* path)
     imagef.path = malloc(strlen(path) + 1 + strlen(assetsFolderPath));
     if (!imagef.path)
     {
-        printf("IR_RegisterImagePath malloc failed");
+        Log_Error("IR_RegisterImagePath malloc failed");
         return i;
     }
     //strcpy(imagef.path, path);
@@ -45,7 +46,7 @@ bool IR_IsImageLoaded(HImage hImage)
 {
     if (hImage >= VectorSize(gImageFiles))
     {
-        printf("IR_IsImageLoaded hImage %i out of range", hImage);
+        Log_Error("IR_IsImageLoaded hImage %i out of range", hImage);
         return false;
     }
     return gImageFiles[hImage].bLoaded;
@@ -55,7 +56,7 @@ u8* IR_GetImageData(HImage img)
 {
     if (img >= VectorSize(gImageFiles))
     {
-        printf("IR_GetImageData hImage %i out of range", img);
+        Log_Error("IR_GetImageData hImage %i out of range", img);
         return NULL;
     }
     if (!gImageFiles[img].bLoaded)
@@ -66,7 +67,7 @@ u8* IR_GetImageData(HImage img)
         {
             for (int i = 0; i < VectorSize(errors); i++)
             {
-                printf("%s", errors->message);
+                Log_Error("%s", errors->message);
                 free(errors->message);
             }
             DestoryVector(errors);
@@ -81,7 +82,7 @@ const struct ImageFile* IR_GetImageFile(HImage hImage)
 {
     if (hImage >= VectorSize(gImageFiles))
     {
-        printf("IR_LoadImageSync hImage %i out of range", hImage);
+        Log_Error("IR_LoadImageSync hImage %i out of range", hImage);
         return false;
     }
 
@@ -92,13 +93,13 @@ bool IR_LoadImageSync(HImage hImage, VECTOR(struct ImageLoadError) outErrors)
 {
     if (hImage >= VectorSize(gImageFiles))
     {
-        printf("IR_LoadImageSync hImage %i out of range", hImage);
+        Log_Error("IR_LoadImageSync hImage %i out of range", hImage);
         return false;
     }
     struct ImageFile* pIF = &gImageFiles[hImage];
     if (pIF->bLoaded)
     {
-        printf("Image %i already loaded!", hImage);
+        Log_Error("Image %i already loaded!", hImage);
         return false;
     }
     //stbi_set_flip_vertically_on_load(true);
@@ -106,7 +107,7 @@ bool IR_LoadImageSync(HImage hImage, VECTOR(struct ImageLoadError) outErrors)
     u8* data = stbi_load(pIF->path, &x, &y, &n, 4);
     if (!data)
     {
-        printf("IR_LoadImageSync stbi_load failed");
+        Log_Error("IR_LoadImageSync stbi_load failed");
         return false;
     }
     pIF->pData = data;
@@ -128,14 +129,14 @@ void IR_InitImageRegistry(const char* jsonPath)
     
     if (!data)
     {
-        printf("IR_InitImageRegistry can't load config file");
+        Log_Error("IR_InitImageRegistry can't load config file");
         return;
     }
     cJSON* pJSON = cJSON_ParseWithLength(data, size);
     if (!pJSON)
     {
         free(data);
-        printf("IR_InitImageRegistry can't parse config file");
+        Log_Error("IR_InitImageRegistry can't parse config file");
         return;
     }
 

@@ -9,6 +9,7 @@
 #include "DataNode.h"
 #include "Scripting.h"
 #include "RootWidget.h"
+#include "Log.h"
 
 void TextWidget_Destroy(struct TextWidgetData* pData)
 {
@@ -58,7 +59,7 @@ void* TextWidget_OutputVerts(float left, float top, const struct WidgetPadding* 
 
 		if (!pAtlasSprite)
 		{
-			printf("can't get atlas sprite, file TextWidget.c");
+			Log_Warning("can't get atlas sprite, file TextWidget.c");
 			EASSERT(false);
 			return pOutVerts;
 		}
@@ -98,7 +99,7 @@ void* TextWidget_OutputAtLetter(float left, float top, const struct WidgetPaddin
 
 		if (!pAtlasSprite)
 		{
-			printf("can't get atlas sprite, file TextWidget.c");
+			Log_Warning("can't get atlas sprite, file TextWidget.c");
 			EASSERT(false);
 			return pOutVerts;
 		}
@@ -166,7 +167,7 @@ static void ParseColourAttribute(char* inText, struct TextWidgetData* pOutWidget
 			pOutWidgetData->a = (float)i / 255.0f;
 			break;
 		default:
-			printf("ParseColourAttribute: invalid number of tokens: %i", onToken);
+			Log_Error("ParseColourAttribute: invalid number of tokens: %i", onToken);
 		}
 		tok = strtok(NULL, ",");
 	}
@@ -306,7 +307,7 @@ void TextWidget_FromXML(struct UIWidget* pWidget, struct TextWidgetData* pData, 
 		HFont font = Fo_FindFont(pUILayerData->atlas, fontName, pData->fSizePts);
 		if (font == NULL_HANDLE)
 		{
-			printf("TextWidget_FromXML: can't find font %s size %f pts\n", fontName, pData->fSizePts);
+			Log_Error("TextWidget_FromXML: can't find font %s size %f pts\n", fontName, pData->fSizePts);
 			EASSERT(false);
 		}
 		pData->font = font;

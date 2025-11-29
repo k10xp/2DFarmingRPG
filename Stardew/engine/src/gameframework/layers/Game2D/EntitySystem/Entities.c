@@ -9,6 +9,7 @@
 #include "EntityQuadTree.h"
 #include "AnimatedSprite.h"
 #include "ObjectPool.h"
+#include "Log.h"
 
 static VECTOR(struct EntitySerializerPair) pSerializers = NULL;
 
@@ -239,7 +240,7 @@ static void DeserializeEntityV1(struct Entity2DCollection* pCollection, struct B
     }
     else 
     {
-        printf("DESERIALIZE: Entity Serializer type %i out of range\n", ent.type);
+        Log_Error("DESERIALIZE: Entity Serializer type %i out of range\n", ent.type);
     }
     Et2D_AddEntity(pCollection, &ent);
 }
@@ -265,7 +266,7 @@ static void LoadEntities(struct BinarySerializer* bs, struct GameLayer2DData* pD
         LoadEntitiesV1(bs, pData, pCollection, objectLayer);
         break;
     default:
-        printf("E2D unsupported version %i\n", version);
+        Log_Error("E2D unsupported version %i\n", version);
         EASSERT(false);
         break;
     }
@@ -305,7 +306,7 @@ static void SaveEntities(struct Entity2DCollection* pCollection, struct BinarySe
             }
             else 
             {
-                printf("Entity Serializer type %i out of range\n", pOn->type);
+                Log_Error("Entity Serializer type %i out of range\n", pOn->type);
             }
         }
         hOn = pOn->nextSibling;

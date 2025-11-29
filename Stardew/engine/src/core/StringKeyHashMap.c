@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "AssertLib.h"
+#include "Log.h"
 
 #define STARDEW_HASHMAP_DEFAULT_LOAD_FACTOR 0.75f
 
@@ -183,15 +184,15 @@ struct KVP* InsertKVPIntoNewAlloc(struct HashMap* pMap, struct KVP* pKVPsrc, cha
 
 void HashmapPrintEntries(struct HashMap* pMap, const char* hashMapName)
 {
-	printf("HASHMAP: '%s' current size: %i current capacity: %i\n\n", hashMapName, pMap->size, pMap->capacity);
+	Log_Info("HASHMAP: '%s' current size: %i current capacity: %i\n\n", hashMapName, pMap->size, pMap->capacity);
 	struct KVP* pKVP = pMap->pHead;
 	while (pKVP)
 	{
 		EASSERT(pKVP->pKey);
-		printf("Key: %s hash: %u\n", pKVP->pKey, pKVP->keyHash);
+		Log_Info("Key: %s hash: %u\n", pKVP->pKey, pKVP->keyHash);
 		pKVP = pKVP->pNext;
 	}
-	printf("\n");
+	Log_Info("\n");
 }
 
 void HashmapResize(struct HashMap* pMap)

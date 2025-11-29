@@ -11,6 +11,7 @@
 #include "RootWidget.h"
 #include "Scripting.h"
 #include "DataNode.h"
+#include "Log.h"
 
 struct RadioGroupData
 {
@@ -112,7 +113,7 @@ static void ParseBindingEspressionAttribute(char* attribName, char* attribConten
 	}
 	else
 	{
-		printf("invalid property binding: %s\n", attribContent);
+		Log_Warning("invalid property binding: %s\n", attribContent);
 	}
 }
 
@@ -123,7 +124,7 @@ static void PopulateRadioGroupDataFromXML(struct UIWidget* pWidget, struct Radio
 		size_t len = pDataNode->fnGetStrlen(pDataNode, "selectedChild");
 		if (!len)
 		{
-			printf("empty string");
+			Log_Warning("empty string");
 			return;
 		}
 		char* val = malloc(len + 1);

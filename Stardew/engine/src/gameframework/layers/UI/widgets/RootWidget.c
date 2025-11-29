@@ -94,7 +94,6 @@ void RootWidget_OnDestroy(struct UIWidget* pThis)
 
 static void* OnOutputVerts(struct UIWidget* pWidget, VECTOR(WidgetVertex) pOutVerts)
 {
-	//printf("pOutVerts: SIZE: %i CAPACITY: %i\n\n", VectorData_DEBUG(pOutVerts)->size, VectorData_DEBUG(pOutVerts)->capacity);
 	return UI_Helper_OnOutputVerts(pWidget, pOutVerts);
 }
 

@@ -7,7 +7,7 @@
 #include "AssertLib.h"
 #include "Scripting.h"
 #include "DataNode.h"
-
+#include "Log.h"
 
 static float GetWidth(struct UIWidget* pWidget, struct UIWidget* pParent)
 {
@@ -308,7 +308,7 @@ static void ParseBindingEspressionAttribute(char* pAttributeName, char* pAttribu
 	}
 	else
 	{
-		printf("invalid property binding: %s\n", pAttributeContent);
+		Log_Warning("invalid property binding: %s\n", pAttributeContent);
 	}
 }
 
@@ -337,7 +337,7 @@ void BackgroundBoxWidget_fromXML(struct UIWidget* pWidget, struct BackgroundBoxW
 		size_t len = pDataNode->fnGetStrlen(pDataNode, "sprite");
 		if(!len)
 		{
-			printf("empty string");
+			Log_Warning("empty string");
 			return;
 		}
 		char* val = malloc(len + 1);

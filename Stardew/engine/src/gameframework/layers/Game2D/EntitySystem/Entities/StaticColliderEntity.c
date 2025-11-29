@@ -5,6 +5,7 @@
 #include "GameFramework.h"
 #include "DrawContext.h"
 #include "InputContext.h"
+#include "Log.h"
 
 void StaticColliderOnInitFn(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, DrawContext* pDrawCtx, InputContext* pInputCtx)
 {
@@ -97,13 +98,13 @@ void Serialize2DRectStaticColliderEntity(struct BinarySerializer* bs, struct Ent
     if(pInEnt->numComponents != 1)
     {
         EASSERT(false);
-        printf("SerializeStaticColliderEntity, collider doesn't have exactly 1 component\n");
+        Log_Error("SerializeStaticColliderEntity, collider doesn't have exactly 1 component\n");
         return;
     }
     if(pInEnt->components[0].type != ETE_StaticCollider)
     {
         EASSERT(false);
-        printf("SerializeStaticColliderEntity, component isn't of type static collider\n");
+        Log_Error("SerializeStaticColliderEntity, component isn't of type static collider\n");
         return;
     }
     //struct PhysicsShape2D* pShape = Ph_GetStaticBodyShape2D(pInEnt->components[0].data.staticCollider.id);
@@ -167,13 +168,13 @@ void Serialize2DCircleStaticColliderEntity(struct BinarySerializer* bs, struct E
     if(pInEnt->numComponents != 1)
     {
         EASSERT(false);
-        printf("SerializeStaticColliderEntity, collider doesn't have exactly 1 component\n");
+        Log_Error("SerializeStaticColliderEntity, collider doesn't have exactly 1 component\n");
         return;
     }
     if(pInEnt->components[0].type != ETE_StaticCollider)
     {
         EASSERT(false);
-        printf("SerializeStaticColliderEntity, component isn't of type static collider\n");
+        Log_Error("SerializeStaticColliderEntity, component isn't of type static collider\n");
         return;
     }
     float r = pInEnt->components[0].data.staticCollider.shape.data.circle.radius;

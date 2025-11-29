@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include "FileHelpers.h"
 #include "AssertLib.h"
+#include "Log.h"
 
 static int gJoystick = -1;
 
@@ -360,7 +361,6 @@ void In_RecieveMouseButton(InputContext* context, int button, int action, int mo
 				if (action == GLFW_PRESS)
 				{
 					static int dCounter = 0;
-					printf("glfw mouse press %i \n", dCounter++);
 					pMapping->data.ButtonMapping.bCurrent = true;
 					pMapping->data.ButtonMapping.bPressThisFrame = true;
 				}
@@ -664,7 +664,7 @@ static void AddGamepadAxisMappingsStructs(cJSON* parent, InputContext* ctx)
 
 InputContext In_InitInputContext()
 {
-#define ERROR(test, str) if(!test) {printf("In_InitInputContext %s", str); InputContext v; memset(&v, 0, sizeof(InputContext)); return v;} 
+#define ERROR(test, str) if(!test) {Log_Error("In_InitInputContext %s", str); InputContext v; memset(&v, 0, sizeof(InputContext)); return v;} 
 	InputContext ctx;
 	memset(&ctx, 0, sizeof(InputContext));
 

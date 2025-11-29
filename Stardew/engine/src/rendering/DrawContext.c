@@ -8,6 +8,7 @@
 #include "AssertLib.h"
 #include "PlatformDefs.h"
 #include "Game2DLayer.h"
+#include "Log.h"
 
 const char* uiVert =
 #if GAME_GL_API_TYPE == GAME_GL_API_TYPE_CORE
@@ -175,7 +176,7 @@ static void TestShaderStatus(GLuint shader, enum ShaderType type)
 		if (!success)
 		{
 			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-			printf("ERROR::SHADER_COMPILATION_ERROR of type: %s\n%s\n -- --------------------------------------------------- -- \n", 
+			Log_Error("ERROR::SHADER_COMPILATION_ERROR of type: %s\n%s\n -- --------------------------------------------------- -- \n", 
 				gShaderTypeNameLUT[type],
 				infoLog);
 		}
@@ -186,7 +187,7 @@ static void TestShaderStatus(GLuint shader, enum ShaderType type)
 		if (!success)
 		{
 			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-			printf("ERROR::PROGRAM_LINKING_ERROR of type: %s\n%s\n -- --------------------------------------------------- -- \n",
+			Log_Error("ERROR::PROGRAM_LINKING_ERROR of type: %s\n%s\n -- --------------------------------------------------- -- \n",
 				gShaderTypeNameLUT[type],
 				infoLog);
 		}
