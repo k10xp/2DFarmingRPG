@@ -233,28 +233,6 @@ DECLARE_THREAD_PROC(ClientThread, arg)
     {
         netcode_client_update( client, time );
 
-        
-        // if ( netcode_client_state( client ) == NETCODE_CLIENT_STATE_CONNECTED )
-        // {
-        //     netcode_client_send_packet( client, packet_data, NETCODE_MAX_PACKET_SIZE );
-        // }
-
-        // while ( 1 )             
-        // {
-        //     int packet_bytes;
-        //     uint64_t packet_sequence;
-        //     void * packet = netcode_client_receive_packet( client, &packet_bytes, &packet_sequence );
-        //     if ( !packet )
-        //         break;
-        //     (void) packet_sequence;
-        //     assert( packet_bytes == NETCODE_MAX_PACKET_SIZE );
-        //     assert( memcmp( packet, packet_data, NETCODE_MAX_PACKET_SIZE ) == 0 );            
-        //     netcode_client_free_packet( client, packet );
-        // }
-
-        // if ( netcode_client_state( client ) <= NETCODE_CLIENT_STATE_DISCONNECTED )
-        //     break;
-
         netcode_sleep( delta_time );
 
         time += delta_time;
@@ -503,10 +481,27 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     netcode_term();
 }
 
-void OnTSQueueWrapAround(void* pItemToBeLost)
+void WrapAroundHandlerBase(void* pItemToBeLost, const char* message)
 {
     struct NetworkQueueItem* pItem = pItemToBeLost;
     Sptr_RemoveRef(pItem->pData);
+    Log_Warning(message);
+}
+
+
+void OnConnectionEventTSQueueWrapAround(void* pItemToBeLost)
+{
+    WrapAroundHandlerBase("Network thread Connection event queue wrapped around, packets lost. It must not have been emptied quick enough");
+}
+
+void OnTXTSQueueWrapAround(void* pItemToBeLost)
+{
+    Log_Warning("Network thread TX queue wrapped around, packets lost. It must not have been emptied quick enough");
+}
+
+void OnRXTSQueueWrapAround(void* pItemToBeLost)
+{
+    Log_Warning("Network thread RX queue wrapped around, packets lost. It must not have been emptied quick enough");
 }
 
 void NW_Init()
@@ -521,9 +516,9 @@ void NW_Init()
 
         pQueues = malloc(sizeof(struct NetworkThreadQueues));
         memset(pQueues, 0, sizeof(struct NetworkThreadQueues));
-        TSQ_Init(&pQueues->rx, sizeof(struct NetworkQueueItem), 32, &OnTSQueueWrapAround);
-        TSQ_Init(&pQueues->tx, sizeof(struct NetworkQueueItem), 32, &OnTSQueueWrapAround);
-        TSQ_Init(&pQueues->connectionEvents, sizeof(struct NetworkConnectionEvent), 32, NULL);
+        TSQ_Init(&pQueues->rx, sizeof(struct NetworkQueueItem), 32, &OnRXTSQueueWrapAround);
+        TSQ_Init(&pQueues->tx, sizeof(struct NetworkQueueItem), 32, &OnTXTSQueueWrapAround);
+        TSQ_Init(&pQueues->connectionEvents, sizeof(struct NetworkConnectionEvent), 32, OnConnectionEventTSQueueWrapAround);
     }
     switch (gRole)
     {
