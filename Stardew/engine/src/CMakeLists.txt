@@ -20,6 +20,8 @@ core/Random.c
 core/SharedLib.c
 core/Thread.c
 core/Network.c
+core/RawNetMessage.c
+core/ThreadSafeQueue.c
 core/Log.c
 gameframework/GameFramework.c
 gameframework/GameFrameworkEvent.c
