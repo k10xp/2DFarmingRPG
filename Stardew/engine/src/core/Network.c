@@ -20,7 +20,7 @@ struct ReliableMessageTracker
     u32 ident;
     SHARED_PTR(void) data;
     u32 dataSize;
-    
+        
     struct ReliableMessageTracker* pNext;
     struct ReliableMessageTracker* pPrev;
 };
@@ -134,7 +134,7 @@ static int NetcodeLog(const char* fmt, ...)
 
 static void InitClients(struct GameClient* clients)
 {
-    for(int i=0; GAME_MAX_CLIENTS; i++)
+    for(int i=0; i < GAME_MAX_CLIENTS; i++)
     {
         clients[i].state = GCS_Disconnected;
     }
@@ -386,6 +386,7 @@ static void SendMessageFragments(struct NetworkThreadQueues* pQueues, struct net
 {
     EASSERT(item->pDataSize > NETCODE_MAX_PACKET_SIZE);
     // TODO: IMPLEMENT ME NEXT
+    
 }
 
 static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server)
@@ -397,6 +398,7 @@ static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server
         {
             /* send fragments here */
             SendMessageFragments(pQueues, server, &item);
+            Sptr_RemoveRef(item.pData);
         }
         else
         {
@@ -408,7 +410,7 @@ static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server
             }
             else
             {
-                int packetSize =NetMsg_WriteUnreliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize);
+                int packetSize = NetMsg_WriteUnreliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize);
                 netcode_server_send_packet(server, item.client, gPacketBuffer, packetSize);
                 Sptr_RemoveRef(item.pData);
             }
@@ -422,7 +424,7 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
 
     struct GameClient gameClients[GAME_MAX_CLIENTS];
     struct NetworkThreadQueues* pQueues = arg; 
-    InitClients(gameClients);
+    InitClients(&gameClients[0]);
     netcode_set_printf_function(&NetcodeLog);
     if ( netcode_init() != NETCODE_OK )
     {
@@ -491,17 +493,17 @@ void WrapAroundHandlerBase(void* pItemToBeLost, const char* message)
 
 void OnConnectionEventTSQueueWrapAround(void* pItemToBeLost)
 {
-    WrapAroundHandlerBase("Network thread Connection event queue wrapped around, packets lost. It must not have been emptied quick enough");
+    WrapAroundHandlerBase(pItemToBeLost, "Network thread Connection event queue wrapped around, packets lost. It must not have been emptied quick enough");
 }
 
 void OnTXTSQueueWrapAround(void* pItemToBeLost)
 {
-    Log_Warning("Network thread TX queue wrapped around, packets lost. It must not have been emptied quick enough");
+    WrapAroundHandlerBase(pItemToBeLost, "Network thread TX queue wrapped around, packets lost. It must not have been emptied quick enough");
 }
 
 void OnRXTSQueueWrapAround(void* pItemToBeLost)
 {
-    Log_Warning("Network thread RX queue wrapped around, packets lost. It must not have been emptied quick enough");
+    WrapAroundHandlerBase(pItemToBeLost, "Network thread RX queue wrapped around, packets lost. It must not have been emptied quick enough");
 }
 
 void NW_Init()
@@ -528,7 +530,6 @@ void NW_Init()
     case GR_ClientServer:
         gNetworkThread = StartThread(&ClientServerThread, pQueues);
         break;
-
     }
 }
 

@@ -18,6 +18,9 @@ struct NetReliableMessageHeader
 
 struct NetFragmentMessageHeader
 {
+    u32 fragmentedMsgID;
+    u32 fragmentedMsgTotalSize;
+
     u16 numFragments; /* how many fragments in total */
     u16 sequenceNum;  /* which message in the sequence is thos one */
 };
@@ -38,7 +41,7 @@ u32 NetMsg_GetReliableMessageIdentifier();
 
 int NetMsg_WriteReliableCompleteDataPacket(u8* dataOut, u8* dataIn, int dataSize, u32 messageIdentifier);
 
-int NetMsg_WriteReliableFragmentDataPacket(u8* dataOut, u8* dataIn, int dataSize, u16 numFragments, u16 sequenceNumber, u32 messageIdentifier);
+int NetMsg_WriteReliableFragmentDataPacket(u8* dataOut, u8* dataIn, int dataSize, u16 numFragments, u16 sequenceNumber, u32 messageIdentifier, u32 fragmentedMsgID, u32 fragmentedMsgTotalSize);
 
 int NetMsg_WriteReliableDataAckPacket(u8* dataOut, u32 messageIdentifier);
 

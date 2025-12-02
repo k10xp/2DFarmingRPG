@@ -68,8 +68,8 @@ bool TSQ_Dequeue(struct ThreadSafeQueue* pQueue, void* pOut)
     LockMutex(&pQueue->mutex);
     if(pQueue->queueCurrentLength == 0)
     {
-        goto unlock_mutex;
         bSomethingDequeued = false;
+        goto unlock_mutex;
     }
     memcpy(pOut, pQueue->queueHead, pQueue->itemSize);
     AdvanceQueueHead(pQueue);

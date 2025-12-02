@@ -79,7 +79,7 @@ int NetMsg_WriteReliableCompleteDataPacket(u8* dataOut, u8* dataIn, int dataSize
     return 0;
 }
 
-int NetMsg_WriteReliableFragmentDataPacket(u8* dataOut, u8* dataIn, int dataSize, u16 numFragments, u16 sequenceNumber, u32 messageIdentifier)
+int NetMsg_WriteReliableFragmentDataPacket(u8* dataOut, u8* dataIn, int dataSize, u16 numFragments, u16 sequenceNumber, u32 messageIdentifier, u32 fragmentedMsgID, u32 fragmentedMsgTotalSize)
 {
     int totalBytes2Write = dataSize + sizeof(u32) + sizeof(struct NetReliableMessageHeader) + sizeof(struct NetFragmentMessageHeader);
     if(totalBytes2Write <= NETCODE_MAX_PACKET_SIZE)
@@ -95,7 +95,9 @@ int NetMsg_WriteReliableFragmentDataPacket(u8* dataOut, u8* dataIn, int dataSize
         struct NetFragmentMessageHeader fragment = 
         {
             .numFragments = numFragments,
-            .sequenceNum = sequenceNumber
+            .sequenceNum = sequenceNumber,
+            .fragmentedMsgID = fragmentedMsgID,
+            .fragmentedMsgTotalSize = fragmentedMsgTotalSize
         };
         dataOut += sizeof(struct NetFragmentMessageHeader);
         memcpy(dataOut, dataIn, dataSize);
