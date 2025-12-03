@@ -303,7 +303,7 @@ static void AcknowledgeIdentifier(u32 ident)
                 pTracker->pPrev->pNext = pTracker->pNext;
             }
             Sptr_RemoveRef(pTracker->data);
-            PushAckedPacketIdentifier(ident);
+            
             return;
         }
         pTracker = pTracker->pNext;
@@ -444,7 +444,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                     {
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
                         netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
-
+                        /* only push the data for a reliable packet once to the game thread */
                         struct NetworkQueueItem qItem;
                         qItem.client = client_index;
                         qItem.pData = malloc(payloadSize);
@@ -452,9 +452,11 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                         memcpy(qItem.pData, pBody, payloadSize);
                         qItem.bReliable = false;
                         TSQ_Enqueue(&pQueues->rx, &qItem);
+                        PushAckedPacketIdentifier(pHeader->messageIdentifier);
                     }
                     else
                     {
+                        /* this same reliable message has been acknowledged before recently, but we're getting it again so ack but don't push to game thread again */
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
                         netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
                     }
