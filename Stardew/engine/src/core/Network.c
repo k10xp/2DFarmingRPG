@@ -465,7 +465,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                 {
                     int completePacketSize = 0;
                     void* pComplete = RecieveFragmentedMessage(packet, packet_bytes, &completePacketSize);
-                    
+                    /* TODO NEXT: send the ack packet... */
                     if(pComplete)
                     {
                         struct NetworkQueueItem qItem;
