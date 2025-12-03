@@ -15,34 +15,66 @@
 #include "SharedPtr.h"
 #include "AssertLib.h"
 
+/*
+    TODO, URGENT BUT TEDIOUS:
+    The FragmentedMessageReciever and ReliableMessageTracker need to use indexes into the pool instead of pointers for
+    next and previous, if it resizes, it'll be all fucked up, yo
+*/
+
+/*
+    A fragmented message that's being reassembled,
+    when reassembly is complete it will be pushed to the rx queue
+*/
+struct FragmentedMessageReciever
+{
+    u8* data;
+    u32 ident;
+    u32 totalFragments;
+    u32 fragmentsRecieved;
+    struct FragmentedMessageReciever* pNext;
+    struct FragmentedMessageReciever* pPrev;
+};
+
+static OBJECT_POOL(struct FragmentedMessageReciever) gFragmentedMessageRecieverPool = NULL;
+
+static struct FragmentedMessageReciever* pFragmentedMessageRecieverListHead = NULL;
+
+static struct FragmentedMessageReciever* pFragmentedMessageRecieverListTail = NULL;
+
+/* 
+    Tracks a reliable message from the POV of the sender.
+    The data must be kept around to be resent until it is acked.
+
+    Multiple ReliableMessageTracker objects can refer to the same shared pointer of data
+    and represent offsets into it, this is to allow big messages to be sent in fragments
+    which are only presented to the message queue when the entire message has been reconstructed.
+
+    When all have been acked the reference count is zero and the data is freed.
+*/
 struct ReliableMessageTracker
 {
     u32 ident;
     SHARED_PTR(void) data;
     u32 dataSize;
+    u32 dataOffset;
+
+    i32 client;
         
     struct ReliableMessageTracker* pNext;
     struct ReliableMessageTracker* pPrev;
+
+    struct NetFragmentMessageHeader fragmentHeader;
+
+    double lastSentTime;
 };
 
-struct MessageFragment
-{
-    u8* pData;
-    u32 size;
-};
-
-struct FragmentedMessage
-{
-    u8* pData;
-    u32 dataSize;
-    VECTOR(struct MessageFragment) pFragments;
-};
 
 typedef HGeneric HReliableTracker;
 
 static OBJECT_POOL(struct ReliableMessageTracker) gReliableTrackerPool = NULL;
 
 struct ReliableMessageTracker* pReliableTrackerListHead = NULL;
+
 struct ReliableMessageTracker* pReliableTrackerListTail = NULL;
 
 static enum GameRole gRole;
@@ -182,8 +214,6 @@ static void ServiceClientConnectionEvents(struct GameClient* client, struct netc
 
 DECLARE_THREAD_PROC(ClientThread, arg)
 {
-    
-
     netcode_set_printf_function(&NetcodeLog);
     if ( netcode_init() != NETCODE_OK )
     {
@@ -273,12 +303,99 @@ static void AcknowledgeIdentifier(u32 ident)
                 pTracker->pPrev->pNext = pTracker->pNext;
             }
             Sptr_RemoveRef(pTracker->data);
+            PushAckedPacketIdentifier(ident);
             return;
         }
         pTracker = pTracker->pNext;
     }
-    PushAckedPacketIdentifier(ident);
     Log_Info("Reliable message ack packet recieved, doesn't correspond to any in list. ID: %i", ident);
+}
+
+static struct FragmentedMessageReciever* FindFragmentedMessageReciever(u32 ident)
+{
+    if(pFragmentedMessageRecieverListHead == NULL || pFragmentedMessageRecieverListTail == NULL)
+    {
+        /* list empty */
+        return NULL;
+    }
+    struct FragmentedMessageReciever* pReciever = pFragmentedMessageRecieverListHead;
+    while(pReciever)
+    {
+        if(pReciever->ident == ident)
+        {
+            return pReciever;
+        }
+        pReciever = pReciever->pNext;
+    }
+}
+
+static struct FragmentedMessageReciever* CreateNewReciever(struct NetFragmentMessageHeader* pFragmentHeader)
+{
+    int i = 0;
+    gFragmentedMessageRecieverPool = GetObjectPoolIndex(gFragmentedMessageRecieverPool, &i);
+    struct FragmentedMessageReciever* pRec = &gFragmentedMessageRecieverPool[i];
+
+    pRec->pNext = NULL;
+    pRec->pPrev = NULL;
+    pRec->fragmentsRecieved = 0;
+    pRec->ident = pFragmentHeader->fragmentedMsgID;
+    pRec->totalFragments = pFragmentedMessageRecieverListHead->totalFragments;
+    pRec->data = malloc(pFragmentHeader->fragmentedMsgTotalSize);
+    if(pFragmentedMessageRecieverListHead == NULL || pFragmentedMessageRecieverListTail == NULL)
+    {
+        pFragmentedMessageRecieverListHead = pRec;
+        pFragmentedMessageRecieverListTail = pRec;
+        return pRec;
+    }
+    pFragmentedMessageRecieverListTail->pNext = pRec;
+    pRec->pPrev = pFragmentedMessageRecieverListTail;
+    pFragmentedMessageRecieverListTail = pRec;
+}
+
+
+/*
+    returns the completed message or nullptr
+*/
+static void* RecieveFragmentedMessage(u8* packet, int packetSize, int* outCompletePacketBytes)
+{
+    *outCompletePacketBytes = 0;
+    enum NetRawMessageType type;
+    u8* body = NULL;
+    NetMsg_Parse(packet, &type, &body);
+    EASSERT(type == ReliableDataMessageFragment);
+
+    struct NetFragmentMessageHeader* pFragment = NetMsg_GetFragmentHeader(packet);
+    struct FragmentedMessageReciever* pReciever = FindFragmentedMessageReciever(pFragment->fragmentedMsgID);
+    if(!pReciever)
+    {
+        pReciever = CreateNewReciever(pFragment);
+    }
+    int fullPacketSize = NETCODE_MAX_PACKET_SIZE - NetMsg_SizeOfHeaders(ReliableDataMessageFragment);
+    u8* pWrite = pReciever->data + pFragment->sequenceNum * fullPacketSize;
+    memcpy(pWrite, body, packetSize - NetMsg_SizeOfHeaders(ReliableDataMessageFragment));
+    pReciever->fragmentsRecieved++;
+    u8* rVal = NULL;
+    if(pReciever->fragmentsRecieved == pReciever->totalFragments)
+    {
+        if(pReciever->pNext)
+        {
+            pReciever->pNext->pPrev = pReciever->pPrev;
+        }
+        if(pReciever->pPrev)
+        {
+            pReciever->pPrev->pNext = pReciever->pNext;
+        }
+        if(pFragmentedMessageRecieverListHead == pReciever)
+        {
+            pFragmentedMessageRecieverListHead = pReciever->pNext;
+        }
+        if(pFragmentedMessageRecieverListTail == pReciever)
+        {
+            pFragmentedMessageRecieverListTail = pReciever->pPrev;
+        }
+        rVal = pReciever->data; /*move from data*/
+    }
+    return rVal;
 }
 
 static void ServerRecievePackets(struct netcode_server_t * server, struct NetworkThreadQueues* pQueues)
@@ -345,6 +462,20 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                 }
                 break;
             case ReliableDataMessageFragment:
+                {
+                    int completePacketSize = 0;
+                    void* pComplete = RecieveFragmentedMessage(packet, packet_bytes, &completePacketSize);
+                    
+                    if(pComplete)
+                    {
+                        struct NetworkQueueItem qItem;
+                        qItem.client = client_index;
+                        qItem.pData = pComplete;
+                        qItem.pDataSize = completePacketSize;
+                        qItem.bReliable = true;
+                        TSQ_Enqueue(&pQueues->rx, &qItem);
+                    }
+                }
                 break;
             case ReliableDataMessageAck:
                 {
@@ -360,7 +491,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
 
 }
 
-static u32 TrackReliableMessage(u8* data, u32 dataSize)
+static u32 TrackReliableMessage(u8* data, u32 dataSize, u32 dataOffset, struct NetFragmentMessageHeader* pHeader, double time, int client)
 {
     HReliableTracker hT;
     gReliableTrackerPool = GetObjectPoolIndex(gReliableTrackerPool, &hT);
@@ -369,7 +500,8 @@ static u32 TrackReliableMessage(u8* data, u32 dataSize)
     gReliableTrackerPool[hT].dataSize = dataSize;
     gReliableTrackerPool[hT].pNext = NULL;
     gReliableTrackerPool[hT].pPrev = NULL;
-
+    gReliableTrackerPool[hT].lastSentTime = time;
+    gReliableTrackerPool[hT].client = client;
     if(pReliableTrackerListHead == NULL)
     {
         pReliableTrackerListHead = &gReliableTrackerPool[hT];
@@ -379,32 +511,66 @@ static u32 TrackReliableMessage(u8* data, u32 dataSize)
     pReliableTrackerListTail->pNext = &gReliableTrackerPool[hT];
     gReliableTrackerPool[hT].pPrev = pReliableTrackerListTail;
     pReliableTrackerListTail = &gReliableTrackerPool[hT];
+    if(pHeader)
+    {
+        gReliableTrackerPool[hT].fragmentHeader = *pHeader;
+    }
+    else
+    {
+        memset(&gReliableTrackerPool[hT].fragmentHeader, 0, sizeof(struct NetFragmentMessageHeader));
+    }
     return gReliableTrackerPool[hT].ident;
 }
 
-static void SendMessageFragments(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server, struct NetworkQueueItem* item)
+static void SendMessageFragments(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server, struct NetworkQueueItem* item, double time)
 {
     EASSERT(item->pDataSize > NETCODE_MAX_PACKET_SIZE);
-    // TODO: IMPLEMENT ME NEXT
+    int sizeOfHeaders = NetMsg_SizeOfHeaders(ReliableDataMessageFragment);
+    int maxPayloadPerPacket = NETCODE_MAX_PACKET_SIZE - sizeOfHeaders;
+    int off = 0;
+    u16 seqNum = 0;
+    u32 fragmentedMsgID = NetMsg_GetReliableMessageIdentifier();
+    u16 numTotal = item->pDataSize / maxPayloadPerPacket;
+    int payloadSize = 0;
+    if(item->pDataSize % maxPayloadPerPacket)
+    {
+        numTotal++;
+    }
+    do
+    {
+        struct NetFragmentMessageHeader h = {      /* awkward code alert */
+            .fragmentedMsgID = fragmentedMsgID,
+            .fragmentedMsgTotalSize = item->pDataSize,
+            .numFragments = numTotal,
+            .sequenceNum = seqNum
+        };
+        payloadSize = off + maxPayloadPerPacket > item->pDataSize ? maxPayloadPerPacket : item->pDataSize - off;
+        int numBytes = NetMsg_WriteReliableFragmentDataPacket(gPacketBuffer, &item->pData[off], maxPayloadPerPacket, numTotal, seqNum++,
+            TrackReliableMessage(item->pData, payloadSize, off, &h, time, item->client),
+            fragmentedMsgID, item->pDataSize);
+        Sptr_AddRef(item->pData);
+        netcode_server_send_packet(server, item->client, gPacketBuffer, numBytes);
+        off += payloadSize;
+    } while (maxPayloadPerPacket == payloadSize);
     
 }
 
-static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server)
+static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server, double time)
 {
     struct NetworkQueueItem item;
     while(TSQ_Dequeue(&pQueues->tx, &item))
     {
-        if(item.pDataSize > NETCODE_MAX_PACKET_SIZE)
+        if(item.pDataSize > NETCODE_MAX_PACKET_SIZE) /* TODO: calculate this properly*/
         {
             /* send fragments here */
-            SendMessageFragments(pQueues, server, &item);
+            SendMessageFragments(pQueues, server, &item, time);
             Sptr_RemoveRef(item.pData);
         }
         else
         {
             if(item.bReliable)
             {
-                int packetSize = NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize, TrackReliableMessage(item.pData, item.pDataSize));
+                int packetSize = NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize, TrackReliableMessage(item.pData, item.pDataSize, 0, NULL, time, item.client));
                 netcode_server_send_packet(server, item.client, gPacketBuffer, packetSize);
                 continue;
             }
@@ -416,6 +582,41 @@ static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server
             }
         }
         
+    }
+}
+
+// resend if unacked after 100ms
+#define RESEND_IF_UNACKED_THRESHOLD (100.0 / 1000.0) 
+
+static void ServerResendReliablePackets(double time, struct netcode_server_t * server)
+{
+    struct ReliableMessageTracker* pTracker = pReliableTrackerListHead;
+    while(pTracker)
+    {
+        if(time - pTracker->lastSentTime > RESEND_IF_UNACKED_THRESHOLD)
+        {
+            if(pTracker->fragmentHeader.numFragments)
+            {
+                /* send a fragment packet */
+                NetMsg_WriteReliableFragmentDataPacket(
+                    gPacketBuffer,
+                    pTracker->data + pTracker->dataOffset,
+                    pTracker->dataSize,
+                    pTracker->fragmentHeader.numFragments,
+                    pTracker->fragmentHeader.sequenceNum,
+                    pTracker->ident,
+                    pTracker->fragmentHeader.fragmentedMsgID,
+                    pTracker->fragmentHeader.fragmentedMsgTotalSize
+                );
+            }
+            else
+            {
+                /* send a complete reliable packet */
+                NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, pTracker->data + pTracker->dataOffset, pTracker->dataSize, pTracker->ident);
+                netcode_server_send_packet(server, pTracker->client, gPacketBuffer,pTracker->dataSize);
+            }
+        }
+        pTracker = pTracker->pNext;
     }
 }
 
@@ -459,13 +660,19 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     {
         netcode_server_update( server, time );
         
+        /* pass messages to the game thread about clients connecting and disconnecting */
         for(int i=0; i<GAME_MAX_CLIENTS; i++)
         {
             ServiceClientConnectionEvents(&gameClients[i], server, i, pQueues);
         }
 
-        DoTXQueue(pQueues, server);
+        /* resend any reliable packets that haven't been acknowledged after a certain threshold of time */
+        ServerResendReliablePackets(time, server);
 
+        /* transmit any data from the game thread to clients */
+        DoTXQueue(pQueues, server, time);
+
+        /* recieve any packets from clients and push to game thread */
         ServerRecievePackets(server, pQueues);
 
         netcode_sleep( delta_time );
@@ -509,6 +716,7 @@ void OnRXTSQueueWrapAround(void* pItemToBeLost)
 void NW_Init()
 {
     gReliableTrackerPool = NEW_OBJECT_POOL(struct ReliableMessageTracker, 128);
+    gFragmentedMessageRecieverPool = NEW_OBJECT_POOL(struct FragmentedMessageReciever, 128);
     gRole = gCmdArgs.role;
 
     switch(gRole)
