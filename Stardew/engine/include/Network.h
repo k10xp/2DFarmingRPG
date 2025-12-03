@@ -21,7 +21,7 @@
             - they'll be continually resent until reciept is acknowledged
         
     This layer of the networking code ensures the game thread can transmit and recieve reliable and unreliable packets of any size
-    and is informed when a client connects or they as a client is connected to the server.
+    and is informed when a client connects or they as a client is connected to the server or disconnected.
 
     For the time being the game thread must create a shared pointer of the packet to be sent which the server thread will then free.
     For data received through the queue the game thread must call free() on it when done.
