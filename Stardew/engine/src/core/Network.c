@@ -580,7 +580,7 @@ static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server
     struct NetworkQueueItem item;
     while(TSQ_Dequeue(&pQueues->tx, &item))
     {
-        if(item.pDataSize > NETCODE_MAX_PACKET_SIZE) /* TODO: calculate this properly*/
+        if(item.pDataSize > NETCODE_MAX_PACKET_SIZE - NetMsg_SizeOfHeaders(ReliableDataMessageComplete))
         {
             /* send fragments here */
             SendMessageFragments(pQueues, server, &item, time);
