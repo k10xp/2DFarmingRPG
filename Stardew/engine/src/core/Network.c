@@ -444,6 +444,8 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                     {
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
                         netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
+                        PushAckedPacketIdentifier(pHeader->messageIdentifier);
+
                         /* only push the data for a reliable packet once to the game thread */
                         struct NetworkQueueItem qItem;
                         qItem.client = client_index;
@@ -451,8 +453,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                         qItem.pDataSize = payloadSize;
                         memcpy(qItem.pData, pBody, payloadSize);
                         qItem.bReliable = false;
-                        TSQ_Enqueue(&pQueues->rx, &qItem);
-                        PushAckedPacketIdentifier(pHeader->messageIdentifier);
+                        TSQ_Enqueue(&pQueues->rx, &qItem);   
                     }
                     else
                     {
@@ -465,18 +466,35 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                 break;
             case ReliableDataMessageFragment:
                 {
-                    int completePacketSize = 0;
-                    void* pComplete = RecieveFragmentedMessage(packet, packet_bytes, &completePacketSize);
-                    /* TODO NEXT: send the ack packet... */
-                    if(pComplete)
+                    struct NetReliableMessageHeader* pHeader = NetMsg_GetReliableHeader(packet);
+                    if(!HasReliablePacketBeenRecentlyAcknowledged(pHeader->messageIdentifier))
                     {
-                        struct NetworkQueueItem qItem;
-                        qItem.client = client_index;
-                        qItem.pData = pComplete;
-                        qItem.pDataSize = completePacketSize;
-                        qItem.bReliable = true;
-                        TSQ_Enqueue(&pQueues->rx, &qItem);
+                        int completePacketSize = 0;
+                        void* pComplete = RecieveFragmentedMessage(packet, packet_bytes, &completePacketSize);
+
+                        /* send ack */
+                        int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
+                        netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
+                        PushAckedPacketIdentifier(pHeader->messageIdentifier);
+
+                        if(pComplete)
+                        {
+                            struct NetworkQueueItem qItem;
+                            qItem.client = client_index;
+                            qItem.pData = pComplete;
+                            qItem.pDataSize = completePacketSize;
+                            qItem.bReliable = true;
+                            TSQ_Enqueue(&pQueues->rx, &qItem);
+                        }
+                        
                     }
+                    else
+                    {
+                        /* this same reliable message has been acknowledged before recently, but we're getting it again so ack but don't push to game thread again */
+                        int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
+                        netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
+                    }
+                    
                 }
                 break;
             case ReliableDataMessageAck:
