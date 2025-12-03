@@ -94,7 +94,7 @@ static void GLAPIENTRY MessageCallback(GLenum source,
 {
     //if (severity >= minimumLogSeverityIncluding) 
     {
-        fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n\n",
+        Log_Warning(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n\n",
             (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
             type, severity, message);
     }
@@ -184,9 +184,19 @@ static void ParseCmdArgs(int argc, char** argv)
             }
             else if(strcmp(argv[i], "--disable_log_tid") == 0)
             {
-
+                gCmdArgs.bLogTIDs = false;
             }
         }
+    }
+}
+
+static void DoNetworkQueues()
+{
+    /* placeholder */
+    struct NetworkConnectionEvent event; 
+    while(NW_DequeueConnectionEvent(&event))
+    {
+        Log_Info("NETWORK EVENT: %s CLIENT: %i", event.type == NCE_ClientConnected ? "NCE_ClientConnected" : "NCE_ClientDisconnected", event.client);
     }
 }
 
@@ -315,6 +325,7 @@ int EngineStart(int argc, char** argv, GameInitFn init)
         while (accumulator > slice)
         {
             glfwPollEvents();
+            DoNetworkQueues();
             GF_InputGameFramework(&gInputContext);
             GF_UpdateGameFramework((float)slice);
             In_EndFrame(&gInputContext);

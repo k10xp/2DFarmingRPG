@@ -15,6 +15,17 @@
 #include "SharedPtr.h"
 #include "AssertLib.h"
 
+struct NetworkThreadQueues
+{
+    /* queue of struct NetworkQueueItem transmit to network */
+    struct ThreadSafeQueue tx;
+    /* queue of struct NetworkQueueItem recieve from network */
+    struct ThreadSafeQueue rx;
+
+    struct ThreadSafeQueue connectionEvents;
+};
+
+
 // resend if unacked after 100ms
 #define RESEND_IF_UNACKED_THRESHOLD (100.0 / 1000.0) 
 
@@ -347,6 +358,7 @@ static void ServiceConnectionEventsBase(struct GameClient* client, int clientInd
                     .client = clientIndex,
                     .type = NCE_ClientConnected
                 };
+                Log_Info("Enqueuing connection event...\n");
                 TSQ_Enqueue(&pQueues->connectionEvents, &event);
                 client->state = GCS_Connected;
             }
@@ -721,7 +733,6 @@ static bool IsServerClientConnected(void* pServerOrClient, int clientIndex)
     return netcode_server_client_connected(pServerOrClient, clientIndex);
 }
 
-
 static void ServerFreePacket(void* serverOrClient, void* packet)
 {
     netcode_server_free_packet(serverOrClient, packet);
@@ -883,3 +894,19 @@ void NW_Init()
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// API
+
+bool NW_DequeueData(struct NetworkQueueItem* pOut)
+{
+    return TSQ_Dequeue(&pQueues->rx, pOut);
+}
+
+bool NW_DequeueConnectionEvent(struct NetworkConnectionEvent* pOut)
+{
+    return TSQ_Dequeue(&pQueues->connectionEvents, pOut);
+}
+
+void NW_EnqueueData(struct NetworkQueueItem* pIn)
+{
+    TSQ_Enqueue(&pQueues->tx, pIn);
+}

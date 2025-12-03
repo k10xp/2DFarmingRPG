@@ -55,16 +55,6 @@ struct NetworkConnectionEvent
     int client;
 };
 
-struct NetworkThreadQueues
-{
-    /* queue of struct NetworkQueueItem transmit to network */
-    struct ThreadSafeQueue tx;
-    /* queue of struct NetworkQueueItem recieve from network */
-    struct ThreadSafeQueue rx;
-
-    struct ThreadSafeQueue connectionEvents;
-};
-
 struct HostInfo
 {
     const char* ip;
@@ -79,5 +69,12 @@ enum GameRole
 };
 
 void NW_Init();
+
+bool NW_DequeueData(struct NetworkQueueItem* pOut);
+
+bool NW_DequeueConnectionEvent(struct NetworkConnectionEvent* pOut);
+
+void NW_EnqueueData(struct NetworkQueueItem* pIn);
+
 
 #endif

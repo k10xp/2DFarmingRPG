@@ -1,8 +1,13 @@
 #ifndef  SHAREDPTR_H
 #define SHAREDPTR_H
 
+
 //called just before the memory is freed
 #include <stddef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef void(*SharedPtrDestuctorFn)(void* data);
 
@@ -15,5 +20,10 @@ void Sptr_RemoveRef(void* pointer);
 #define SHARED_PTR(p) p*
 
 #define SHARED_PTR_NEW(a, dtor) Sptr_New(sizeof(a), dtor)
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ! SHAREDPTR_H

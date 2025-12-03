@@ -11,6 +11,7 @@ add_executable(
   SharedPtrTests.cpp
   StringHashMapTests.cpp
   GameFrameworkEventTests.cpp
+  TSQTests.cpp
   main.cpp
 )
 

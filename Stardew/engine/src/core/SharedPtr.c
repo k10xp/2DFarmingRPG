@@ -39,8 +39,8 @@ void Sptr_RemoveRef(void* pointer)
 	{
 		if (ptr->pDtor)
 		{
-			ptr->pDtor(ptr);
+			ptr->pDtor(ptr + 1);
 		}
 		free(ptr);
 	}
-}
+s}
