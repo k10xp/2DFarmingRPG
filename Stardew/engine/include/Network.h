@@ -6,10 +6,29 @@
 #include <stdlib.h>
 
 /*
-    assume, for now:
-    - the data is malloc'd
-    - client and server, whoever dequeus the packet, frees it 
+
+    - game can be started with command line args to configure it as a server or a client (or singleplayer)
+    - if server or client is chosen a thread is spawned to recieve date too and from the socket
+    - it communicates with the game thread through 3 thread safe queues (named from the game threads perspective):
+        - recieve data packets
+        - transmit data packets
+        - recieve connection events
+    - A UDP based custom protocol using the netcode library to handle connecting and disconnecting: 
+        - data can be sent reliably or unreliably
+        - packets larget than NETCODE_MAX_PACKET_SIZE + (a small header) are transmitted as multiple packets and only 
+        presented to the game thread when the full message is assembled
+        - reliable packets should only be recieved by recipients game thread once
+            - they'll be continually resent until reciept is acknowledged
+        
+    This layer of the networking code ensures the game thread can transmit and recieve reliable and unreliable packets of any size
+    and is informed when a client connects or they as a client is connected to the server.
+
+    For the time being the game thread must create a shared pointer of the packet to be sent which the server thread will then free.
+    For data received through the queue the game thread must call free() on it when done.
+
+    Some better memory usage arrangement needs to be come up with at some point.
 */
+
 struct NetworkQueueItem
 {
     /*
@@ -27,7 +46,7 @@ struct NetworkQueueItem
 enum NetworkConnectionEventType
 {
     NCE_ClientConnected,
-    NCE_ClientDisconnected
+    NCE_ClientDisconnected,
 };
 
 struct NetworkConnectionEvent

@@ -15,6 +15,10 @@
 #include "SharedPtr.h"
 #include "AssertLib.h"
 
+// resend if unacked after 100ms
+#define RESEND_IF_UNACKED_THRESHOLD (100.0 / 1000.0) 
+
+
 /*
     TODO, URGENT BUT TEDIOUS:
     The FragmentedMessageReciever and ReliableMessageTracker need to use indexes into the pool instead of pointers for
@@ -91,8 +95,7 @@ static struct NetworkThreadQueues* pQueues;
 enum GameClientState
 {
     GCS_Disconnected,
-    GCS_WaitingToPlay,
-    GCS_Playing
+    GCS_Connected
 };
 
 struct GameClient
@@ -143,6 +146,8 @@ static uint8_t private_key[NETCODE_KEY_BYTES] = { 0x60, 0x6a, 0xbe, 0x6e, 0xc9, 
                                                   0x6b, 0x3c, 0x60, 0xf4, 0xb7, 0x15, 0xab, 0xa1 };
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Client and Server
+
 static int NetcodeLog(const char* fmt, ...)
 {
     static char* netcodeLogTagString = "[Netcode] ";
@@ -164,120 +169,6 @@ static int NetcodeLog(const char* fmt, ...)
     va_end(args);
 }
 
-static void InitClients(struct GameClient* clients)
-{
-    for(int i=0; i < GAME_MAX_CLIENTS; i++)
-    {
-        clients[i].state = GCS_Disconnected;
-    }
-}
-
-static void ServiceClientConnectionEvents(struct GameClient* client, struct netcode_server_t * server, int clientIndex, struct NetworkThreadQueues* pQueues)
-{
-    if(!netcode_server_client_connected( server, clientIndex ))
-    {
-        if(client->state != GCS_Disconnected)
-        {
-            struct NetworkConnectionEvent event = 
-            {
-                .client = clientIndex,
-                .type = NCE_ClientDisconnected
-            };
-            TSQ_Enqueue(&pQueues->connectionEvents, &event);
-        }
-        client->state = GCS_Disconnected;
-    }
-    else
-    {
-        switch(client->state)
-        {
-        case GCS_Disconnected:
-            {
-                struct NetworkConnectionEvent event = 
-                {
-                    .client = clientIndex,
-                    .type = NCE_ClientConnected
-                };
-                TSQ_Enqueue(&pQueues->connectionEvents, &event);
-                client->state = GCS_WaitingToPlay;
-            }
-            break;
-        case GCS_WaitingToPlay:
-            break;
-        case GCS_Playing:
-            break;
-        }
-    }
-    
-}
-
-
-DECLARE_THREAD_PROC(ClientThread, arg)
-{
-    netcode_set_printf_function(&NetcodeLog);
-    if ( netcode_init() != NETCODE_OK )
-    {
-        Log_Error( "error: failed to initialize netcode" );
-        return (void*)1;
-    }
-
-    netcode_log_level( NETCODE_LOG_LEVEL_INFO );
-
-    double time = 0.0;
-    double delta_time = 1.0 / 60.0;
-
-    Log_Info( "client" );
-
-    struct netcode_client_config_t client_config;
-    netcode_default_client_config( &client_config );
-    struct netcode_client_t * client = netcode_client_create( "0.0.0.0", &client_config, time );
-
-    if ( !client )
-    {
-        Log_Error( "error: failed to create client" );
-        return (void*)1;
-    }
-
-    NETCODE_CONST char* server_address = gCmdArgs.serverAddress;
-
-    uint64_t client_id = 0;
-    netcode_random_bytes( (uint8_t*) &client_id, 8 );
-    Log_Info( "client id is %.16" PRIx64 , client_id );
-
-    uint8_t user_data[NETCODE_USER_DATA_BYTES];
-    netcode_random_bytes(user_data, NETCODE_USER_DATA_BYTES);
-
-    uint8_t connect_token[NETCODE_CONNECT_TOKEN_BYTES];
-
-    if ( netcode_generate_connect_token( 1, &server_address, &server_address, CONNECT_TOKEN_EXPIRY, CONNECT_TOKEN_TIMEOUT, client_id, GAME_PROTOCOL_ID, private_key, user_data, connect_token ) != NETCODE_OK )
-    {
-        Log_Error( "error: failed to generate connect token" );
-        return (void*)1;
-    }
-
-    netcode_client_connect( client, connect_token );
-
-    bool quit = false;
-
-    while ( !quit )
-    {
-        netcode_client_update( client, time );
-
-        netcode_sleep( delta_time );
-
-        time += delta_time;
-    }
-
-    if ( quit )
-    {
-        Log_Info( "shutting netcode thread down" );
-    }
-
-    netcode_client_destroy( client );
-
-    netcode_term();
-    return NULL;
-}
 
 static void AcknowledgeIdentifier(u32 ident)
 {
@@ -398,8 +289,86 @@ static void* RecieveFragmentedMessage(u8* packet, int packetSize, int* outComple
     return rVal;
 }
 
-static void ServerRecievePackets(struct netcode_server_t * server, struct NetworkThreadQueues* pQueues)
+
+static u32 TrackReliableMessage(u8* data, u32 dataSize, u32 dataOffset, struct NetFragmentMessageHeader* pHeader, double time, int client)
 {
+    HReliableTracker hT;
+    gReliableTrackerPool = GetObjectPoolIndex(gReliableTrackerPool, &hT);
+    gReliableTrackerPool[hT].ident = NetMsg_GetReliableMessageIdentifier();
+    gReliableTrackerPool[hT].data = data;
+    gReliableTrackerPool[hT].dataSize = dataSize;
+    gReliableTrackerPool[hT].pNext = NULL;
+    gReliableTrackerPool[hT].pPrev = NULL;
+    gReliableTrackerPool[hT].lastSentTime = time;
+    gReliableTrackerPool[hT].client = client;
+    if(pReliableTrackerListHead == NULL)
+    {
+        pReliableTrackerListHead = &gReliableTrackerPool[hT];
+        pReliableTrackerListTail = pReliableTrackerListHead;
+        return gReliableTrackerPool[hT].ident;
+    }
+    pReliableTrackerListTail->pNext = &gReliableTrackerPool[hT];
+    gReliableTrackerPool[hT].pPrev = pReliableTrackerListTail;
+    pReliableTrackerListTail = &gReliableTrackerPool[hT];
+    if(pHeader)
+    {
+        gReliableTrackerPool[hT].fragmentHeader = *pHeader;
+    }
+    else
+    {
+        memset(&gReliableTrackerPool[hT].fragmentHeader, 0, sizeof(struct NetFragmentMessageHeader));
+    }
+    return gReliableTrackerPool[hT].ident;
+}
+
+static void ServiceConnectionEventsBase(struct GameClient* client, int clientIndex, struct NetworkThreadQueues* pQueues, bool(*IsConnected)(void*,int), void* clientOrServer)
+{
+    if(!IsConnected(clientOrServer, clientIndex))
+    {
+        if(client->state != GCS_Disconnected)
+        {
+            struct NetworkConnectionEvent event = 
+            {
+                .client = clientIndex,
+                .type = NCE_ClientDisconnected
+            };
+            TSQ_Enqueue(&pQueues->connectionEvents, &event);
+        }
+        client->state = GCS_Disconnected;
+    }
+    else
+    {
+        switch(client->state)
+        {
+        case GCS_Disconnected:
+            {
+                struct NetworkConnectionEvent event = 
+                {
+                    .client = clientIndex,
+                    .type = NCE_ClientConnected
+                };
+                TSQ_Enqueue(&pQueues->connectionEvents, &event);
+                client->state = GCS_Connected;
+            }
+            break;
+        case GCS_Connected:
+            break;
+        }
+    }
+    
+}
+
+/*
+    These functions wrap netcode_client/server_send/recieve .
+    Those that take clientIndex are only relevant if you are the server.
+*/
+typedef u8*(*RecievePacketFn)(void* serverOrClient, int clientIndex, int* bytesRecieved, uint64_t* packetSequence);
+typedef void(*SendPacketFn)(void* serverOrClient, int clientIndex, u8* packetData, int packetSize);
+typedef void(*FreePacketFn)(void* serverOrClient, void* packet);
+
+static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues* pQueues, RecievePacketFn recievePacket, SendPacketFn sendPacket, FreePacketFn freePacket)
+{
+    
     int client_index;
     for ( client_index = 0; client_index < NETCODE_MAX_CLIENTS; ++client_index )
     {
@@ -407,7 +376,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
         {
             int packet_bytes;
             uint64_t packet_sequence;
-            void * packet = netcode_server_receive_packet( server, client_index, &packet_bytes, &packet_sequence );
+            void * packet = recievePacket( serverOrClient, client_index, &packet_bytes, &packet_sequence );
             if ( !packet )
                 break;
 
@@ -443,7 +412,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                     if(!HasReliablePacketBeenRecentlyAcknowledged(pHeader->messageIdentifier))
                     {
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
-                        netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
+                        sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
                         PushAckedPacketIdentifier(pHeader->messageIdentifier);
 
                         /* only push the data for a reliable packet once to the game thread */
@@ -459,7 +428,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                     {
                         /* this same reliable message has been acknowledged before recently, but we're getting it again so ack but don't push to game thread again */
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
-                        netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
+                        sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
                     }
                     
                 }
@@ -474,7 +443,7 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
 
                         /* send ack */
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
-                        netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
+                        sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
                         PushAckedPacketIdentifier(pHeader->messageIdentifier);
 
                         if(pComplete)
@@ -492,9 +461,8 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                     {
                         /* this same reliable message has been acknowledged before recently, but we're getting it again so ack but don't push to game thread again */
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
-                        netcode_server_send_packet(server, client_index, gPacketBuffer, packetSize);
+                        sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
                     }
-                    
                 }
                 break;
             case ReliableDataMessageAck:
@@ -505,44 +473,13 @@ static void ServerRecievePackets(struct netcode_server_t * server, struct Networ
                 break;
             }
 
-            netcode_server_free_packet( server, packet );
+            freePacket(serverOrClient, packet);
         }
     }
-
 }
 
-static u32 TrackReliableMessage(u8* data, u32 dataSize, u32 dataOffset, struct NetFragmentMessageHeader* pHeader, double time, int client)
-{
-    HReliableTracker hT;
-    gReliableTrackerPool = GetObjectPoolIndex(gReliableTrackerPool, &hT);
-    gReliableTrackerPool[hT].ident = NetMsg_GetReliableMessageIdentifier();
-    gReliableTrackerPool[hT].data = data;
-    gReliableTrackerPool[hT].dataSize = dataSize;
-    gReliableTrackerPool[hT].pNext = NULL;
-    gReliableTrackerPool[hT].pPrev = NULL;
-    gReliableTrackerPool[hT].lastSentTime = time;
-    gReliableTrackerPool[hT].client = client;
-    if(pReliableTrackerListHead == NULL)
-    {
-        pReliableTrackerListHead = &gReliableTrackerPool[hT];
-        pReliableTrackerListTail = pReliableTrackerListHead;
-        return gReliableTrackerPool[hT].ident;
-    }
-    pReliableTrackerListTail->pNext = &gReliableTrackerPool[hT];
-    gReliableTrackerPool[hT].pPrev = pReliableTrackerListTail;
-    pReliableTrackerListTail = &gReliableTrackerPool[hT];
-    if(pHeader)
-    {
-        gReliableTrackerPool[hT].fragmentHeader = *pHeader;
-    }
-    else
-    {
-        memset(&gReliableTrackerPool[hT].fragmentHeader, 0, sizeof(struct NetFragmentMessageHeader));
-    }
-    return gReliableTrackerPool[hT].ident;
-}
 
-static void SendMessageFragments(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server, struct NetworkQueueItem* item, double time)
+static void SendMessageFragmentsBase(struct NetworkThreadQueues* pQueues, void* serverOrClient, struct NetworkQueueItem* item, double time, SendPacketFn sendPacket)
 {
     EASSERT(item->pDataSize > NETCODE_MAX_PACKET_SIZE);
     int sizeOfHeaders = NetMsg_SizeOfHeaders(ReliableDataMessageFragment);
@@ -569,46 +506,13 @@ static void SendMessageFragments(struct NetworkThreadQueues* pQueues, struct net
             TrackReliableMessage(item->pData, payloadSize, off, &h, time, item->client),
             fragmentedMsgID, item->pDataSize);
         Sptr_AddRef(item->pData);
-        netcode_server_send_packet(server, item->client, gPacketBuffer, numBytes);
+        sendPacket(serverOrClient, item->client, gPacketBuffer, numBytes);
         off += payloadSize;
     } while (maxPayloadPerPacket == payloadSize);
-    
 }
 
-static void DoTXQueue(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server, double time)
-{
-    struct NetworkQueueItem item;
-    while(TSQ_Dequeue(&pQueues->tx, &item))
-    {
-        if(item.pDataSize > NETCODE_MAX_PACKET_SIZE - NetMsg_SizeOfHeaders(ReliableDataMessageComplete))
-        {
-            /* send fragments here */
-            SendMessageFragments(pQueues, server, &item, time);
-            Sptr_RemoveRef(item.pData);
-        }
-        else
-        {
-            if(item.bReliable)
-            {
-                int packetSize = NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize, TrackReliableMessage(item.pData, item.pDataSize, 0, NULL, time, item.client));
-                netcode_server_send_packet(server, item.client, gPacketBuffer, packetSize);
-                continue;
-            }
-            else
-            {
-                int packetSize = NetMsg_WriteUnreliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize);
-                netcode_server_send_packet(server, item.client, gPacketBuffer, packetSize);
-                Sptr_RemoveRef(item.pData);
-            }
-        }
-        
-    }
-}
 
-// resend if unacked after 100ms
-#define RESEND_IF_UNACKED_THRESHOLD (100.0 / 1000.0) 
-
-static void ServerResendReliablePackets(double time, struct netcode_server_t * server)
+static void ResendReliablePacketsBase(double time, void * serverOrClient, SendPacketFn sendPacket)
 {
     struct ReliableMessageTracker* pTracker = pReliableTrackerListHead;
     while(pTracker)
@@ -628,16 +532,234 @@ static void ServerResendReliablePackets(double time, struct netcode_server_t * s
                     pTracker->fragmentHeader.fragmentedMsgID,
                     pTracker->fragmentHeader.fragmentedMsgTotalSize
                 );
+                sendPacket(serverOrClient, pTracker->client, gPacketBuffer, pTracker->dataSize);
             }
             else
             {
                 /* send a complete reliable packet */
                 NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, pTracker->data + pTracker->dataOffset, pTracker->dataSize, pTracker->ident);
-                netcode_server_send_packet(server, pTracker->client, gPacketBuffer,pTracker->dataSize);
+                sendPacket(serverOrClient, pTracker->client, gPacketBuffer, pTracker->dataSize);
             }
         }
         pTracker = pTracker->pNext;
     }
+}
+
+static void DoTXQueueBase(struct NetworkThreadQueues* pQueues, void* serverOrClient, double time, SendPacketFn sendPacket)
+{
+    struct NetworkQueueItem item;
+    while(TSQ_Dequeue(&pQueues->tx, &item))
+    {
+        if(item.pDataSize > NETCODE_MAX_PACKET_SIZE - NetMsg_SizeOfHeaders(ReliableDataMessageComplete))
+        {
+            /* send fragments here */
+            SendMessageFragmentsBase(pQueues, serverOrClient, &item, time, sendPacket);
+            Sptr_RemoveRef(item.pData);
+        }
+        else
+        {
+            if(item.bReliable)
+            {
+                int packetSize = NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize, 
+                    TrackReliableMessage(item.pData, item.pDataSize, 0, NULL, time, item.client));
+
+                sendPacket(serverOrClient, item.client, gPacketBuffer, packetSize);
+                continue;
+            }
+            else
+            {
+                int packetSize = NetMsg_WriteUnreliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize);
+                sendPacket(serverOrClient, item.client, gPacketBuffer, packetSize);
+                Sptr_RemoveRef(item.pData);
+            }
+        }
+        
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Client
+
+static void ClientFreePacket(void* serverOrClient, void* packet)
+{
+    netcode_client_free_packet(serverOrClient, packet);
+}
+
+static u8* ClientRecievePacket(void* serverOrClient, int clientIndex, int* packetBytes, uint64_t* packetSequence)
+{
+    return netcode_client_receive_packet(serverOrClient, packetBytes, packetSequence);
+}
+
+static void ClientSendPacket(void* clientOrServer, int clientIndex, u8* packet, int packetSize)
+{
+    netcode_client_send_packet(clientOrServer, packet, packetSize);
+}
+
+static void ClientRecievePackets(struct netcode_client_t * client, struct NetworkThreadQueues* pQueues)
+{
+    RecievePacketsBase(client, pQueues, &ClientRecievePacket, &ClientSendPacket, &ClientFreePacket);
+}
+
+static void DoTXQueueClient(struct NetworkThreadQueues* pQueues, struct netcode_client_t* server, double time)
+{
+    DoTXQueueBase(pQueues, server, time, &ClientSendPacket);
+}
+
+static void ClientResendReliablePackets(double time, struct netcode_client_t * client)
+{
+    ResendReliablePacketsBase(time, client, &ClientSendPacket);
+}
+
+static bool IsConnectedToServer(void* client, int clientIndex)
+{
+    return netcode_client_state( client ) == NETCODE_CLIENT_STATE_CONNECTED;
+}
+
+static void ServiceClientConnectionEvents(struct GameClient* gameClient, struct netcode_client_t * client, int clientIndex, struct NetworkThreadQueues* pQueues)
+{
+    ServiceConnectionEventsBase(gameClient, -1, pQueues, &IsConnectedToServer, client);
+}
+
+DECLARE_THREAD_PROC(ClientThread, arg)
+{
+    struct GameClient gameClient = 
+    {
+        .state = GCS_Disconnected
+    };
+    struct NetworkThreadQueues* pQueues = arg; 
+    netcode_set_printf_function(&NetcodeLog);
+    if ( netcode_init() != NETCODE_OK )
+    {
+        Log_Error( "error: failed to initialize netcode" );
+        return (void*)1;
+    }
+
+    netcode_log_level( NETCODE_LOG_LEVEL_INFO );
+
+    double time = 0.0;
+    double delta_time = 1.0 / 60.0;
+
+    Log_Info( "client" );
+
+    struct netcode_client_config_t client_config;
+    netcode_default_client_config( &client_config );
+    struct netcode_client_t * client = netcode_client_create( "0.0.0.0", &client_config, time );
+
+    if ( !client )
+    {
+        Log_Error( "error: failed to create client" );
+        return (void*)1;
+    }
+
+    NETCODE_CONST char* server_address = gCmdArgs.serverAddress;
+
+    uint64_t client_id = 0;
+    netcode_random_bytes( (uint8_t*) &client_id, 8 );
+    Log_Info( "client id is %.16" PRIx64 , client_id );
+
+    uint8_t user_data[NETCODE_USER_DATA_BYTES];
+    netcode_random_bytes(user_data, NETCODE_USER_DATA_BYTES);
+
+    uint8_t connect_token[NETCODE_CONNECT_TOKEN_BYTES];
+
+    if ( netcode_generate_connect_token( 1, &server_address, &server_address, CONNECT_TOKEN_EXPIRY, CONNECT_TOKEN_TIMEOUT, client_id, GAME_PROTOCOL_ID, private_key, user_data, connect_token ) != NETCODE_OK )
+    {
+        Log_Error( "error: failed to generate connect token" );
+        return (void*)1;
+    }
+
+    netcode_client_connect( client, connect_token );
+
+    bool quit = false;
+
+    
+
+    while ( !quit )
+    {
+        netcode_client_update( client, time );
+
+        ServiceClientConnectionEvents(&gameClient, client, -1, pQueues);
+
+        /* resend any reliable packets that haven't been acknowledged after a certain threshold of time */
+        ClientResendReliablePackets(time, client);
+
+        /* transmit any data from the game thread to clients */
+        DoTXQueueClient(pQueues, client, time);
+
+        /* recieve any packets from clients and push to game thread */
+        ClientRecievePackets(client, pQueues);
+
+        netcode_sleep( delta_time );
+
+        time += delta_time;
+    }
+
+    if ( quit )
+    {
+        Log_Info( "shutting netcode thread down" );
+    }
+
+    netcode_client_destroy( client );
+
+    netcode_term();
+    return NULL;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Server
+
+static void InitClients(struct GameClient* clients)
+{
+    for(int i=0; i < GAME_MAX_CLIENTS; i++)
+    {
+        clients[i].state = GCS_Disconnected;
+    }
+}
+
+static bool IsServerClientConnected(void* pServerOrClient, int clientIndex)
+{
+    return netcode_server_client_connected(pServerOrClient, clientIndex);
+}
+
+
+static void ServerFreePacket(void* serverOrClient, void* packet)
+{
+    netcode_server_free_packet(serverOrClient, packet);
+}
+
+static u8* ServerRecievePacket(void* serverOrClient, int clientIndex, int* packetBytes, uint64_t* packetSequence)
+{
+    return netcode_server_receive_packet(serverOrClient, clientIndex, packetBytes, packetSequence);
+}
+
+static void ServerSendPacket(void* clientOrServer, int clientIndex, u8* packet, int packetSize)
+{
+    netcode_server_send_packet(clientOrServer, clientIndex, packet, packetSize);
+}
+
+static void ServerRecievePackets(struct netcode_server_t * server, struct NetworkThreadQueues* pQueues)
+{
+    RecievePacketsBase(server, pQueues, &ServerRecievePacket, &ServerSendPacket, &ServerFreePacket);
+}
+
+static void SendMessageFragmentsServer(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server, struct NetworkQueueItem* item, double time)
+{
+    SendMessageFragmentsBase(pQueues, server, item, time, &ServerSendPacket);   
+}
+
+static void DoTXQueueServer(struct NetworkThreadQueues* pQueues, struct netcode_server_t* server, double time)
+{
+    DoTXQueueBase(pQueues, server, time, &ServerSendPacket);
+}
+
+static void ServerResendReliablePackets(double time, struct netcode_server_t * server)
+{
+    ResendReliablePacketsBase(time, server, &ServerSendPacket);
+}
+
+static void ServiceServerConnectionEvents(struct GameClient* client, struct netcode_server_t * server, int clientIndex, struct NetworkThreadQueues* pQueues)
+{
+    ServiceConnectionEventsBase(client, clientIndex, pQueues, &IsServerClientConnected, server);
 }
 
 DECLARE_THREAD_PROC(ClientServerThread, arg)
@@ -683,14 +805,14 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
         /* pass messages to the game thread about clients connecting and disconnecting */
         for(int i=0; i<GAME_MAX_CLIENTS; i++)
         {
-            ServiceClientConnectionEvents(&gameClients[i], server, i, pQueues);
+            ServiceServerConnectionEvents(&gameClients[i], server, i, pQueues);
         }
 
         /* resend any reliable packets that haven't been acknowledged after a certain threshold of time */
         ServerResendReliablePackets(time, server);
 
         /* transmit any data from the game thread to clients */
-        DoTXQueue(pQueues, server, time);
+        DoTXQueueServer(pQueues, server, time);
 
         /* recieve any packets from clients and push to game thread */
         ServerRecievePackets(server, pQueues);
