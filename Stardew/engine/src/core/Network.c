@@ -668,7 +668,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     uint64_t client_id = 0;
     netcode_random_bytes( (uint8_t*) &client_id, 8 );
-    Log_Info( "client id is %.16"PRIx64 , client_id );
+    Log_Info( "client id is %lu" , client_id );
 
     uint8_t user_data[NETCODE_USER_DATA_BYTES];
     netcode_random_bytes(user_data, NETCODE_USER_DATA_BYTES);
