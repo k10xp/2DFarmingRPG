@@ -80,10 +80,60 @@
             ]
         },
         {
-            "name": "(gdb) Create Persistant Data Save",
+            "name": "(gdb) Launch nettest Client",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Stardew/build/game/WarFarmer",
+            "args": ["-r", "c", "-s", "127.0.0.1:666", "-l", "i", "--input_file_path", "./enginenettest/test.bin", "--output_file_path", "./enginenettest/test_clientout.bin"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/Stardew",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch nettest Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Stardew/build/enginenettest/EngineNetTest",
+            "args": ["-r", "s", "-s", "127.0.0.1:666", "-l", "i", "--output_file_path", "./enginenettest/test_serverout.bin"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}/Stardew",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "${workspaceRoot}/Stardew/SudoGDB.sh",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Create Persistant Data Save",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Stardew/build/enginenettest/EngineNetTest",
             "args": ["--outPersistantFile", "./Assets/Saves/Dev/Persistant.game"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}/Stardew",

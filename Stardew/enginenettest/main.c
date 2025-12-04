@@ -5,6 +5,7 @@
 #include "AssertLib.h"
 #include "SharedPtr.h"
 #include "cwalk.h"
+#include "netcode.h"
 #include <string.h>
 #include <stdio.h>
 /*
@@ -31,13 +32,15 @@ struct NetTestCmdArgs
 {
     char* inputFilePath;
     char* outputFilePath;
+    double timeoutSeconds;
 };
 
 enum GameRole gRole;
 
 static struct  NetTestCmdArgs gTestArgs = {
     .inputFilePath = NULL,
-    .outputFilePath = NULL
+    .outputFilePath = NULL,
+    .timeoutSeconds = -1.0 /* < 0 means no timeout */
 };
 
 void HandleNetTestArgs(int argc, char** argv, int onArg)
@@ -66,6 +69,16 @@ void HandleNetTestArgs(int argc, char** argv, int onArg)
         char* file = argv[onArg+1];
         gTestArgs.outputFilePath = file;
     }
+    else if(strcmp(arg, "--server_timeout") == 0)
+    {
+        /*
+            client:
+            no effect
+            server:
+            process will terminate after this many seconds
+        */
+        gTestArgs.timeoutSeconds = atof(argv[onArg + 1]);
+    }
 }
 
 static char* GetFileOutputPath(int clientID)
@@ -73,31 +86,33 @@ static char* GetFileOutputPath(int clientID)
     static char sPathBuf[256];
     char extensionBuf[16];
     strcpy(sPathBuf, gTestArgs.outputFilePath);
-    if(cwk_path_has_extension(sPathBuf))
-    {
-        char* extension = NULL;
-        size_t extensionlen = 0;
-        cwk_path_get_extension(sPathBuf, (const char**)&extension, &extensionlen);
-        /* save the extension for later */
-        memset(extensionBuf, 0, 16);
-        memcpy(extensionBuf, extension, extensionlen);
-        /* remove extension from path */
-        memset(extension, 0, extensionlen);
-        /* add client id and then extension */
-        char* end = sPathBuf + strlen(sPathBuf);
-        sprintf(end, "%i%s", clientID, extension);
-        Log_Info("Server is saving output to %s", sPathBuf);
-    }
-    else
-    {
-        char* end = sPathBuf + strlen(sPathBuf);
-        sprintf(end, "%i", clientID);
-    }
+    // if(cwk_path_has_extension(sPathBuf))
+    // {
+    //     char* extension = NULL;
+    //     size_t extensionlen = 0;
+    //     cwk_path_get_extension(sPathBuf, (const char**)&extension, &extensionlen);
+    //     /* save the extension for later */
+    //     memset(extensionBuf, 0, 16);
+    //     memcpy(extensionBuf, extension, extensionlen);
+    //     /* remove extension from path */
+    //     memset(extension, 0, extensionlen);
+    //     /* add client id and then extension */
+    //     char* end = sPathBuf + strlen(sPathBuf);
+    //     sprintf(end, "%i%s", clientID, extension);
+    //     Log_Info("Server is saving output to %s", sPathBuf);
+    // }
+    // else
+    // {
+    //     char* end = sPathBuf + strlen(sPathBuf);
+    //     sprintf(end, "%i", clientID);
+    // }
     return sPathBuf;
 }
 
 static int NetTestServer()
 {
+    double time = 0;
+    double delta_time = 1.0 / 60.0;
     while(true)
     {
         struct NetworkQueueItem nci;
@@ -121,6 +136,15 @@ static int NetTestServer()
             /* 3.) echo back to client */
             memcpy(response.pData, nci.pData, nci.pDataSize);
             NW_EnqueueData(&response);
+        }
+
+        netcode_sleep( delta_time );
+
+        time += delta_time;
+        if(gTestArgs.timeoutSeconds > 0 && time >= gTestArgs.timeoutSeconds)
+        {
+            Log_Info("Timing out after %.2f seconds", gTestArgs.timeoutSeconds);
+            break;
         }
     }
 }
@@ -161,6 +185,7 @@ connected:
     while(true)
         while(NW_DequeueData(&item))
         {
+            Log_Info("Client: I've recieved a response from the server");
             FILE* pFile = fopen(gTestArgs.outputFilePath, "w");
             fwrite(item.pData, 1, item.pDataSize, pFile);
             fclose(pFile);

@@ -394,7 +394,7 @@ static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues*
 
             /* respond to packet here */
             enum NetRawMessageType msgType;
-            u8 pBody = NULL;
+            u8* pBody = NULL;
             NetMsg_Parse(packet, &msgType, &pBody);
             int headersSize = NetMsg_SizeOfHeaders(msgType);
             int payloadSize = packet_bytes - headersSize;

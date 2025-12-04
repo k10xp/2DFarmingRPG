@@ -177,7 +177,7 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
             {
                 gCmdArgs.bIncludeLogTimeStamps = false;
             }
-            else if(strcmp(argv[i], "--logfile") == 0 || strcmp(argv[i], "--lf"))
+            else if(strcmp(argv[i], "--logfile") == 0 || strcmp(argv[i], "--lf") == 0)
             {
                 EASSERT(i + 1 < argc);
                 i++;

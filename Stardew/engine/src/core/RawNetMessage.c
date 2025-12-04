@@ -61,7 +61,7 @@ int NetMsg_WriteReliableCompleteDataPacket(u8* dataOut, u8* dataIn, int dataSize
     int totalBytes2Write = dataSize + sizeof(u32) + sizeof(struct NetReliableMessageHeader);
     if(totalBytes2Write <= NETCODE_MAX_PACKET_SIZE)
     {
-        *((u32*)dataOut) = UnreliableDataMessageComplete;
+        *((u32*)dataOut) = ReliableDataMessageComplete;
         dataOut += sizeof(u32);
         struct NetReliableMessageHeader reliable =
         {
@@ -84,7 +84,7 @@ int NetMsg_WriteReliableFragmentDataPacket(u8* dataOut, u8* dataIn, int dataSize
     int totalBytes2Write = dataSize + sizeof(u32) + sizeof(struct NetReliableMessageHeader) + sizeof(struct NetFragmentMessageHeader);
     if(totalBytes2Write <= NETCODE_MAX_PACKET_SIZE)
     {
-        *((u32*)dataOut) = UnreliableDataMessageComplete;
+        *((u32*)dataOut) = ReliableDataMessageFragment;
         dataOut += sizeof(u32);
         struct NetReliableMessageHeader reliable =
         {
