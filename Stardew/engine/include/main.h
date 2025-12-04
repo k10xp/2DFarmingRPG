@@ -10,6 +10,7 @@ int Mn_GetScreenWidth();
 int Mn_GetScreenHeight();
 
 typedef void(*GameInitFn)(InputContext*,DrawContext*);
+typedef void(*ArgHandlerFn)(int argc, char** argv, int onArg);
 
 int EngineStart(int argc, char** argv, GameInitFn init);
 
@@ -20,6 +21,8 @@ int EngineStart(int argc, char** argv, GameInitFn init);
 */
 DrawContext* GetDrawContext();
 InputContext* GetInputContext();
+
+void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn);
 
 struct CommandLineArgs
 {

@@ -102,7 +102,8 @@ static void GLAPIENTRY MessageCallback(GLenum source,
 
 typedef void(*GameInitFn)(InputContext*,DrawContext*);
 
-static void ParseCmdArgs(int argc, char** argv)
+
+void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
 {
     gCmdArgs.role = GR_Singleplayer;
     gCmdArgs.serverAddress = "127.0.0.1:40000";
@@ -186,6 +187,10 @@ static void ParseCmdArgs(int argc, char** argv)
             {
                 gCmdArgs.bLogTIDs = false;
             }
+            else if(handlerFn)
+            {
+                handlerFn(argc, argv, i);
+            }
         }
     }
 }
@@ -202,7 +207,7 @@ static void DoNetworkQueues()
 
 int EngineStart(int argc, char** argv, GameInitFn init)
 {
-    ParseCmdArgs(argc, argv);
+    Engine_ParseCmdArgs(argc, argv, NULL);
     Log_Init();
     NW_Init();
     

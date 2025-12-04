@@ -43,4 +43,4 @@ void Sptr_RemoveRef(void* pointer)
 		}
 		free(ptr);
 	}
-s}
+}
