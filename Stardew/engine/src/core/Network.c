@@ -514,7 +514,7 @@ static void SendMessageFragmentsBase(struct NetworkThreadQueues* pQueues, void* 
             .sequenceNum = seqNum
         };
         payloadSize = off + maxPayloadPerPacket > item->pDataSize ? maxPayloadPerPacket : item->pDataSize - off;
-        int numBytes = NetMsg_WriteReliableFragmentDataPacket(gPacketBuffer, &item->pData[off], maxPayloadPerPacket, numTotal, seqNum++,
+        int numBytes = NetMsg_WriteReliableFragmentDataPacket(gPacketBuffer, ((u8*)item->pData) + off, maxPayloadPerPacket, numTotal, seqNum++,
             TrackReliableMessage(item->pData, payloadSize, off, &h, time, item->client),
             fragmentedMsgID, item->pDataSize);
         Sptr_AddRef(item->pData);
@@ -536,7 +536,7 @@ static void ResendReliablePacketsBase(double time, void * serverOrClient, SendPa
                 /* send a fragment packet */
                 NetMsg_WriteReliableFragmentDataPacket(
                     gPacketBuffer,
-                    pTracker->data + pTracker->dataOffset,
+                    (u8*)pTracker->data + pTracker->dataOffset,
                     pTracker->dataSize,
                     pTracker->fragmentHeader.numFragments,
                     pTracker->fragmentHeader.sequenceNum,
@@ -549,7 +549,7 @@ static void ResendReliablePacketsBase(double time, void * serverOrClient, SendPa
             else
             {
                 /* send a complete reliable packet */
-                NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, pTracker->data + pTracker->dataOffset, pTracker->dataSize, pTracker->ident);
+                NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, (u8*)pTracker->data + pTracker->dataOffset, pTracker->dataSize, pTracker->ident);
                 sendPacket(serverOrClient, pTracker->client, gPacketBuffer, pTracker->dataSize);
             }
         }
@@ -668,7 +668,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     uint64_t client_id = 0;
     netcode_random_bytes( (uint8_t*) &client_id, 8 );
-    Log_Info( "client id is %.16" PRIx64 , client_id );
+    Log_Info( "client id is %.16"PRIx64 , client_id );
 
     uint8_t user_data[NETCODE_USER_DATA_BYTES];
     netcode_random_bytes(user_data, NETCODE_USER_DATA_BYTES);
