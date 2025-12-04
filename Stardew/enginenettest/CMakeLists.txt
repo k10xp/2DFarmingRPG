@@ -1,1 +1,2 @@
-add_executable( EngineNetTest main.c )
+add_executable( EngineNetTest main.c cwalk.c )
+target_include_directories(EngineNetTest PRIVATE .)
