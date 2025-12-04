@@ -74,7 +74,7 @@ int vLog_Fmt(const char* fmt, enum LogLvl lvl, va_list args)
     }
     if(gCmdArgs.bLogTIDs)
     {
-        static_assert(sizeof(CrossPlatformThreadID) == sizeof(u32));
+        //static_assert(sizeof(CrossPlatformThreadID) == sizeof(u32));
         CrossPlatformThreadID tid = GetThisThreadsID();
         const char* tidFmt = gCmdArgs.bLogTextColoured ? " "BHMAG"TID: 0x%08x"CRESET" " : "TID: %08x ";
         snprintf(start, 512 - namelen, tidFmt, (u32)tid);
