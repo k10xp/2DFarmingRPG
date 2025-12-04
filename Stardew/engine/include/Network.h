@@ -40,7 +40,7 @@ struct NetworkQueueItem
     int client;
     SHARED_PTR(void) pData;
     int pDataSize;
-    bool bReliable
+    bool bReliable;
 };
 
 enum NetworkConnectionEventType
