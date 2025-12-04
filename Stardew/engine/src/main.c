@@ -14,6 +14,7 @@
 #include <libxml/parser.h>
 #include "Log.h"
 #include "Network.h"
+#include "AssertLib.h"
 
 #define SCR_WIDTH 640
 #define SCR_HEIGHT 480
@@ -120,7 +121,7 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
             Log_Info("Cmd arg %i: %s", i, argv[i]);
             if(strcmp(argv[i], "--role") == 0 || strcmp(argv[i], "-r") == 0)
             {
-                assert(i + 1 < argc);
+                EASSERT(i + 1 < argc);
                 i++;
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
                 if(strcmp(argv[i], "server") == 0 || strcmp(argv[i], "s") == 0)
@@ -134,21 +135,21 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
             }
             else if(strcmp(argv[i], "--server_address") == 0 || strcmp(argv[i], "-s") == 0)
             {
-                assert(i + 1 < argc);
+                EASSERT(i + 1 < argc);
                 i++;
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
                 gCmdArgs.serverAddress = argv[i];
             }
             else if(strcmp(argv[i], "--client_address") == 0 || strcmp(argv[i], "-c") == 0)
             {
-                assert(i + 1 < argc);
+                EASSERT(i + 1 < argc);
                 i++;
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
                 gCmdArgs.serverAddress = argv[i];
             }
             else if(strcmp(argv[i], "--log_level") == 0 || strcmp(argv[i], "-l") == 0)
             {
-                assert(i + 1 < argc);
+                EASSERT(i + 1 < argc);
                 i++;
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
                 if(strcmp(argv[i], "verbose") == 0 || strcmp(argv[i], "v") == 0)
@@ -178,7 +179,7 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
             }
             else if(strcmp(argv[i], "--logfile") == 0 || strcmp(argv[i], "--lf"))
             {
-                assert(i + 1 < argc);
+                EASSERT(i + 1 < argc);
                 i++;
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
                 gCmdArgs.logfilePath = argv[i];
