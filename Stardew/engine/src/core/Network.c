@@ -513,7 +513,7 @@ static void SendMessageFragmentsBase(struct NetworkThreadQueues* pQueues, void* 
             .numFragments = numTotal,
             .sequenceNum = seqNum
         };
-        payloadSize = off + maxPayloadPerPacket > item->pDataSize ? maxPayloadPerPacket : item->pDataSize - off;
+        payloadSize = off + maxPayloadPerPacket < item->pDataSize ? maxPayloadPerPacket : item->pDataSize - off;
         int numBytes = NetMsg_WriteReliableFragmentDataPacket(gPacketBuffer, ((u8*)item->pData) + off, maxPayloadPerPacket, numTotal, seqNum++,
             TrackReliableMessage(item->pData, payloadSize, off, &h, time, item->client),
             fragmentedMsgID, item->pDataSize);
