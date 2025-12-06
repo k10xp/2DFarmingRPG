@@ -36,8 +36,6 @@
 #pragma warning(disable:4996)
 #endif // #ifdef _MSC_VER
 
-
-
 #include <sodium.h>
 
 #define NETCODE_SOCKET_IPV6         1

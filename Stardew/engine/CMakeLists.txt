@@ -2,6 +2,9 @@ include(CMakePrintHelpers)
 cmake_minimum_required(VERSION 3.25)
 project(StardewEngine)
 
+
+add_definitions(-D__STDC_FORMAT_MACROS)
+
 if(WIN32)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)

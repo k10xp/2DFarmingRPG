@@ -15,6 +15,7 @@ basic_test() {
     ../build/enginenettest/EngineNetTest -r c -s 127.0.0.1:666 -l i --input_file_path $2 --output_file_path $3
 
     sleep 2s
+    killall -s KILL EngineNetTest
 
     printf "\n\n\n\nSERVER LOG\n\n\n\n"
 
@@ -53,4 +54,7 @@ basic_test() {
 
 basic_test 512 ./random.bin ./client_out.bin ./server_out.bin
 
-killall -s KILL EngineNetTest
+
+
+
+#basic_test 3000 ./random.bin ./client_out.bin ./server_out.bin
