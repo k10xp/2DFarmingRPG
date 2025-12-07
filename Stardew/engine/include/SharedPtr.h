@@ -4,6 +4,7 @@
 
 //called just before the memory is freed
 #include <stddef.h>
+#include "IntTypes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,6 +17,8 @@ void* Sptr_New(size_t size, SharedPtrDestuctorFn dtor);
 void Sptr_AddRef(void* pointer);
 
 void Sptr_RemoveRef(void* pointer);
+
+i64 Sptr_GetRefCount(void* pointer);
 
 #define SHARED_PTR(p) p*
 

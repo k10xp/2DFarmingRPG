@@ -5,12 +5,17 @@ NET_TEST_EXE_PATH="../build/enginenettest/EngineNetTest"
 # $1 : output file path
 # $2 : server timeout
 # $3 : console log disabled
+# $4 : log verbosity
 start_server() {
+    local OUTPUT_FILE_PATH=$1
+    local SERVER_TIMEOUT=$2
+    local CONSOLE_LOG_DISABLED=$3
+    local LOG_VERBOSITY=$4
     local CMD=""
-    if [[ $3 == "true" ]]; then
-        CMD="$NET_TEST_EXE_PATH -r s -s 127.0.0.1:666 -l i --output_file_path $1 --server_timeout $2 --lf ./server_process.log --disable_console_log"
+    if [[ $CONSOLE_LOG_DISABLED == "true" ]]; then
+        CMD="$NET_TEST_EXE_PATH -r s -s 127.0.0.1:666 -l $LOG_VERBOSITY --output_file_path $OUTPUT_FILE_PATH --server_timeout $SERVER_TIMEOUT --lf ./server_process.log --disable_console_log"
     else
-        CMD="$NET_TEST_EXE_PATH -r s -s 127.0.0.1:666 -l i --output_file_path $1 --server_timeout $2 --lf ./server_process.log"
+        CMD="$NET_TEST_EXE_PATH -r s -s 127.0.0.1:666 -l $LOG_VERBOSITY --output_file_path $OUTPUT_FILE_PATH --server_timeout $SERVER_TIMEOUT --lf ./server_process.log"
     fi
     $CMD
 }
@@ -25,12 +30,18 @@ random_file() {
 # $2 : output file path
 # $3 : disable console log
 # $4 : log file 
+# $5 : log verbosity
 start_client() {
+    local INPUT_FILE_PATH=$1
+    local OUTPUT_FILE_PATH=$2
+    local DISABLE_CONSOLE_LOG=$3
+    local LOG_FILE_PATH=$4
+    local LOG_VERBOSITY=$5
     local CMD=""
-    if [[ $3 == "true" ]]; then
-        CMD="$NET_TEST_EXE_PATH -r c -s 127.0.0.1:666 -l i --input_file_path $1 --output_file_path $2 --lf $4 --disable_console_log"
+    if [[ $DISABLE_CONSOLE_LOG == "true" ]]; then
+        CMD="$NET_TEST_EXE_PATH -r c -s 127.0.0.1:666 -l $LOG_VERBOSITY --input_file_path $INPUT_FILE_PATH --output_file_path $OUTPUT_FILE_PATH --lf $LOG_FILE_PATH --disable_console_log"
     else
-        CMD="$NET_TEST_EXE_PATH -r c -s 127.0.0.1:666 -l i --input_file_path $1 --output_file_path $2 --lf $4"
+        CMD="$NET_TEST_EXE_PATH -r c -s 127.0.0.1:666 -l $LOG_VERBOSITY --input_file_path $INPUT_FILE_PATH --output_file_path $OUTPUT_FILE_PATH --lf $LOG_FILE_PATH"
     fi
     $CMD
 }
@@ -77,6 +88,7 @@ basic_test() {
         $SERVER_OUTPUT_FILE_PATH \
         1.5s \
         true \
+        v \
         &
 
     # random file
@@ -90,7 +102,8 @@ basic_test() {
         $RANDOM_FILE_PATH \
         $CLIENT_OUTPUT_FILE_PATH \
         true \
-         ./client_process.log
+        ./client_process.log \
+        v
 
     sleep 2s
 
@@ -136,7 +149,20 @@ basic_test() {
     return 0
 }
 
+printf "\n\nRUNNING TEST ONE: A SMALL AMOUNT OF DATA THAT FITS IN 1 PACKET\n\n"
 
 basic_test 512 ./random.bin ./client_out.bin ./server_out.bin
+if [[ $? == 1 ]]; then
+    return 1
+fi
 
+
+printf "\n\nRUNNING TEST TWO: A LARGE AMOUNT OF DATA THAT MUST BE SENT AS MULTIPLE PACKETS\n\n"
+
+basic_test 10000 ./random.bin ./client_out.bin ./server_out.bin
+if [[ $? == 1 ]]; then
+    return 1
+fi
+
+print "\n\nALL TESTS PASSED!"
 

@@ -30,6 +30,12 @@ void Sptr_AddRef(void* pointer)
 	ptr->reference++;
 }
 
+i64 Sptr_GetRefCount(void* pointer)
+{
+	struct SharedPtrHeader* ptr = (struct SharedPtrHeader*)pointer - 1;
+	return ptr->reference;
+}
+
 void Sptr_RemoveRef(void* pointer)
 {
 

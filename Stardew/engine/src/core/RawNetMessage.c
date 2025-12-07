@@ -99,6 +99,7 @@ int NetMsg_WriteReliableFragmentDataPacket(u8* dataOut, u8* dataIn, int dataSize
             .fragmentedMsgID = fragmentedMsgID,
             .fragmentedMsgTotalSize = fragmentedMsgTotalSize
         };
+        *((struct NetFragmentMessageHeader*)dataOut) = fragment;
         dataOut += sizeof(struct NetFragmentMessageHeader);
         memcpy(dataOut, dataIn, dataSize);
         return totalBytes2Write;

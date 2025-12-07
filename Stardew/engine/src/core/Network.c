@@ -204,6 +204,8 @@ static void AcknowledgeIdentifier(u32 ident)
             {
                 pTracker->pPrev->pNext = pTracker->pNext;
             }
+            i64 rc = Sptr_GetRefCount(pTracker->data);
+            Log_Verbose(BHGRN"[NETWORK]"CRESET" found tracker for msg ID %i, about to decrement refcount, current count %lld", ident, rc);
             Sptr_RemoveRef(pTracker->data);
             
             return;
@@ -268,7 +270,9 @@ static void* RecieveFragmentedMessage(u8* packet, int packetSize, int* outComple
     EASSERT(type == ReliableDataMessageFragment);
 
     struct NetFragmentMessageHeader* pFragment = NetMsg_GetFragmentHeader(packet);
+    *outCompletePacketBytes = pFragment->fragmentedMsgTotalSize;
     struct FragmentedMessageReciever* pReciever = FindFragmentedMessageReciever(pFragment->fragmentedMsgID);
+    Log_Verbose(BHGRN"[NETWORK]"CRESET" Recieving message fragment. package fragment no: %i/%i, msg ID: %i", pFragment->sequenceNum, pFragment->numFragments, pFragment->fragmentedMsgID);
     if(!pReciever)
     {
         pReciever = CreateNewReciever(pFragment);
@@ -280,6 +284,7 @@ static void* RecieveFragmentedMessage(u8* packet, int packetSize, int* outComple
     u8* rVal = NULL;
     if(pReciever->fragmentsRecieved == pReciever->totalFragments)
     {
+        Log_Verbose(BHGRN"[NETWORK]"CRESET" complete message recieved");
         if(pReciever->pNext)
         {
             pReciever->pNext->pPrev = pReciever->pPrev;
@@ -425,6 +430,7 @@ static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues*
                     if(!HasReliablePacketBeenRecentlyAcknowledged(pHeader->messageIdentifier))
                     {
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
+                        Log_Verbose(BHGRN"[NETWORK]"CRESET" Sending ack packet for complete message, msg ID: %i", pHeader->messageIdentifier);
                         sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
                         PushAckedPacketIdentifier(pHeader->messageIdentifier);
 
@@ -439,6 +445,7 @@ static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues*
                     }
                     else
                     {
+                        Log_Verbose(BHGRN"[NETWORK]"CRESET" resending ack packet for retransmitted message fragment, previous ack must have been lost");
                         /* this same reliable message has been acknowledged before recently, but we're getting it again so ack but don't push to game thread again */
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
                         sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
@@ -456,6 +463,7 @@ static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues*
 
                         /* send ack */
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
+                        Log_Verbose(BHGRN"[NETWORK]"CRESET" Sending ack packet for fragment message, msg ID: %i", pHeader->messageIdentifier);
                         sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
                         PushAckedPacketIdentifier(pHeader->messageIdentifier);
 
@@ -473,6 +481,7 @@ static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues*
                     else
                     {
                         /* this same reliable message has been acknowledged before recently, but we're getting it again so ack but don't push to game thread again */
+                        Log_Verbose(BHGRN"[NETWORK]"CRESET"Sending ack packet for retransmitted message fragment, previous ack must have been lost");
                         int packetSize = NetMsg_WriteReliableDataAckPacket(gPacketBuffer, pHeader->messageIdentifier);
                         sendPacket(serverOrClient, client_index, gPacketBuffer, packetSize);
                     }
@@ -481,6 +490,7 @@ static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues*
             case ReliableDataMessageAck:
                 {
                     u32 identifier = NetMsg_GetAckedIdentifier(packet);
+                    Log_Verbose(BHGRN"[NETWORK]"CRESET" Recieved Ack packet for ID %i", identifier);
                     AcknowledgeIdentifier(identifier);
                 }
                 break;
@@ -502,10 +512,14 @@ static void SendMessageFragmentsBase(struct NetworkThreadQueues* pQueues, void* 
     u32 fragmentedMsgID = NetMsg_GetReliableMessageIdentifier();
     u16 numTotal = item->pDataSize / maxPayloadPerPacket;
     int payloadSize = 0;
+
     if(item->pDataSize % maxPayloadPerPacket)
     {
         numTotal++;
     }
+
+    Log_Verbose(BHGRN"[NETWORK]"CRESET" Sending as %i packets. Max payload per packet: %i", numTotal, maxPayloadPerPacket);
+
     do
     {
         struct NetFragmentMessageHeader h = {      /* awkward code alert */
@@ -515,7 +529,7 @@ static void SendMessageFragmentsBase(struct NetworkThreadQueues* pQueues, void* 
             .sequenceNum = seqNum
         };
         payloadSize = off + maxPayloadPerPacket < item->pDataSize ? maxPayloadPerPacket : item->pDataSize - off;
-        int numBytes = NetMsg_WriteReliableFragmentDataPacket(gPacketBuffer, ((u8*)item->pData) + off, maxPayloadPerPacket, numTotal, seqNum++,
+        int numBytes = NetMsg_WriteReliableFragmentDataPacket(gPacketBuffer, ((u8*)item->pData) + off, payloadSize, numTotal, seqNum++,
             TrackReliableMessage(item->pData, payloadSize, off, &h, time, item->client),
             fragmentedMsgID, item->pDataSize);
         Sptr_AddRef(item->pData);
@@ -565,6 +579,7 @@ static void DoTXQueueBase(struct NetworkThreadQueues* pQueues, void* serverOrCli
     {
         if(item.pDataSize > NETCODE_MAX_PACKET_SIZE - NetMsg_SizeOfHeaders(ReliableDataMessageComplete))
         {
+            Log_Verbose(BHGRN"[NETWORK]"CRESET" Message size %i too big to send in one packet, sending fragments.", item.pDataSize);
             /* send fragments here */
             SendMessageFragmentsBase(pQueues, serverOrClient, &item, time, sendPacket);
             Sptr_RemoveRef(item.pData);
@@ -573,15 +588,20 @@ static void DoTXQueueBase(struct NetworkThreadQueues* pQueues, void* serverOrCli
         {
             if(item.bReliable)
             {
+
                 int packetSize = NetMsg_WriteReliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize, 
                     TrackReliableMessage(item.pData, item.pDataSize, 0, NULL, time, item.client));
+                
+                Log_Verbose(BHGRN"[NETWORK]"CRESET" Sending complete reliable packet, size with headers %i.", packetSize);
 
                 sendPacket(serverOrClient, item.client, gPacketBuffer, packetSize);
-                continue;
             }
             else
             {
                 int packetSize = NetMsg_WriteUnreliableCompleteDataPacket(gPacketBuffer, item.pData, item.pDataSize);
+
+                Log_Verbose(BHGRN"[NETWORK]"CRESET" Sending complete unreliable packet, size with headers %i.", packetSize);
+
                 sendPacket(serverOrClient, item.client, gPacketBuffer, packetSize);
                 Sptr_RemoveRef(item.pData);
             }
