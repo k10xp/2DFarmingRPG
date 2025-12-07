@@ -147,6 +147,8 @@ struct netcode_network_simulator_t
     struct netcode_network_simulator_packet_entry_t pending_receive_packets[NETCODE_NETWORK_SIMULATOR_NUM_PENDING_RECEIVE_PACKETS];
 };
 
+void netcode_network_simulator_update( struct netcode_network_simulator_t * network_simulator, double time );
+
 struct netcode_network_simulator_t * netcode_network_simulator_create( void * allocator_context, 
                                                                        void * (*allocate_function)(void*,size_t), 
                                                                        void (*free_function)(void*,void*) );

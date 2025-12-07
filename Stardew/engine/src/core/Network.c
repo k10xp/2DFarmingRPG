@@ -743,6 +743,10 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     while ( !quit )
     {
+        if(client_config.network_simulator)
+        {
+            netcode_network_simulator_update(client_config.network_simulator, time);
+        }
         netcode_client_update( client, time );
 
         ServiceClientConnectionEvents(&gameClient, client, -1, pQueues);
@@ -767,6 +771,11 @@ DECLARE_THREAD_PROC(ClientThread, arg)
     }
 
     netcode_client_destroy( client );
+
+    if(client_config.network_simulator)
+    {
+        netcode_network_simulator_destroy(client_config.network_simulator);
+    }
 
     netcode_term();
     return NULL;
@@ -866,6 +875,11 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     bool quit = false;
     while ( !quit )
     {
+        if(server_config.network_simulator)
+        {
+            netcode_network_simulator_update(server_config.network_simulator, time);
+        }
+
         netcode_server_update( server, time );
         
         /* pass messages to the game thread about clients connecting and disconnecting */
@@ -894,6 +908,11 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     }
 
     netcode_server_destroy( server );
+
+    if(server_config.network_simulator)
+    {
+        netcode_network_simulator_destroy(server_config.network_simulator);
+    }
 
     netcode_term();
 }
