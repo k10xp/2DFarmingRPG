@@ -2345,34 +2345,6 @@ void * netcode_packet_queue_pop( struct netcode_packet_queue_t * queue, uint64_t
 
 // ----------------------------------------------------------------
 
-#define NETCODE_NETWORK_SIMULATOR_NUM_PACKET_ENTRIES ( NETCODE_MAX_CLIENTS * 256 )
-#define NETCODE_NETWORK_SIMULATOR_NUM_PENDING_RECEIVE_PACKETS ( NETCODE_MAX_CLIENTS * 64 )
-
-struct netcode_network_simulator_packet_entry_t
-{
-    struct netcode_address_t from;
-    struct netcode_address_t to;
-    double delivery_time;
-    uint8_t * packet_data;
-    int packet_bytes;
-};
-
-struct netcode_network_simulator_t
-{
-    void * allocator_context;
-    void * (*allocate_function)(void*,size_t);
-    void (*free_function)(void*,void*);
-    float latency_milliseconds;
-    float jitter_milliseconds;
-    float packet_loss_percent;
-    float duplicate_packet_percent;
-    double time;
-    int current_index;
-    int num_pending_receive_packets;
-    struct netcode_network_simulator_packet_entry_t packet_entries[NETCODE_NETWORK_SIMULATOR_NUM_PACKET_ENTRIES];
-    struct netcode_network_simulator_packet_entry_t pending_receive_packets[NETCODE_NETWORK_SIMULATOR_NUM_PENDING_RECEIVE_PACKETS];
-};
-
 struct netcode_network_simulator_t * netcode_network_simulator_create( void * allocator_context, 
                                                                        void * (*allocate_function)(void*,size_t), 
                                                                        void (*free_function)(void*,void*) )
