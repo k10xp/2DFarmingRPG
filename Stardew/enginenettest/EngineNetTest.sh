@@ -6,17 +6,24 @@ NET_TEST_EXE_PATH="../build/enginenettest/EngineNetTest"
 # $2 : server timeout
 # $3 : console log disabled
 # $4 : log verbosity
+# $5 : network simulator config
 start_server() {
     local OUTPUT_FILE_PATH=$1
     local SERVER_TIMEOUT=$2
     local CONSOLE_LOG_DISABLED=$3
     local LOG_VERBOSITY=$4
+    local NETSIM_CONFIG=$5
     local CMD=""
+    CMD="$NET_TEST_EXE_PATH -r s -s 127.0.0.1:666 -l $LOG_VERBOSITY --output_file_path $OUTPUT_FILE_PATH --server_timeout $SERVER_TIMEOUT --lf ./server_process.log"
+
     if [[ $CONSOLE_LOG_DISABLED == "true" ]]; then
-        CMD="$NET_TEST_EXE_PATH -r s -s 127.0.0.1:666 -l $LOG_VERBOSITY --output_file_path $OUTPUT_FILE_PATH --server_timeout $SERVER_TIMEOUT --lf ./server_process.log --disable_console_log"
-    else
-        CMD="$NET_TEST_EXE_PATH -r s -s 127.0.0.1:666 -l $LOG_VERBOSITY --output_file_path $OUTPUT_FILE_PATH --server_timeout $SERVER_TIMEOUT --lf ./server_process.log"
+        CMD="${CMD} --disable_console_log"
     fi
+
+    if [[ $NETSIM_CONFIG != "" ]]; then
+        CMD="${CMD} --network_sim_config ${NETSIM_CONFIG}"
+    fi
+    echo $CMD
     $CMD
 }
 
@@ -31,18 +38,22 @@ random_file() {
 # $3 : disable console log
 # $4 : log file 
 # $5 : log verbosity
+# $6 : network simulator config
 start_client() {
     local INPUT_FILE_PATH=$1
     local OUTPUT_FILE_PATH=$2
     local DISABLE_CONSOLE_LOG=$3
     local LOG_FILE_PATH=$4
     local LOG_VERBOSITY=$5
-    local CMD=""
+    local NETSIM_CONFIG=$6
+    local CMD="$NET_TEST_EXE_PATH -r c -s 127.0.0.1:666 -l $LOG_VERBOSITY --input_file_path $INPUT_FILE_PATH --output_file_path $OUTPUT_FILE_PATH --lf $LOG_FILE_PATH"
     if [[ $DISABLE_CONSOLE_LOG == "true" ]]; then
-        CMD="$NET_TEST_EXE_PATH -r c -s 127.0.0.1:666 -l $LOG_VERBOSITY --input_file_path $INPUT_FILE_PATH --output_file_path $OUTPUT_FILE_PATH --lf $LOG_FILE_PATH --disable_console_log"
-    else
-        CMD="$NET_TEST_EXE_PATH -r c -s 127.0.0.1:666 -l $LOG_VERBOSITY --input_file_path $INPUT_FILE_PATH --output_file_path $OUTPUT_FILE_PATH --lf $LOG_FILE_PATH"
+        CMD="${CMD} --disable_console_log"
     fi
+    if [[ $NETSIM_CONFIG != "" ]]; then
+        CMD="${CMD} --network_sim_config ${NETSIM_CONFIG}"
+    fi
+    echo $CMD
     $CMD
 }
 
@@ -77,11 +88,13 @@ compare_test_files() {
 # $2 : random file name
 # $3 : client output file name
 # $4 : server output file
+# $5 : network simulator config
 basic_test() {
     local RANDOM_FILE_SIZE=$1
     local RANDOM_FILE_PATH=$2
     local CLIENT_OUTPUT_FILE_PATH=$3
     local SERVER_OUTPUT_FILE_PATH=$4
+    local NETSIM_CONFIG=$5
 
     local FILES_TO_CLEANUP=( $RANDOM_FILE_PATH $CLIENT_OUTPUT_FILE_PATH $SERVER_OUTPUT_FILE_PATH "./client_process.log" "./server_process.log" )
     start_server \
@@ -89,6 +102,7 @@ basic_test() {
         1.5s \
         true \
         v \
+        $NETSIM_CONFIG \
         &
 
     # random file
@@ -103,7 +117,8 @@ basic_test() {
         $CLIENT_OUTPUT_FILE_PATH \
         true \
         ./client_process.log \
-        v
+        v \
+        $NETSIM_CONFIG
 
     sleep 2s
 
@@ -151,7 +166,7 @@ basic_test() {
 
 printf "\n\nRUNNING TEST ONE: A SMALL AMOUNT OF DATA THAT FITS IN 1 PACKET\n\n"
 
-basic_test 512 ./random.bin ./client_out.bin ./server_out.bin
+basic_test 512 ./random.bin ./client_out.bin ./server_out.bin ""
 if [[ $? == 1 ]]; then
     return 1
 fi
@@ -159,10 +174,21 @@ fi
 
 printf "\n\nRUNNING TEST TWO: A LARGE AMOUNT OF DATA THAT MUST BE SENT AS MULTIPLE PACKETS\n\n"
 
-basic_test 10000 ./random.bin ./client_out.bin ./server_out.bin
+basic_test 10000 ./random.bin ./client_out.bin ./server_out.bin ""
 if [[ $? == 1 ]]; then
     return 1
 fi
+
+#printf "\n\nRUNNING TEST TWO: A LARGE AMOUNT OF DATA THAT MUST BE SENT AS MULTIPLE PACKETS, OVER A BAD NETWORK\n\n"
+
+
+# basic_test 10000 ./random.bin ./client_out.bin ./server_out.bin ./NetworkSimConfig_BadNetwork.json
+# if [[ $? == 1 ]]; then
+#     return 1
+# fi
+
+
+
 
 printf "\n\nALL TESTS PASSED!\n"
 
