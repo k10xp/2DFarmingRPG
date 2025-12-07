@@ -514,6 +514,10 @@ static void LoadLayerAssets(struct GameLayer2DData* pData, DrawContext* pDC)
 	BS_CreateForLoad(pData->atlasFilePath, &bs);
 	At_SerializeAtlas(&bs, &pData->hAtlas, pDC);
 	BS_Finish(&bs);
+	if(pData->preLoadLevelFn)
+	{
+		pData->preLoadLevelFn(pData);
+	}
 	LoadLevelData(&pData->tilemap, pData->tilemapFilePath, pDC, pData->hAtlas, pData);
 	pData->bLoaded = true;
 }

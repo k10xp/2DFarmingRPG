@@ -22,6 +22,7 @@ struct GameFrameworkEventListener;
 struct GameLayer2DData;
 
 typedef void (*PreFirstInitFn)(struct GameLayer2DData* pGameLayerData);
+typedef void (*PreLoadLevelFn)(struct GameLayer2DData* pGameLayerData);
 
 struct GameFrameworkLayer;
 struct DrawContext;
@@ -169,6 +170,8 @@ struct GameLayer2DData
 		An opportunity for your game to load sprite handles from the atlas that the entities will use in their init methods.
 	*/
 	PreFirstInitFn preFirstInitCallback;
+
+	PreLoadLevelFn preLoadLevelFn;
 
 	/*
 		HACK:

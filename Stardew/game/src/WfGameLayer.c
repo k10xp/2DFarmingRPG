@@ -83,7 +83,7 @@ void WfGameLayerOnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawConte
     pWfData->SettingsPushedEventListener = Ev_SubscribeEvent("onSettingsMenuPushed", &WfOnSettingsLayerPushed, pLayer);
 }
 
-void WfPreFirstInit(struct GameLayer2DData* pEngineLayer)
+void WfPreLoadLevel(struct GameLayer2DData* pEngineLayer)
 {
     WfInitGameLayerData(pEngineLayer, (struct WfGameLayerData*)pEngineLayer->pUserData);
 }
@@ -111,7 +111,8 @@ void WfPushGameLayer(DrawContext* pDC, const char* lvlFilePath)
     testLayer.onPush = &WfGameLayerOnPush;
     testLayer.onPop = &WfGameLayerOnPop;
     struct GameLayer2DData* pEngineLayer = testLayer.userData;
-    pEngineLayer->preFirstInitCallback = &WfPreFirstInit;
+    pEngineLayer->preLoadLevelFn = &WfPreLoadLevel;
+    pEngineLayer->preFirstInitCallback = NULL;
     testLayer.flags |= (EnableOnPop | EnableOnPush | EnableUpdateFn | EnableDrawFn | EnableInputFn);
     struct WfPlayerPreferences* pPrefs = WfGetPreferences();
     pEngineLayer->camera.scale[0] = pPrefs->zoomLevel;

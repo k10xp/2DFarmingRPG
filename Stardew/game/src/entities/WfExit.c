@@ -74,6 +74,7 @@ void WfDeSerializeExitEntityV1(struct BinarySerializer* bs, struct Entity2D* pOu
     pComponent1->data.staticCollider.shape.data.rect.w = gExitEntityDataPool[hExitData].w;
     pComponent1->data.staticCollider.shape.data.rect.h = gExitEntityDataPool[hExitData].h;
     pComponent1->data.staticCollider.bGenerateSensorEvents = true;
+    pOutEnt->bSerialize = true;
 }
 
 void WfDeSerializeExitEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
@@ -97,4 +98,6 @@ void WfSerializeExitEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt,
     struct WfExitEntityData* pEntData = &gExitEntityDataPool[pInEnt->user.hData];
     BS_SerializeFloat(pEntData->w, bs);
     BS_SerializeFloat(pEntData->h, bs);
+    BS_SerializeString(pEntData->toArea, bs);
+
 }

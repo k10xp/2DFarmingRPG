@@ -52,6 +52,7 @@ void WfDeSerializePlayerStartEntityV1(struct BinarySerializer* bs, struct Entity
     pOutEnt->init = &WfPlayerStartEntityOnInit;
     pOutEnt->bKeepInDynamicList = false;
     pOutEnt->bKeepInQuadtree = false;
+    pOutEnt->bSerialize = true;
 }
 
 void WfDeSerializePlayerStartEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
