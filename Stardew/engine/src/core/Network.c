@@ -875,6 +875,7 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     bool quit = false;
     while ( !quit )
     {
+        /*NOTE: the network simulator stuff does NOT work. TODO: fix it!*/
         if(server_config.network_simulator)
         {
             netcode_network_simulator_update(server_config.network_simulator, time);
