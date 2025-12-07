@@ -2,6 +2,7 @@
 
 rem "TEMPORARY SOLUTION TODO: MOVE TO CMAKE"
 git apply engine/src/vendor/patches/0001-PRIx64-macro-manually-expanded.patch
+git apply engine/src/vendor/patches/0001-exposed-struct-netcode_network_simulator_t.patch
 
 if not exist build mkdir build
 cd build
@@ -21,6 +22,7 @@ cd enginetest\Debug
 StardewEngineTest.exe
 
 rem "TEMPORARY SOLUTION TODO: MOVE TO CMAKE"
+git apply -R engine/src/vendor/patches/0001-exposed-struct-netcode_network_simulator_t.patch
 git apply -R engine/src/vendor/patches/0001-PRIx64-macro-manually-expanded.patch
 
 pause

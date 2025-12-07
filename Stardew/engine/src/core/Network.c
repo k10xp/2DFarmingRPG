@@ -171,9 +171,17 @@ static struct netcode_network_simulator_t* GetNetworkSimulator()
     int sz = 0;
     char* data = LoadFile(gCmdArgs.networkSimulatorConfigPath, &sz);
     cJSON* pJSON = cJSON_ParseWithLength(data, sz);
-    cJSON* pImgReg = cJSON_GetObjectItem(pJSON, "ImageFileRegistry");
-    //struct netcode_network_simulator_t* pSim = //netcode_network_simulator_create()
-    return NULL;
+    cJSON* pLatency = cJSON_GetObjectItem(pJSON, "latency_milliseconds");
+    cJSON* pJitter = cJSON_GetObjectItem(pJSON, "jitter_milliseconds");
+    cJSON* pPacketLossPercent = cJSON_GetObjectItem(pJSON, "packet_loss_percent");
+    cJSON* pDuplicatePacketPercent = cJSON_GetObjectItem(pJSON, "duplicate_packet_percent");
+
+    struct netcode_network_simulator_t* pSim = netcode_network_simulator_create(NULL, NULL, NULL);
+    pSim->latency_milliseconds = (float)pLatency->valuedouble;
+    pSim->jitter_milliseconds = (float)pJitter->valuedouble;
+    pSim->packet_loss_percent = (float)pPacketLossPercent->valuedouble;
+    pSim->duplicate_packet_percent = (float)pDuplicatePacketPercent->valuedouble;
+    return pSim;
 }
 
 static int NetcodeLog(const char* fmt, ...)
