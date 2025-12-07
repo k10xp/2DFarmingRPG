@@ -20,32 +20,6 @@ void WfTreeInit()
     gTreeDataObjectPool = NEW_OBJECT_POOL(struct WfTreeEntityData, 512);
 }
 
-void WfDeSerializeTreeEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
-{
-    u32 version = 0;
-    BS_DeSerializeU32(&version, bs); // version
-    switch (version)
-    {
-    case 1:
-        /* code */
-        {
-            struct WfTreeEntityData entData;
-            BS_DeSerializeI32((i32*)&entData.def.season, bs);
-            BS_DeSerializeI32((i32*)&entData.def.type, bs);
-            BS_DeSerializeI32((i32*)&entData.def.subtype, bs);
-            BS_DeSerializeFloat(&entData.groundContactPoint[0], bs);
-            BS_DeSerializeFloat(&entData.groundContactPoint[1], bs);
-            
-            WfMakeEntityIntoTreeBasedAt(pOutEnt, entData.groundContactPoint[0], entData.groundContactPoint[1], &entData.def, pData);
-        }
-        break;
-    
-    default:
-        break;
-    }
-}
-
-
 static void TreeOnDestroy(struct Entity2D* pEnt, struct GameFrameworkLayer* pData)
 {
     FreeObjectPoolIndex(gTreeDataObjectPool, pEnt->user.hData);
@@ -58,8 +32,7 @@ static float TreeGetPreDrawSortValue(struct Entity2D* pEnt)
     return pData->groundContactPoint[1];
 }
 
-
-void WfMakeEntityIntoTreeBasedAt(struct Entity2D* pEnt, float x, float y, struct WfTreeDef* def, struct GameLayer2DData* pGameLayerData)
+static void WfMakeEntityIntoTreeBasedAt(struct Entity2D* pEnt, float x, float y, struct WfTreeDef* def, struct GameLayer2DData* pGameLayerData)
 {
     struct WfSprites* pSprites = &((struct WfGameLayerData*)pGameLayerData->pUserData)->sprites;
 
@@ -142,6 +115,32 @@ void WfMakeEntityIntoTreeBasedAt(struct Entity2D* pEnt, float x, float y, struct
     Et2D_PopulateCommonHandlers(pEnt);
     pEnt->onDestroy = &TreeOnDestroy;
     pEnt->getSortPos = &TreeGetPreDrawSortValue;
+}
+
+
+void WfDeSerializeTreeEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
+{
+    u32 version = 0;
+    BS_DeSerializeU32(&version, bs); // version
+    switch (version)
+    {
+    case 1:
+        /* code */
+        {
+            struct WfTreeEntityData entData;
+            BS_DeSerializeI32((i32*)&entData.def.season, bs);
+            BS_DeSerializeI32((i32*)&entData.def.type, bs);
+            BS_DeSerializeI32((i32*)&entData.def.subtype, bs);
+            BS_DeSerializeFloat(&entData.groundContactPoint[0], bs);
+            BS_DeSerializeFloat(&entData.groundContactPoint[1], bs);
+            
+            WfMakeEntityIntoTreeBasedAt(pOutEnt, entData.groundContactPoint[0], entData.groundContactPoint[1], &entData.def, pData);
+        }
+        break;
+    
+    default:
+        break;
+    }
 }
 
 void WfSerializeTreeEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData)

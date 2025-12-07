@@ -6,11 +6,6 @@
 
 struct GameLayer2DData;
 
-struct WfBasePlayerSprites
-{
-
-};
-
 struct WfTreeSprites
 {
     hSprite coniferousTop1;
