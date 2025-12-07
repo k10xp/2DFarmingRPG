@@ -117,6 +117,7 @@ static int NetTestServer()
 
             /* 3.) echo back to client */
             memcpy(response.pData, nci.pData, nci.pDataSize);
+            Log_Info(CYNHB"[Server]"CRESET" sending response to client %i, response size %i", response.client, response.pDataSize);
             NW_EnqueueData(&response);
         }
 

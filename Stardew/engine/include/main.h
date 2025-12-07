@@ -34,6 +34,7 @@ struct CommandLineArgs
     bool bLogTIDs;
     bool bLogToConsole;
     const char* logfilePath;
+    const char* networkSimulatorConfigPath;
 };
 
 extern struct CommandLineArgs gCmdArgs;

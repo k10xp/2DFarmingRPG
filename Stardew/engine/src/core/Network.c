@@ -14,6 +14,8 @@
 #include "DynArray.h"
 #include "SharedPtr.h"
 #include "AssertLib.h"
+#include "FileHelpers.h"
+#include "cJSON.h"
 
 struct NetworkThreadQueues
 {
@@ -158,6 +160,20 @@ static uint8_t private_key[NETCODE_KEY_BYTES] = { 0x60, 0x6a, 0xbe, 0x6e, 0xc9, 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Client and Server
+
+
+static struct netcode_network_simulator_t* GetNetworkSimulator()
+{
+    if(!gCmdArgs.networkSimulatorConfigPath)
+    {
+        return NULL;
+    }
+    int sz = 0;
+    char* data = LoadFile(gCmdArgs.networkSimulatorConfigPath, &sz);
+    cJSON* pJSON = cJSON_ParseWithLength(data, sz);
+    cJSON* pImgReg = cJSON_GetObjectItem(pJSON, "ImageFileRegistry");
+    struct netcode_network_simulator_t* pSim = //netcode_network_simulator_create()
+}
 
 static int NetcodeLog(const char* fmt, ...)
 {
@@ -677,6 +693,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     struct netcode_client_config_t client_config;
     netcode_default_client_config( &client_config );
+    client_config.network_simulator = GetNetworkSimulator();
     struct netcode_client_t * client = netcode_client_create( "0.0.0.0", &client_config, time );
 
     if ( !client )

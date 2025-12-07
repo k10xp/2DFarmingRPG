@@ -164,5 +164,5 @@ if [[ $? == 1 ]]; then
     return 1
 fi
 
-printf "\n\nALL TESTS PASSED!"
+printf "\n\nALL TESTS PASSED!\n"
 

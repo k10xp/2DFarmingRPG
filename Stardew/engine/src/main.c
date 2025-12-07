@@ -113,6 +113,7 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
     gCmdArgs.bIncludeLogTimeStamps = true;
     gCmdArgs.bLogTIDs = true;
     gCmdArgs.logfilePath = NULL;
+    gCmdArgs.networkSimulatorConfigPath = NULL;
     gCmdArgs.bLogToConsole = true;
     if(argc > 1)
     {
@@ -192,6 +193,13 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
             else if(strcmp(argv[i], "--disable_console_log") == 0)
             {
                 gCmdArgs.bLogToConsole = false;
+            }
+            else if(strcmp(argv[i], "--network_sim_config") == 0)
+            {
+                EASSERT(i + 1 < argc);
+                i++;
+                Log_Info("Cmd arg %i: %s", i, argv[i]);
+                gCmdArgs.networkSimulatorConfigPath = argv[i];
             }
             else if(handlerFn)
             {
