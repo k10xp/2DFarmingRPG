@@ -172,7 +172,8 @@ static struct netcode_network_simulator_t* GetNetworkSimulator()
     char* data = LoadFile(gCmdArgs.networkSimulatorConfigPath, &sz);
     cJSON* pJSON = cJSON_ParseWithLength(data, sz);
     cJSON* pImgReg = cJSON_GetObjectItem(pJSON, "ImageFileRegistry");
-    struct netcode_network_simulator_t* pSim = //netcode_network_simulator_create()
+    //struct netcode_network_simulator_t* pSim = //netcode_network_simulator_create()
+    return NULL;
 }
 
 static int NetcodeLog(const char* fmt, ...)
