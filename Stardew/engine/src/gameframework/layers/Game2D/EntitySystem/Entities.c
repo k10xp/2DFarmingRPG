@@ -169,11 +169,11 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
 
     if(pCollection->gEntityListHead == hEnt)
     {
-        pCollection->gEntityListTail = pEnt->nextSibling;
+        pCollection->gEntityListHead = pEnt->nextSibling;
     }
     if(pCollection->gEntityListTail == hEnt)
     {
-        pCollection->gEntityListHead = pEnt->previousSibling;
+        pCollection->gEntityListTail = pEnt->previousSibling;
     }
 
     if(pEnt->nextSibling != NULL_HANDLE)
@@ -191,7 +191,7 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
     pEnt->onDestroy(pEnt, pLayer);
     pCollection->gNumEnts--;
     FreeObjectPoolIndex(pCollection->pEntityPool, hEnt);
-    FreeObjectPool(pCollection->dynamicEntities.pDynamicListItemPool);
+    //FreeObjectPool(pCollection->dynamicEntities.pDynamicListItemPool);
 }
 
 HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt)
@@ -291,6 +291,7 @@ static u32 NumEntsToSerialize(struct Entity2DCollection* pCollection)
 static void SaveEntities(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData)
 {
     EASSERT(bs->bSaving);
+    BS_SerializeU32(1, bs);
     BS_SerializeU32(NumEntsToSerialize(pCollection), bs);
     HEntity2D hOn = pCollection->gEntityListHead;
     while(hOn != NULL_HANDLE)
@@ -318,7 +319,7 @@ void Et2D_SerializeEntities(struct Entity2DCollection* pCollection, struct Binar
 {
     if(bs->bSaving)
     {
-        SaveEntities(bs, pData, pCollection);
+        SaveEntities(pCollection, bs, pData);
     }
     else
     {

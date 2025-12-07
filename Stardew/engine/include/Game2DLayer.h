@@ -181,6 +181,11 @@ struct GameLayer2DData
 		
 	*/
 	bool bSkipDraw;
+
+	/*
+		Current location has changed in such a way that it needs to be saved, when a new area is moved to or you sleep
+	*/
+	bool bCurrentLocationIsDirty;
 };
 
 struct Game2DLayerOptions

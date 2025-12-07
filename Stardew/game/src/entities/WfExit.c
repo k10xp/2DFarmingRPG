@@ -9,6 +9,7 @@
 #include "WfEntities.h"
 #include "WfWorld.h"
 #include "WfUI.h"
+#include "Log.h"
 
 struct WfExitEntityData
 {
@@ -35,10 +36,18 @@ void WfOnExitSensorOverlapBegin(struct GameFrameworkLayer* pLayer, HEntity2D hOv
     struct GameLayer2DData* pLayerData = pLayer->userData;
     struct Entity2D* pSensorEnt = Et2D_GetEntity(&pLayerData->entities, thisSensorEntity);
     struct Entity2D* pOverlappingEnt = Et2D_GetEntity(&pLayerData->entities, hOverlappingEntity);
+    
+    
     if(pOverlappingEnt->type == WfEntityType_Player)
     {
         struct WfExitEntityData* pSensorData = &gExitEntityDataPool[pSensorEnt->user.hData];
-        /* TODO: add a bDirty flag on the GameLayer2DData indicating whether we need to save the level here */
+        if(pLayerData->bCurrentLocationIsDirty)
+        {
+            char* pPath = WfWorld_GetCurrentLocationFilePath();
+            Log_Info("Saving level %s", pPath);
+            Game2DLayer_SaveLevelFile(pLayerData, pPath);
+            pLayerData->bCurrentLocationIsDirty = false;
+        }
         GF_PopGameFrameworkLayer();
         GF_PopGameFrameworkLayer();
         WfWorld_LoadLocation(pSensorData->toArea, pLayerData->pDrawContext);

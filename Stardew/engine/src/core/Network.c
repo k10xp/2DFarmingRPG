@@ -985,3 +985,8 @@ void NW_EnqueueData(struct NetworkQueueItem* pIn)
 {
     TSQ_Enqueue(&pQueues->tx, pIn);
 }
+
+enum GameRole NW_GetRole()
+{
+    return gRole;
+}

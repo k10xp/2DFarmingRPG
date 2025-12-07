@@ -608,6 +608,8 @@ void Game2DLayer_Get(struct GameFrameworkLayer* pLayer, struct Game2DLayerOption
 
 	pData->windowH = pDC->screenHeight;
 	pData->windowW = pDC->screenWidth;
+
+	pData->bCurrentLocationIsDirty = false;
 }
 
 void Game2DLayer_SaveLevelFile(struct GameLayer2DData* pData, const char* outputFilePath)
@@ -616,11 +618,12 @@ void Game2DLayer_SaveLevelFile(struct GameLayer2DData* pData, const char* output
 	memset(&bs, 0, sizeof(struct BinarySerializer));
 	BS_CreateForSave(outputFilePath, &bs);
 	BS_SerializeU32(1, &bs);
-
+	
 	vec2 tl, br;
-	vec3 dims;
-	glm_vec2_add(tl, dims, br);
+	vec2 dims;
 	Entity2DQuadTree_GetDims(pData->hEntitiesQuadTree, tl, &dims[0], &dims[1]);
+	glm_vec2_add(tl, dims, br);
+	
 	
 	
 	/* data needed to init quadtree */
@@ -640,15 +643,15 @@ void Game2DLayer_SaveLevelFile(struct GameLayer2DData* pData, const char* output
 		{
 		case 1: // tile layer
 			BS_SerializeU32(pLayer->widthTiles, &bs);
-			BS_SerializeU32(&pLayer->heightTiles, &bs);
-			BS_SerializeU32(&pLayer->transform.position[1], &bs);
-			BS_SerializeU32(&pLayer->transform.position[1], &bs);
-			BS_SerializeU32(&pLayer->tileWidthPx, &bs);
-			BS_SerializeU32(&pLayer->tileWidthPx, &bs);
+			BS_SerializeU32(pLayer->heightTiles, &bs);
+			BS_SerializeU32(pLayer->transform.position[1], &bs);
+			BS_SerializeU32(pLayer->transform.position[1], &bs);
+			BS_SerializeU32(pLayer->tileWidthPx, &bs);
+			BS_SerializeU32(pLayer->tileHeightPx, &bs);
 			BS_SerializeU32(2, &bs); // no compression
 
 			// serialize the layer tiles
-			BS_SerializeBytes(pLayer->Tiles, pLayer->widthTiles * pLayer->heightTiles * sizeof(TileIndex), &bs);
+			BS_SerializeBytesNoLen(pLayer->Tiles, pLayer->widthTiles * pLayer->heightTiles * sizeof(TileIndex), &bs);
 			break;
 		case 2: // object layer
 			BS_SerializeU32(pLayer->drawOrder, &bs);
@@ -658,4 +661,5 @@ void Game2DLayer_SaveLevelFile(struct GameLayer2DData* pData, const char* output
 			EASSERT(false);
 		}
 	}
+	BS_Finish(&bs);
 }

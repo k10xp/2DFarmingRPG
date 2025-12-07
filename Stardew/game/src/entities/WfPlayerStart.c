@@ -73,4 +73,5 @@ void WfSerializePlayerStartEntity(struct BinarySerializer* bs, struct Entity2D* 
 {
     BS_SerializeU32(1, bs); // version
     BS_SerializeString(gPlayerStartDataPool[pInEnt->user.hData].from, bs);
+    BS_SerializeString(gPlayerStartDataPool[pInEnt->user.hData].thisLocation, bs);
 }

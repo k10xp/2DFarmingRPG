@@ -76,5 +76,6 @@ bool NW_DequeueConnectionEvent(struct NetworkConnectionEvent* pOut);
 
 void NW_EnqueueData(struct NetworkQueueItem* pIn);
 
+enum GameRole NW_GetRole();
 
 #endif

@@ -15,6 +15,7 @@ extern "c" {
 		char* pPath;
 	};
 
+	void BS_CreateForLoadFromBuffer(void* buf, int size, struct BinarySerializer* pOutSerializer);
 	void BS_CreateForLoad(const char* path, struct BinarySerializer* pOutSerializer);
 	void BS_CreateForSave(const char* path, struct BinarySerializer* pOutSerializer);
 	void BS_Finish(struct BinarySerializer* pOutSerializer);
@@ -33,6 +34,7 @@ extern "c" {
 	void BS_SerializeDouble(double val, struct BinarySerializer* pSerializer);
 	void BS_SerializeString(const char* val, struct BinarySerializer* pSerializer);
 	void BS_SerializeBytes(const char* val, u32 len, struct BinarySerializer* pSerializer);
+	void BS_SerializeBytesNoLen(const char* val, u32 len, struct BinarySerializer* pSerializer);
 
 
 	void BS_DeSerializeI64(i64* val, struct BinarySerializer* pSerializer);

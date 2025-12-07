@@ -16,6 +16,8 @@ struct WfLocation
 struct DrawContext;
 typedef struct DrawContext DrawContext;
 
+char* WfWorld_GetCurrentLocationFilePath();
+
 void WfWorld_AddLocation(const struct WfLocation* pLocation, const char* locationName);
 
 void WfWorld_LoadLocation(const char* locationName, DrawContext* pDC);

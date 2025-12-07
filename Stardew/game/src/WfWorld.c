@@ -66,3 +66,14 @@ void WfWorld_ClearLocations()
     DestoryVector(keys);
     WfWorld_SetCurrentLocationName("UNINITIALIZED");
 }
+
+char* WfWorld_GetCurrentLocationFilePath()
+{
+    struct WfLocation* pLocation = HashmapSearch(&gWorld.locationsHashMap, gWorld.currentLocation);
+    if(pLocation)
+    {
+        return pLocation->levelFilePath;
+    }
+    return NULL;
+}
+

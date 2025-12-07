@@ -6,6 +6,16 @@
 #include "DynArray.h"
 #include "AssertLib.h"
 
+void BS_CreateForLoadFromBuffer(void* buf, int size, struct BinarySerializer* pOutSerializer)
+{
+	memset(pOutSerializer, 0, sizeof(struct BinarySerializer));
+	pOutSerializer->bSaving = false;
+	pOutSerializer->pData = buf;
+	pOutSerializer->pReadPtr = pOutSerializer->pData;
+	pOutSerializer->pPath = NULL;
+	pOutSerializer->pDataSize = size;
+}
+
 void BS_CreateForLoad(const char* path, struct BinarySerializer* pOutSerializer)
 {
 	memset(pOutSerializer, 0, sizeof(struct BinarySerializer));
@@ -155,6 +165,16 @@ void BS_SerializeBytes(const char* val, u32 len, struct BinarySerializer* pSeria
 		BS_SerializeU8((u8)val[i], pSerializer);
 	}
 }
+
+
+void BS_SerializeBytesNoLen(const char* val, u32 len, struct BinarySerializer* pSerializer)
+{
+	for (int i = 0; i < len; i++)
+	{
+		BS_SerializeU8((u8)val[i], pSerializer);
+	}
+}
+
 
 void BS_DeSerializeI64(i64* val, struct BinarySerializer* pSerializer)
 {
