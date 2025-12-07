@@ -32,6 +32,7 @@ struct CommandLineArgs
     bool bLogTextColoured;
     bool bIncludeLogTimeStamps;
     bool bLogTIDs;
+    bool bLogToConsole;
     const char* logfilePath;
 };
 

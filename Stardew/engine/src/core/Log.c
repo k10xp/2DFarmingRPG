@@ -84,9 +84,12 @@ int vLog_Fmt(const char* fmt, enum LogLvl lvl, va_list args)
     }
 
     vsnprintf(start, 512 - namelen, fmt, args);
-
+    int r = 0;
     LockMutex(&gLogMtx);
-    int r = printf("%s\n", gLogBuffer);
+    if(gCmdArgs.bLogToConsole)
+    {
+        r = printf("%s\n", gLogBuffer);
+    }
     if(gLogFile)
     {
         fprintf(gLogFile, "%s\n", gLogBuffer);

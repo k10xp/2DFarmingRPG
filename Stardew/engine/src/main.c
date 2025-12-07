@@ -113,6 +113,7 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
     gCmdArgs.bIncludeLogTimeStamps = true;
     gCmdArgs.bLogTIDs = true;
     gCmdArgs.logfilePath = NULL;
+    gCmdArgs.bLogToConsole = true;
     if(argc > 1)
     {
         for(int i=1; i <argc; i++)
@@ -187,6 +188,10 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
             else if(strcmp(argv[i], "--disable_log_tid") == 0)
             {
                 gCmdArgs.bLogTIDs = false;
+            }
+            else if(strcmp(argv[i], "--disable_console_log") == 0)
+            {
+                gCmdArgs.bLogToConsole = false;
             }
             else if(handlerFn)
             {

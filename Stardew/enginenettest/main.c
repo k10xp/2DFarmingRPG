@@ -6,6 +6,7 @@
 #include "SharedPtr.h"
 #include "cwalk.h"
 #include "netcode.h"
+#include "ANSIColourCodes.h"
 #include <string.h>
 #include <stdio.h>
 /*
@@ -86,26 +87,6 @@ static char* GetFileOutputPath(int clientID)
     static char sPathBuf[256];
     char extensionBuf[16];
     strcpy(sPathBuf, gTestArgs.outputFilePath);
-    // if(cwk_path_has_extension(sPathBuf))
-    // {
-    //     char* extension = NULL;
-    //     size_t extensionlen = 0;
-    //     cwk_path_get_extension(sPathBuf, (const char**)&extension, &extensionlen);
-    //     /* save the extension for later */
-    //     memset(extensionBuf, 0, 16);
-    //     memcpy(extensionBuf, extension, extensionlen);
-    //     /* remove extension from path */
-    //     memset(extension, 0, extensionlen);
-    //     /* add client id and then extension */
-    //     char* end = sPathBuf + strlen(sPathBuf);
-    //     sprintf(end, "%i%s", clientID, extension);
-    //     Log_Info("Server is saving output to %s", sPathBuf);
-    // }
-    // else
-    // {
-    //     char* end = sPathBuf + strlen(sPathBuf);
-    //     sprintf(end, "%i", clientID);
-    // }
     return sPathBuf;
 }
 
@@ -119,9 +100,10 @@ static int NetTestServer()
         /* 1.) recieve packet */
         while(NW_DequeueData(&nci))
         {
-            
+            char* path = GetFileOutputPath(nci.client);
+            Log_Info(CYNHB"[Server]"CRESET" recieved packet. client: %i, size: %i. Saving to path %s", nci.client, nci.pDataSize, path);
             /* 2.) dump to file */
-            FILE* pFile = fopen(GetFileOutputPath(nci.client), "w");
+            FILE* pFile = fopen(path, "w");
             fwrite(nci.pData, 1, nci.pDataSize, pFile);
             fclose(pFile);
 
@@ -143,7 +125,7 @@ static int NetTestServer()
         time += delta_time;
         if(gTestArgs.timeoutSeconds > 0 && time >= gTestArgs.timeoutSeconds)
         {
-            Log_Info("Timing out after %.2f seconds", gTestArgs.timeoutSeconds);
+            Log_Info(CYNHB"[Server]"CRESET" Timing out after %.2f seconds", gTestArgs.timeoutSeconds);
             break;
         }
     }
@@ -170,7 +152,7 @@ static int NetTestClient()
 connected:
 
     /* now connected */
-    Log_Info("Client: I've connected!");
+    Log_Info(YELHB"[Client]"CRESET" I've connected!");
     struct NetworkQueueItem item = 
     {
         .bReliable = true,
@@ -180,12 +162,12 @@ connected:
     };
     memcpy(item.pData, fileContents, size);
     NW_EnqueueData(&item);
-    Log_Info("Client: I've sent my packet to the server");
+    Log_Info(YELHB"[Client]"CRESET" I've sent my packet to the server");
     
     while(true)
         while(NW_DequeueData(&item))
         {
-            Log_Info("Client: I've recieved a response from the server");
+            Log_Info(YELHB"[Client]"CRESET" I've recieved a response from the server. Size %i, Saving to path %s", item.pDataSize, gTestArgs.outputFilePath);
             FILE* pFile = fopen(gTestArgs.outputFilePath, "w");
             fwrite(item.pData, 1, item.pDataSize, pFile);
             fclose(pFile);

@@ -241,7 +241,7 @@ static struct FragmentedMessageReciever* CreateNewReciever(struct NetFragmentMes
     pRec->pPrev = NULL;
     pRec->fragmentsRecieved = 0;
     pRec->ident = pFragmentHeader->fragmentedMsgID;
-    pRec->totalFragments = pFragmentedMessageRecieverListHead->totalFragments;
+    pRec->totalFragments = pFragmentHeader->numFragments;
     pRec->data = malloc(pFragmentHeader->fragmentedMsgTotalSize);
     if(pFragmentedMessageRecieverListHead == NULL || pFragmentedMessageRecieverListTail == NULL)
     {
@@ -252,6 +252,7 @@ static struct FragmentedMessageReciever* CreateNewReciever(struct NetFragmentMes
     pFragmentedMessageRecieverListTail->pNext = pRec;
     pRec->pPrev = pFragmentedMessageRecieverListTail;
     pFragmentedMessageRecieverListTail = pRec;
+    return pRec;
 }
 
 
