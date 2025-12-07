@@ -119,6 +119,44 @@ struct netcode_address_t
     uint8_t type;
 };
 
+#define NETCODE_NETWORK_SIMULATOR_NUM_PACKET_ENTRIES ( NETCODE_MAX_CLIENTS * 256 )
+#define NETCODE_NETWORK_SIMULATOR_NUM_PENDING_RECEIVE_PACKETS ( NETCODE_MAX_CLIENTS * 64 )
+
+struct netcode_network_simulator_packet_entry_t
+{
+    struct netcode_address_t from;
+    struct netcode_address_t to;
+    double delivery_time;
+    uint8_t * packet_data;
+    int packet_bytes;
+};
+
+struct netcode_network_simulator_t
+{
+    void * allocator_context;
+    void * (*allocate_function)(void*,size_t);
+    void (*free_function)(void*,void*);
+    float latency_milliseconds;
+    float jitter_milliseconds;
+    float packet_loss_percent;
+    float duplicate_packet_percent;
+    double time;
+    int current_index;
+    int num_pending_receive_packets;
+    struct netcode_network_simulator_packet_entry_t packet_entries[NETCODE_NETWORK_SIMULATOR_NUM_PACKET_ENTRIES];
+    struct netcode_network_simulator_packet_entry_t pending_receive_packets[NETCODE_NETWORK_SIMULATOR_NUM_PENDING_RECEIVE_PACKETS];
+};
+
+void netcode_network_simulator_update( struct netcode_network_simulator_t * network_simulator, double time );
+
+struct netcode_network_simulator_t * netcode_network_simulator_create( void * allocator_context, 
+                                                                       void * (*allocate_function)(void*,size_t), 
+                                                                       void (*free_function)(void*,void*) );
+
+void netcode_network_simulator_destroy( struct netcode_network_simulator_t * network_simulator );
+
+void netcode_network_simulator_reset( struct netcode_network_simulator_t * network_simulator );
+
 int netcode_parse_address( NETCODE_CONST char * address_string_in, struct netcode_address_t * address );
 
 char * netcode_address_to_string( struct netcode_address_t * address, char * buffer );

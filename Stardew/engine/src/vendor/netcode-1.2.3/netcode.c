@@ -1778,7 +1778,7 @@ void * netcode_read_packet( uint8_t * buffer,
         uint64_t packet_protocol_id = netcode_read_uint64( &buffer );
         if ( packet_protocol_id != protocol_id )
         {
-            netcode_printf( NETCODE_LOG_LEVEL_DEBUG, "ignored connection request packet. wrong protocol id. expected %.16" PRIx64 ", got %.16" PRIx64 "\n", 
+            netcode_printf( NETCODE_LOG_LEVEL_DEBUG, "ignored connection request packet. wrong protocol id. expected %.16lx, got %.16lx\n", 
                 protocol_id, packet_protocol_id );
             return NULL;
         }
@@ -1888,7 +1888,7 @@ void * netcode_read_packet( uint8_t * buffer,
         {
             if ( netcode_replay_protection_already_received( replay_protection, *sequence ) )
             {
-                netcode_printf( NETCODE_LOG_LEVEL_DEBUG, "ignored packet. sequence %.16" PRIx64 " already received (replay protection)\n", *sequence );
+                netcode_printf( NETCODE_LOG_LEVEL_DEBUG, "ignored packet. sequence %.16lx already received (replay protection)\n", *sequence );
                 return NULL;
             }
         }
@@ -2344,34 +2344,6 @@ void * netcode_packet_queue_pop( struct netcode_packet_queue_t * queue, uint64_t
 }
 
 // ----------------------------------------------------------------
-
-#define NETCODE_NETWORK_SIMULATOR_NUM_PACKET_ENTRIES ( NETCODE_MAX_CLIENTS * 256 )
-#define NETCODE_NETWORK_SIMULATOR_NUM_PENDING_RECEIVE_PACKETS ( NETCODE_MAX_CLIENTS * 64 )
-
-struct netcode_network_simulator_packet_entry_t
-{
-    struct netcode_address_t from;
-    struct netcode_address_t to;
-    double delivery_time;
-    uint8_t * packet_data;
-    int packet_bytes;
-};
-
-struct netcode_network_simulator_t
-{
-    void * allocator_context;
-    void * (*allocate_function)(void*,size_t);
-    void (*free_function)(void*,void*);
-    float latency_milliseconds;
-    float jitter_milliseconds;
-    float packet_loss_percent;
-    float duplicate_packet_percent;
-    double time;
-    int current_index;
-    int num_pending_receive_packets;
-    struct netcode_network_simulator_packet_entry_t packet_entries[NETCODE_NETWORK_SIMULATOR_NUM_PACKET_ENTRIES];
-    struct netcode_network_simulator_packet_entry_t pending_receive_packets[NETCODE_NETWORK_SIMULATOR_NUM_PENDING_RECEIVE_PACKETS];
-};
 
 struct netcode_network_simulator_t * netcode_network_simulator_create( void * allocator_context, 
                                                                        void * (*allocate_function)(void*,size_t), 
@@ -4383,7 +4355,7 @@ void netcode_server_connect_client( struct netcode_server_t * server,
 
     char address_string[NETCODE_MAX_ADDRESS_STRING_LENGTH];
 
-    netcode_printf( NETCODE_LOG_LEVEL_INFO, "server accepted client %s %.16" PRIx64 " in slot %d\n", 
+    netcode_printf( NETCODE_LOG_LEVEL_INFO, "server accepted client %s %.16lx in slot %d\n", 
         netcode_address_to_string( address, address_string ), client_id, client_index );
 
     struct netcode_connection_keep_alive_packet_t packet;
@@ -4976,7 +4948,7 @@ void netcode_server_connect_loopback_client( struct netcode_server_t * server, i
         memset( server->client_user_data[client_index], 0, NETCODE_USER_DATA_BYTES );
     }
 
-    netcode_printf( NETCODE_LOG_LEVEL_INFO, "server connected loopback client %.16" PRIx64 " in slot %d\n", client_id, client_index );
+    netcode_printf( NETCODE_LOG_LEVEL_INFO, "server connected loopback client %.16lx in slot %d\n", client_id, client_index );
 
     if ( server->config.connect_disconnect_callback )
     {

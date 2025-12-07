@@ -170,6 +170,7 @@ static struct netcode_network_simulator_t* GetNetworkSimulator()
     }
     int sz = 0;
     char* data = LoadFile(gCmdArgs.networkSimulatorConfigPath, &sz);
+    Log_Info("Creating network simulator...");
     cJSON* pJSON = cJSON_ParseWithLength(data, sz);
     cJSON* pLatency = cJSON_GetObjectItem(pJSON, "latency_milliseconds");
     cJSON* pJitter = cJSON_GetObjectItem(pJSON, "jitter_milliseconds");
@@ -181,6 +182,12 @@ static struct netcode_network_simulator_t* GetNetworkSimulator()
     pSim->jitter_milliseconds = (float)pJitter->valuedouble;
     pSim->packet_loss_percent = (float)pPacketLossPercent->valuedouble;
     pSim->duplicate_packet_percent = (float)pDuplicatePacketPercent->valuedouble;
+    Log_Info("Network simulator: latency: %.2fms jitter: %.2f packet loss: %.2f%% packet dup: %.2f%%",
+        pSim->latency_milliseconds,
+        pSim->jitter_milliseconds,
+        pSim->packet_loss_percent,
+        pSim->duplicate_packet_percent
+    );
     return pSim;
 }
 
@@ -703,7 +710,7 @@ DECLARE_THREAD_PROC(ClientThread, arg)
     struct netcode_client_config_t client_config;
     netcode_default_client_config( &client_config );
     client_config.network_simulator = GetNetworkSimulator();
-    struct netcode_client_t * client = netcode_client_create( "0.0.0.0", &client_config, time );
+    struct netcode_client_t * client = netcode_client_create( "0.0.0.0:667", &client_config, time );
 
     if ( !client )
     {
@@ -736,6 +743,10 @@ DECLARE_THREAD_PROC(ClientThread, arg)
 
     while ( !quit )
     {
+        if(client_config.network_simulator)
+        {
+            netcode_network_simulator_update(client_config.network_simulator, time);
+        }
         netcode_client_update( client, time );
 
         ServiceClientConnectionEvents(&gameClient, client, -1, pQueues);
@@ -760,6 +771,11 @@ DECLARE_THREAD_PROC(ClientThread, arg)
     }
 
     netcode_client_destroy( client );
+
+    if(client_config.network_simulator)
+    {
+        netcode_network_simulator_destroy(client_config.network_simulator);
+    }
 
     netcode_term();
     return NULL;
@@ -843,6 +859,7 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     NETCODE_CONST char* server_address = gCmdArgs.serverAddress;
     struct netcode_server_config_t server_config;
     netcode_default_server_config( &server_config );
+    server_config.network_simulator = GetNetworkSimulator();
     server_config.protocol_id = GAME_PROTOCOL_ID;
     memcpy( &server_config.private_key, private_key, NETCODE_KEY_BYTES );
 
@@ -858,6 +875,12 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     bool quit = false;
     while ( !quit )
     {
+        /*NOTE: the network simulator stuff does NOT work. TODO: fix it!*/
+        if(server_config.network_simulator)
+        {
+            netcode_network_simulator_update(server_config.network_simulator, time);
+        }
+
         netcode_server_update( server, time );
         
         /* pass messages to the game thread about clients connecting and disconnecting */
@@ -886,6 +909,11 @@ DECLARE_THREAD_PROC(ClientServerThread, arg)
     }
 
     netcode_server_destroy( server );
+
+    if(server_config.network_simulator)
+    {
+        netcode_network_simulator_destroy(server_config.network_simulator);
+    }
 
     netcode_term();
 }
