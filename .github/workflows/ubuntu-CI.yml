@@ -36,3 +36,8 @@ jobs:
       run: |
         cd Stardew/build/enginetest
         ./StardewEngineTest
+
+    - name: NetTest
+      run: |
+        cd Stardew
+        sudo ./RunEngineNetTest.sh
