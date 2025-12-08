@@ -1,7 +1,3 @@
-rem "TEMPORARY SOLUTION TODO: MOVE TO CMAKE"
-git apply engine/src/vendor/patches/0001-PRIx64-macro-manually-expanded.patch
-git apply engine/src/vendor/patches/0001-exposed-struct-netcode_network_simulator_t.patch
-
 if not exist build mkdir build
 cd build
 cmake .. -G "Visual Studio 17 2022" -DCMAKE_TOOLCHAIN_FILE=generators\conan_toolchain.cmake  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
