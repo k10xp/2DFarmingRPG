@@ -6,6 +6,12 @@ extern "c" {
 #include <stdbool.h>
 #include "IntTypes.h"
 
+	enum SerializationContext
+	{
+		SCTX_ToFile,
+		SCTX_ToNetwork
+	};
+
 	struct BinarySerializer
 	{
 		bool bSaving;
@@ -13,11 +19,15 @@ extern "c" {
 		int pDataSize;
 		char* pReadPtr;
 		char* pPath;
+		enum SerializationContext ctx;
+		int toClient; /* only valid if saving to network as a server */
 	};
 
 	void BS_CreateForLoadFromBuffer(void* buf, int size, struct BinarySerializer* pOutSerializer);
 	void BS_CreateForLoad(const char* path, struct BinarySerializer* pOutSerializer);
 	void BS_CreateForSave(const char* path, struct BinarySerializer* pOutSerializer);
+	void BS_CreateForSaveToNetwork(struct BinarySerializer* pOutSerializer, int client);
+
 	void BS_Finish(struct BinarySerializer* pOutSerializer);
 
 

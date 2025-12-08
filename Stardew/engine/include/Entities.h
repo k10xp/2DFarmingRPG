@@ -214,7 +214,9 @@ struct Entity2D
     int inDrawLayer;
 
     /* do we serialize when the level is serialized? */
-    bool bSerialize;
+    bool bSerializeToDisk;
+
+    bool bSerializeToNetwork;
 };
 
 /*

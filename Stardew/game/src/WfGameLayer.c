@@ -14,6 +14,7 @@
 #include "Scripting.h"
 #include "GameFrameworkEvent.h"
 #include "WfPersistantGameData.h"
+#include "Network.h"
 
 static void WfPublishInventoryChangedEvent()
 {

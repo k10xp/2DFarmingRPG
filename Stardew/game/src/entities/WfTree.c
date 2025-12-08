@@ -115,7 +115,8 @@ static void WfMakeEntityIntoTreeBasedAt(struct Entity2D* pEnt, float x, float y,
     Et2D_PopulateCommonHandlers(pEnt);
     pEnt->onDestroy = &TreeOnDestroy;
     pEnt->getSortPos = &TreeGetPreDrawSortValue;
-    pEnt->bSerialize = true;
+    pEnt->bSerializeToDisk = true;
+    pEnt->bSerializeToDisk = true;
 }
 
 

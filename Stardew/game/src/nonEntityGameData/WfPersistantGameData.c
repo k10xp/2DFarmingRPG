@@ -12,6 +12,8 @@ struct WfPersistantData
 
 struct WfPersistantData gPersistantData;
 
+
+
 void WfPersistantDataInit()
 {
     gPersistantData.inventory.pItems = NEW_VECTOR(struct WfInventoryItem);

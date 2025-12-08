@@ -72,7 +72,7 @@ void Ph_SetDynamicBodyVelocity(H2DBody hBody, vec2 velocity);
 
 void Ph_GetDynamicBodyVelocity(H2DBody hBody, vec2 outVelocity);
 
-void Ph_GetDymaicBodyPosition(H2DBody hBody, vec2 outPos);
+void Ph_GetDynamicBodyPosition(H2DBody hBody, vec2 outPos);
 
 void Ph_UnpackShapeUserData(void* pUserData, HEntity2D* pOutEnt, u16* pOutCompIndex, u16* pOutBodyType);
 

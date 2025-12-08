@@ -274,7 +274,7 @@ void Ph_GetDynamicBodyVelocity(H2DBody hBody, vec2 outVelocity)
     outVelocity[1] = b2Vec.y;
 }
 
-void Ph_GetDymaicBodyPosition(H2DBody hBody, vec2 outPos)
+void Ph_GetDynamicBodyPosition(H2DBody hBody, vec2 outPos)
 {
     b2Vec2 b2Vec = b2Body_GetPosition(g2DPhysBodyPool[hBody].bodyID);
     outPos[0] = b2Vec.x;

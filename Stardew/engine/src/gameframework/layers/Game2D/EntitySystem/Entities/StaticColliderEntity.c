@@ -75,6 +75,8 @@ void DeSerialize2DRectStaticColliderEntityV1(struct BinarySerializer* bs, struct
         }
     };
     pOutEnt->components[pOutEnt->numComponents++] = cmp;
+    pOutEnt->bSerializeToDisk = true;
+    pOutEnt->bSerializeToNetwork = true;
     SetStaticColliderCallbacks(pOutEnt);
 }
 

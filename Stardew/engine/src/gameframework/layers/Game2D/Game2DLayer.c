@@ -15,6 +15,7 @@
 #include "EntityQuadTree.h"
 #include "FloatingPointLib.h"
 #include "Camera2D.h"
+#include "Network.h"
 
 int gTilesRendered = 0;
 
@@ -116,6 +117,23 @@ static bool InitEntities(struct Entity2D* pEnt, int i, void* pUser)
 	struct InitEntitiesCtx* pCtx = pUser;
 	pEnt->init(pEnt, pCtx->pLayer, pCtx->pDrawContext, pCtx->pInputContext);
 	return true;
+}
+
+static void LoadLevelDataFromServer(struct TileMap* pTileMap, DrawContext* pDC, hAtlas atlas, struct GameLayer2DData* pData)
+{
+	/*THIS HAS TO BE THE FIRST THING TO DEQUEUE CONNECTION EVENTS IF GAME2DLAYER IS USED*/
+	EASSERT(NW_GetRole(GR_Client));
+	struct NetworkConnectionEvent nce;
+	while(true)
+		while(NW_DequeueConnectionEvent(&nce))
+		{
+			if(nce.type == NCE_ClientConnected)
+			{
+				goto connected;
+			}
+		}
+connected:
+	
 }
 
 static void LoadLevelData(struct TileMap* pTileMap, const char* tilemapFilePath, DrawContext* pDC, hAtlas atlas, struct GameLayer2DData* pData)
@@ -518,7 +536,15 @@ static void LoadLayerAssets(struct GameLayer2DData* pData, DrawContext* pDC)
 	{
 		pData->preLoadLevelFn(pData);
 	}
-	LoadLevelData(&pData->tilemap, pData->tilemapFilePath, pDC, pData->hAtlas, pData);
+	if(NW_GetRole() == GR_Client)
+	{
+		LoadLevelDataFromServer(&pData->tilemap, pDC, pData->hAtlas, pData);
+	}
+	else
+	{
+		LoadLevelData(&pData->tilemap, pData->tilemapFilePath, pDC, pData->hAtlas, pData);
+	}
+	
 	pData->bLoaded = true;
 }
 

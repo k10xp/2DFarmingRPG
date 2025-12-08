@@ -279,7 +279,7 @@ static u32 NumEntsToSerialize(struct Entity2DCollection* pCollection)
     while(hOn != NULL_HANDLE)
     {
         struct Entity2D* pOn = &pCollection->pEntityPool[hOn];
-        if(pOn->bSerialize)
+        if(pOn->bSerializeToDisk)
         {
             i++;
         }
@@ -297,7 +297,7 @@ static void SaveEntities(struct Entity2DCollection* pCollection, struct BinarySe
     while(hOn != NULL_HANDLE)
     {
         struct Entity2D* pOn = &pCollection->pEntityPool[hOn];
-        if(pOn->bSerialize)
+        if(pOn->bSerializeToDisk)
         {
             BS_SerializeU32(pOn->type, bs);
             Et2D_SerializeCommon(bs, pOn);

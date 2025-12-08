@@ -53,7 +53,7 @@ static struct GameFrameworkEventListener* AddListener(struct GameFrameworkEvent*
 
 struct GameFrameworkEventListener* Ev_SubscribeEvent(char* eventName, EventListenerFn listenerFn, void* pUser)
 {
-	Log_Info("SUBSCRIBING TO EVENT %s", eventName);
+	Log_Verbose("SUBSCRIBING TO EVENT %s", eventName);
 	EASSERT(strlen(eventName) < EVENT_MAX_NAME_LEN);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, eventName);
 	if (pEvent == NULL)
@@ -67,7 +67,7 @@ struct GameFrameworkEventListener* Ev_SubscribeEvent(char* eventName, EventListe
 
 bool Ev_UnsubscribeEvent(struct GameFrameworkEventListener* pListener)
 {
-	Log_Info("UNSUBSCRIBING TO EVENT %s", pListener->eventName);
+	Log_Verbose("UNSUBSCRIBING TO EVENT %s", pListener->eventName);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, pListener->eventName);
 	if (pEvent)
 	{
@@ -100,7 +100,7 @@ bool Ev_UnsubscribeEvent(struct GameFrameworkEventListener* pListener)
 void Ev_FireEvent(char* eventName, void* eventArgs)
 {
 	int i = 0;
-	Log_Info("FIRING EVENT %s", eventName);
+	Log_Verbose("FIRING EVENT %s", eventName);
 	struct GameFrameworkEvent* pEvent = HashmapSearch(&gEventMap, eventName);
 	if (pEvent)
 	{

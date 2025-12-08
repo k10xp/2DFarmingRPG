@@ -1,33 +1,26 @@
 #include "Game2DLayerNetwork.h"
 #include "Log.h"
 #include "Network.h"
+#include "BinarySerializer.h"
+#include "Network.h"
 
 static struct NetworkQueueItem gDequeueBuffer[128];
+static PacketExtensionNoArgsFn gExtendRequestLvlData = NULL;
 
-
-void UpdateGame2DLayerNetwork(struct GameFrameworkLayer* pLayer)
+void G2D_Extend_RequestLevelDataMessage(PacketExtensionNoArgsFn fn)
 {
-    int numDequeued=0;
-    while(NW_DequeueData(&gDequeueBuffer[numDequeued++]))
-    {
-
-    }
-    for(int i=0; i<numDequeued; i++)
-    {
-        struct Game2DLayerPacketHeader* pHeader = gDequeueBuffer[i].pData;
-        switch(pHeader->type)
-        {
-        case G2DPacket_RequestLevelData:
-            if(NW_GetRole() == GR_ClientServer)
-            {
-                
-            }
-            else
-            {
-                Log_Error("Recieving G2DPacket_RequestLevelData when the role is not server! something badly wrong");
-            }
-            break;
-        }
-    }
+    gExtendRequestLvlData = fn;
 }
 
+void G2D_Enqueue_RequestLevelData()
+{
+    EASSERT(NW_GetRole() == GR_Client);
+    struct BinarySerializer bs;
+    BS_CreateForSaveToNetwork(&bs, -1);
+    BS_SerializeU32(G2DPacket_RequestLevelData, &bs);
+    if(gExtendRequestLvlData)
+    {
+
+    }
+    BS_Finish(&bs);
+}

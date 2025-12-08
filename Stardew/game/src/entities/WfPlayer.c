@@ -326,7 +326,7 @@ void WfPlayerPostPhys(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, 
     vec2 pixelsPos, physPos;
     struct DynamicCollider* pCollider = &pEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider;
     
-    Ph_GetDymaicBodyPosition(pCollider->id, physPos);
+    Ph_GetDynamicBodyPosition(pCollider->id, physPos);
     Ph_PhysicsCoords2PixelCoords(pLayerData->hPhysicsWorld, physPos, pixelsPos);
     glm_vec2_add(pixelsPos, pPlayerEntData->groundColliderCenter2EntTransform, pEnt->transform.position);
 
@@ -409,7 +409,8 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameFrameworkLayer* pL
     pEnt->input = &OnInputPlayer;
     pEnt->bKeepInQuadtree = false;
     pEnt->bKeepInDynamicList = true;
-    pEnt->bSerialize = false;
+    pEnt->bSerializeToDisk = false;
+    pEnt->bSerializeToNetwork = true;
 
     struct WfInventory* pInv = WfGetInventory();
     struct WfInventoryItem* pItem = &pInv->pItems[pInv->selectedItem];

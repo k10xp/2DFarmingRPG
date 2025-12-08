@@ -3,6 +3,7 @@
 
 
 struct GameFrameworkLayer;
+struct BinarySerializer;
 /* Networking layer specific to game 2d layer */
 
 enum G2DPacketType
@@ -16,10 +17,13 @@ enum G2DPacketType
 struct Game2DLayerPacketHeader
 {
     enum G2DPacketType type;
-    
 };
 
-void UpdateGame2DLayerNetwork(struct GameFrameworkLayer* pLayer);
+typedef void(*PacketExtensionNoArgsFn)(struct BinarySerializer*);
+
+void G2D_Extend_RequestLevelDataMessage(PacketExtensionNoArgsFn fn);
+
+void G2D_Enqueue_RequestLevelData();
 
 //void LoadLevelDataFromSe
 

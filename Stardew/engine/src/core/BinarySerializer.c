@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "DynArray.h"
 #include "AssertLib.h"
+#include "Network.h"
 
 void BS_CreateForLoadFromBuffer(void* buf, int size, struct BinarySerializer* pOutSerializer)
 {
@@ -14,6 +15,7 @@ void BS_CreateForLoadFromBuffer(void* buf, int size, struct BinarySerializer* pO
 	pOutSerializer->pReadPtr = pOutSerializer->pData;
 	pOutSerializer->pPath = NULL;
 	pOutSerializer->pDataSize = size;
+	pOutSerializer->ctx = SCTX_ToNetwork;
 }
 
 void BS_CreateForLoad(const char* path, struct BinarySerializer* pOutSerializer)
@@ -23,6 +25,7 @@ void BS_CreateForLoad(const char* path, struct BinarySerializer* pOutSerializer)
 	pOutSerializer->pData = LoadFile(path, &pOutSerializer->pDataSize);
 	pOutSerializer->pReadPtr = pOutSerializer->pData;
 	pOutSerializer->pPath = malloc(strlen(path) + 1);
+	pOutSerializer->ctx = SCTX_ToFile;
 	strcpy(pOutSerializer->pPath, path);
 }
 
@@ -32,24 +35,55 @@ void BS_CreateForSave(const char* path, struct BinarySerializer* pOutSerializer)
 	pOutSerializer->bSaving = true;
 	pOutSerializer->pData = NEW_VECTOR(char);
 	pOutSerializer->pPath = malloc(strlen(path) + 1);
+	pOutSerializer->ctx = SCTX_ToFile;
 	strcpy(pOutSerializer->pPath, path);
+}
+
+void BS_CreateForSaveToNetwork(struct BinarySerializer* pOutSerializer, int client)
+{
+	memset(pOutSerializer, 0, sizeof(struct BinarySerializer));
+	pOutSerializer->bSaving = true;
+	pOutSerializer->pData = NEW_VECTOR(char);
+	pOutSerializer->pPath = NULL;
+	pOutSerializer->ctx = SCTX_ToNetwork;
+	pOutSerializer->toClient = client;
 }
 
 void BS_Finish(struct BinarySerializer* pOutSerializer)
 {
-	if (pOutSerializer->bSaving)
+	switch (pOutSerializer->ctx)
 	{
-		FILE* pFile = fopen(pOutSerializer->pPath, "wb");
-		fwrite(pOutSerializer->pData, 1, VectorSize(pOutSerializer->pData), pFile);
-		fclose(pFile);
-		DestoryVector(pOutSerializer->pData);
+	case SCTX_ToFile:
+		if (pOutSerializer->bSaving)
+		{
+			FILE* pFile = fopen(pOutSerializer->pPath, "wb");
+			fwrite(pOutSerializer->pData, 1, VectorSize(pOutSerializer->pData), pFile);
+			fclose(pFile);
+			DestoryVector(pOutSerializer->pData);
+		}
+		else
+		{
+			free(pOutSerializer->pData);
+		}
+		EASSERT(pOutSerializer->pPath);
+		free(pOutSerializer->pPath);
+		break;
+	case SCTX_ToNetwork:
+		if (pOutSerializer->bSaving)
+		{
+			struct NetworkQueueItem nci;
+			nci.bReliable = true; /* TODO: MAKE OPTIONAL */
+			nci.client = pOutSerializer->toClient;
+			nci.pData = Sptr_New(pOutSerializer->pDataSize, NULL);
+			nci.pDataSize = pOutSerializer->pDataSize;
+			memcpy(nci.pData, pOutSerializer->pData, pOutSerializer->pDataSize);
+			NW_EnqueueData(&nci);
+			DestoryVector(pOutSerializer->pData);
+		}
+	default:
+		break;
 	}
-	else
-	{
-		free(pOutSerializer->pData);
-	}
-	EASSERT(pOutSerializer->pPath);
-	free(pOutSerializer->pPath);
+	
 }
 
 void BS_SerializeI64(i64 val, struct BinarySerializer* pSerializer)
