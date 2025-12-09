@@ -16,6 +16,7 @@
 #include "FloatingPointLib.h"
 #include "Camera2D.h"
 #include "Network.h"
+#include "Log.h"
 
 int gTilesRendered = 0;
 
@@ -135,7 +136,7 @@ static void LoadLevelDataFromServer(struct TileMap* pTileMap, DrawContext* pDC, 
 		}
 	}
 connected:
-	
+	Log_Info("game2d client connected");
 }
 
 static void LoadLevelData(struct TileMap* pTileMap, const char* tilemapFilePath, DrawContext* pDC, hAtlas atlas, struct GameLayer2DData* pData)
