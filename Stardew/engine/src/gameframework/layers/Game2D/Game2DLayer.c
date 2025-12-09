@@ -125,6 +125,7 @@ static void LoadLevelDataFromServer(struct TileMap* pTileMap, DrawContext* pDC, 
 	EASSERT(NW_GetRole(GR_Client));
 	struct NetworkConnectionEvent nce;
 	while(true)
+	{
 		while(NW_DequeueConnectionEvent(&nce))
 		{
 			if(nce.type == NCE_ClientConnected)
@@ -132,6 +133,7 @@ static void LoadLevelDataFromServer(struct TileMap* pTileMap, DrawContext* pDC, 
 				goto connected;
 			}
 		}
+	}
 connected:
 	
 }
