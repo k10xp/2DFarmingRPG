@@ -217,6 +217,8 @@ struct Entity2D
     bool bSerializeToDisk;
 
     bool bSerializeToNetwork;
+
+    int networkID;
 };
 
 /*

@@ -277,6 +277,12 @@ static void SaveLevelDataInternal(struct GameLayer2DData* pData, struct BinarySe
 }
 
 
+
+static void DoServerRPCs(struct GameFrameworkLayer* pLayer, float deltaT)
+{
+
+}
+
 static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 {
 	struct GameLayer2DData* pData = pLayer->userData;
@@ -313,7 +319,6 @@ static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float delt
 					BS_CreateForLoadFromBuffer(pBody, nqi.pDataSize - headerSize, &bs);
 					pData->levelDataRequestHandlerExtender(pData, &bs);
 					BS_Finish(&bs); /* does nothing if BS_CreateForLoadFromBuffer but added anyway */
-
 				}
 				Log_Info("sending level data response to client %i,", nqi.client);
 				/* write response */
@@ -332,6 +337,7 @@ static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float delt
 			EASSERT(false);
 			break;
 		case G2DPacket_RPC:
+			DoServerRPCs(pLayer, deltaT);
 			break;
 		case G2DPacket_WorldState:
 			break;

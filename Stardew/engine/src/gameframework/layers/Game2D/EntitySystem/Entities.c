@@ -15,6 +15,7 @@ static VECTOR(struct EntitySerializerPair) pSerializers = NULL;
 
 static OBJECT_POOL(struct DynamicEntityListItem) gDynamicListPool = NULL;
 
+
 bool DestroyCollectionItr(struct Entity2D* pEnt, int i, void* pUser)
 {
     struct GameFrameworkLayer* pLayer = pUser;
@@ -194,8 +195,21 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
     //FreeObjectPool(pCollection->dynamicEntities.pDynamicListItemPool);
 }
 
+#include "Network.h"
+
 HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt)
 {
+    static int netID = 0;
+
+    /* 
+        - assign new ID at this point if we're the server.
+        - if we're the client it will be serialized 
+    */
+    if(NW_GetRole() == GR_ClientServer)
+    {
+        pEnt->networkID = netID++;
+    }
+
     HEntity2D hEnt = NULL_HANDLE;
     pEnt->nextSibling = NULL_HANDLE;
     pEnt->previousSibling = NULL_HANDLE;
@@ -357,9 +371,14 @@ void Et2D_DeserializeCommon(struct BinarySerializer* bs, struct Entity2D* pOutEn
         BS_DeSerializeFloat(&pOutEnt->transform.scale[0], bs);
         BS_DeSerializeFloat(&pOutEnt->transform.scale[1], bs);
         BS_DeSerializeFloat(&pOutEnt->transform.rotation, bs);
-        
         BS_DeSerializeU32(&version, bs);
         pOutEnt->bKeepInQuadtree = version != 0;
+
+        if(bs->ctx == SCTX_ToNetwork)
+        {
+            BS_DeSerializeI32(&pOutEnt->networkID, bs);
+        }
+
         Et2D_PopulateCommonHandlers(pOutEnt);
         break;
     }
@@ -377,6 +396,11 @@ void Et2D_SerializeCommon(struct BinarySerializer* bs, struct Entity2D* pInEnt)
     BS_SerializeFloat(pInEnt->transform.rotation, bs);
     version = (u32)pInEnt->bKeepInQuadtree;
     BS_SerializeU32(version, bs);
+
+    if(bs->ctx == SCTX_ToNetwork)
+    {
+        BS_SerializeI32(pInEnt->networkID, bs);
+    }
 }
 
 struct Entity2D* Et2D_GetEntity(struct Entity2DCollection* pCollection, HEntity2D hEnt)
