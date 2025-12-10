@@ -12,6 +12,7 @@ struct WfPersistantData
 
 struct WfPersistantData gPersistantData;
 
+struct WfPersistantData gNetworkPlayersPersistantData[3];
 
 
 void WfPersistantDataInit()
@@ -115,6 +116,12 @@ void WfNewSavePersistantData()
 struct WfInventory* WfGetInventory()
 {
     return &gPersistantData.inventory;
+}
+
+struct WfInventory* WfGetNetworkPlayersInventory(int player)
+{
+    EASSERT(player <= 2 && player >= 0);
+    return &gNetworkPlayersPersistantData[player];
 }
 
 struct WfPlayerPreferences* WfGetPreferences()

@@ -65,6 +65,9 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
 
     In_SetMask(&pPlayerEntData->playerControlsMask, pInputCtx);
     pPlayerEntData->bMovingThisFrame = false;
+    pPlayerEntData->bMovingLastFrame = false;
+    pPlayerEntData->bNetworkControlled = false;
+    pPlayerEntData->networkPlayerNum = -1;
     pPlayerEntData->metersPerSecondWalkSpeedBase = 100.0f;
     pPlayerEntData->speedMultiplier = 3.0f;
     ClampCameraToTileLayer(pLayer->userData, 0);
@@ -223,9 +226,20 @@ static void OnUpdatePlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLa
     Entity2DUpdate(pEnt, pLayer, deltaT);
 }
 
+
+static struct WfInventory* WfGetPlayerInventory(struct WfPlayerEntData* pEntData)
+{
+    if(pEntData->bNetworkControlled)
+    {
+        return WfGetNetworkPlayersInventory(pEntData->networkPlayerNum);
+    }
+    return WfGetInventory();
+}
+
+
 static void ChangeItem(struct GameFrameworkLayer* pLayer, struct Entity2D* pEnt, struct WfPlayerEntData* pPlayerEntData, int incr)
 {
-    struct WfInventory* pInv = WfGetInventory();
+    struct WfInventory* pInv = WfGetPlayerInventory(pPlayerEntData);
 
     int oldIndex = pInv->selectedItem;
     pInv->selectedItem += incr;
@@ -333,7 +347,7 @@ void WfPlayerPostPhys(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, 
     CenterCameraAt(pixelsPos[0], pixelsPos[1], &pLayerData->camera, pLayerData->windowW, pLayerData->windowH);
 }
 
-void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos)
+void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
 {
     struct GameLayer2DData* pData = pLayer->userData;
     pEnt->nextSibling = NULL_HANDLE;
@@ -345,10 +359,11 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameFrameworkLayer* pL
     pEntData->groundColliderCenter2EntTransform[1] = -60;
     pEntData->animationSet.layersMask = 0;
     pEntData->state = WfWalking;
+    pEntData->bNetworkControlled = bNetworkControlled;
+    pEntData->networkPlayerNum = networkPlayerNum;
 
     pEnt->numComponents = 0;
     pEnt->type = WfEntityType_Player;
-    
 
     /*
         Ground Collider
@@ -410,15 +425,20 @@ void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameFrameworkLayer* pL
     pEnt->bKeepInQuadtree = false;
     pEnt->bKeepInDynamicList = true;
     pEnt->bSerializeToDisk = false;
-    pEnt->bSerializeToNetwork = false;
+    pEnt->bSerializeToNetwork = true;
 
-    struct WfInventory* pInv = WfGetInventory();
+    struct WfInventory* pInv = WfGetPlayerInventory(pEntData);
     struct WfInventoryItem* pItem = &pInv->pItems[pInv->selectedItem];
     if(pItem->itemIndex >= 0)
     {
         struct WfItemDef* pDef = WfGetItemDef(pItem->itemIndex);
         pDef->onMakeCurrent(pEnt, pLayer);
     }
+}
+
+void WfMakeIntoPlayerEntity(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos)
+{
+    WfMakeIntoPlayerEntityBase(pEnt, pLayer, spawnAtGroundPos, false, -1);
 }
 
 struct WfAnimationSet* WfGetPlayerAnimationSet(struct Entity2D* pInPlayerEnt)

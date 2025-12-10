@@ -33,4 +33,6 @@ struct WfInventory* WfGetInventory();
 
 struct WfPlayerPreferences* WfGetPreferences();
 
+struct WfInventory* WfGetNetworkPlayersInventory(int player);
+
 #endif

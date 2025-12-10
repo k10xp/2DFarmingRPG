@@ -70,9 +70,12 @@ struct WfPlayerEntData
 
     enum WfPlayerState state;
 
+    int networkPlayerNum;
+
     /* flags section */
     u32 bMovingThisFrame : 1;
     u32 bMovingLastFrame : 1;
+    u32 bNetworkControlled : 1;
 };
 
 void WfInitPlayer();
