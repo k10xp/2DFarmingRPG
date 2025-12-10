@@ -297,7 +297,17 @@ static void SaveEntities(struct Entity2DCollection* pCollection, struct BinarySe
     while(hOn != NULL_HANDLE)
     {
         struct Entity2D* pOn = &pCollection->pEntityPool[hOn];
-        if(pOn->bSerializeToDisk)
+        bool bSerialize = false;
+        switch(bs->ctx)
+        {
+        case SCTX_ToFile:
+            bSerialize = pOn->bSerializeToDisk;
+            break;
+		case SCTX_ToNetwork:
+            bSerialize = pOn->bSerializeToNetwork;
+            break;
+        }
+        if(bSerialize)
         {
             BS_SerializeU32(pOn->type, bs);
             Et2D_SerializeCommon(bs, pOn);
