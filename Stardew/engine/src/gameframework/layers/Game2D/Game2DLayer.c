@@ -176,7 +176,7 @@ connected:
 		}
 	}
 level_loaded:
-	Log_info("Level loaded from server"); /* because of what I can only assume is a compiler bug, there needs to be *something* after this label or msvc will chuck a syntax error here */
+	Log_Info("Level loaded from server"); /* because of what I can only assume is a compiler bug, there needs to be *something* after this label or msvc will chuck a syntax error here */
 }
 
 static void LoadLevelData(struct TileMap* pTileMap, const char* tilemapFilePath, DrawContext* pDC, hAtlas atlas, struct GameLayer2DData* pData)
