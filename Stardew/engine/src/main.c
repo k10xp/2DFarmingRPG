@@ -344,7 +344,7 @@ int EngineStart(int argc, char** argv, GameInitFn init)
         while (accumulator > slice)
         {
             glfwPollEvents();
-            DoNetworkQueues();
+            //DoNetworkQueues();
             GF_InputGameFramework(&gInputContext);
             GF_UpdateGameFramework((float)slice);
             In_EndFrame(&gInputContext);

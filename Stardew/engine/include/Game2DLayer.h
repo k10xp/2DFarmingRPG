@@ -20,9 +20,25 @@ typedef struct InputMapping InputMapping;
 struct GameFrameworkEventListener;
 
 struct GameLayer2DData;
+struct BinarySerializer;
 
 typedef void (*PreFirstInitFn)(struct GameLayer2DData* pGameLayerData);
 typedef void (*PreLoadLevelFn)(struct GameLayer2DData* pGameLayerData);
+
+/*
+	Extend the writing of the level data packet that servers send to clients
+*/
+typedef void (*LevelDataPacketExtenderFn)(struct GameLayer2DData* pGameLayerData, struct BinarySerializer* pBS);
+
+/*
+	- Extend the handling of a level data request packet that the server reciever
+	- the client can send extra data by extending the G2D_Enqueue_RequestLevelData function by calling G2D_Extend_RequestLevelDataMessage and
+	registering an extender 
+*/
+typedef void (*LevelDataRequestHandlerExtenderFn)(struct GameLayer2DData* pGameLayerData, struct BinarySerializer* pBS);
+
+typedef void (*LevelDataHandlerExtenderFn)(struct GameLayer2DData* pGameLayerData, struct BinarySerializer* pBS);
+
 
 struct GameFrameworkLayer;
 struct DrawContext;
@@ -189,6 +205,27 @@ struct GameLayer2DData
 		Current location has changed in such a way that it needs to be saved, when a new area is moved to or you sleep
 	*/
 	bool bCurrentLocationIsDirty;
+
+	/*
+		AS THE SERVER:
+		Write extra game specific data to the level data packet the server sends initially to each client
+	*/
+	LevelDataPacketExtenderFn levelDataPacketExtender;
+
+	/*
+		AS THE SERVER:
+		Read extra game specific data from the level data request packet the client sends to the server
+
+		- extra data is written by extending the G2D_Enqueue_RequestLevelData function by calling G2D_Extend_RequestLevelDataMessage and
+		registering an extender
+	*/
+	LevelDataRequestHandlerExtenderFn levelDataRequestHandlerExtender;
+
+	/*
+		AS THE CLIENT:
+		Read extra game specific data the server has written to the initial level data packet
+	*/
+	LevelDataHandlerExtenderFn levelDataHandlerExtender;
 };
 
 struct Game2DLayerOptions

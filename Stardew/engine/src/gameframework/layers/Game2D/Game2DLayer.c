@@ -17,6 +17,7 @@
 #include "Camera2D.h"
 #include "Network.h"
 #include "Log.h"
+#include "Game2DLayerNetwork.h"
 
 int gTilesRendered = 0;
 
@@ -120,6 +121,22 @@ static bool InitEntities(struct Entity2D* pEnt, int i, void* pUser)
 	return true;
 }
 
+static void LoadLevelDataInternal(struct TileMap* pTileMap, struct BinarySerializer* pBs, DrawContext* pDC, hAtlas atlas, struct GameLayer2DData* pData)
+{
+	u32 version = 0;
+	BS_DeSerializeU32(&version, pBs);
+	switch (version)
+	{
+	case 1:
+		LoadLevelDataV1(pTileMap, pBs, pData);
+		break;
+	default:
+		Log_Error("Unexpected tilemap file version %u\n", version);
+		break;
+	}
+	BS_Finish(pBs);
+}
+
 static void LoadLevelDataFromServer(struct TileMap* pTileMap, DrawContext* pDC, hAtlas atlas, struct GameLayer2DData* pData)
 {
 	/*THIS HAS TO BE THE FIRST THING TO DEQUEUE CONNECTION EVENTS IF GAME2DLAYER IS USED*/
@@ -136,7 +153,27 @@ static void LoadLevelDataFromServer(struct TileMap* pTileMap, DrawContext* pDC, 
 		}
 	}
 connected:
-	Log_Info("game2d client connected");
+	Log_Info("game2d client connected, sending level request");
+	G2D_Enqueue_RequestLevelData();
+	struct NetworkQueueItem nci;
+	while(true)
+	{
+		while(NW_DequeueData(&nci))
+		{
+			u8* pBody = NULL;
+			int headerSize = 0;
+			enum G2DPacketType type = G2D_ParsePacket(nci.pData, &pBody, &headerSize);
+			struct BinarySerializer bs;
+			EASSERT(type == G2DPacket_LevelDataResponseData);
+			BS_CreateForLoadFromBuffer(pBody, nci.pDataSize - headerSize, &bs);
+			LoadLevelDataInternal(pTileMap, &bs, pDC, atlas, pData);
+			if(pData->levelDataHandlerExtender)
+			{
+				pData->levelDataHandlerExtender(pData, &bs);
+			}
+			free(nci.pData);
+		}
+	}
 }
 
 static void LoadLevelData(struct TileMap* pTileMap, const char* tilemapFilePath, DrawContext* pDC, hAtlas atlas, struct GameLayer2DData* pData)
@@ -145,19 +182,7 @@ static void LoadLevelData(struct TileMap* pTileMap, const char* tilemapFilePath,
 	struct BinarySerializer bs;
 	memset(&bs, 0, sizeof(struct BinarySerializer));
 	BS_CreateForLoad(tilemapFilePath, &bs);
-	u32 version = 0;
-	BS_DeSerializeU32(&version, &bs);
-	switch (version)
-	{
-	case 1:
-		LoadLevelDataV1(pTileMap, &bs, pData);
-		break;
-	default:
-		Log_Error("Unexpected tilemap file version %u\n", version);
-		break;
-	}
-	BS_Finish(&bs);
-
+	LoadLevelDataInternal(pTileMap, &bs, pDC, atlas, pData);
 }
 
 static void PublishDebugMessage(struct GameLayer2DData* pData)
@@ -202,8 +227,166 @@ static bool UpdateEntities(struct Entity2D* pEnt, int i, void* pUser)
 	return true;
 }
 
+static void SaveLevelDataInternal(struct GameLayer2DData* pData, struct BinarySerializer* pBS)
+{
+	BS_SerializeU32(1, pBS);
+	
+	vec2 tl, br;
+	vec2 dims;
+	Entity2DQuadTree_GetDims(pData->hEntitiesQuadTree, tl, &dims[0], &dims[1]);
+	glm_vec2_add(tl, dims, br);
+	
+	/* data needed to init quadtree */
+	BS_SerializeFloat(tl[0], pBS);
+	BS_SerializeFloat(tl[1], pBS);
+	BS_SerializeFloat(br[0], pBS);
+	BS_SerializeFloat(br[1], pBS);
+
+	int numLayers = VectorSize(pData->tilemap.layers);
+	BS_SerializeU32(numLayers, pBS);
+	int onObjectLayer = 0;
+	for(int i=0; i<numLayers; i++)
+	{
+		BS_SerializeU32(pData->tilemap.layers[i].type, pBS); // type of layer
+		struct TileMapLayer* pLayer = &pData->tilemap.layers[i];
+		switch(pLayer->type)
+		{
+		case 1: // tile layer
+			BS_SerializeU32(pLayer->widthTiles, pBS);
+			BS_SerializeU32(pLayer->heightTiles, pBS);
+			BS_SerializeU32(pLayer->transform.position[1], pBS);
+			BS_SerializeU32(pLayer->transform.position[1], pBS);
+			BS_SerializeU32(pLayer->tileWidthPx, pBS);
+			BS_SerializeU32(pLayer->tileHeightPx, pBS);
+			BS_SerializeU32(2, pBS); // no compression
+
+			// serialize the layer tiles
+			BS_SerializeBytesNoLen(pLayer->Tiles, pLayer->widthTiles * pLayer->heightTiles * sizeof(TileIndex), pBS);
+			break;
+		case 2: // object layer
+			BS_SerializeU32(pLayer->drawOrder, pBS);
+			Et2D_SerializeEntities(&pData->entities, pBS, pData, onObjectLayer++);
+			break;
+		default:
+			EASSERT(false);
+		}
+	}
+}
+
+
+static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
+{
+	struct GameLayer2DData* pData = pLayer->userData;
+
+	struct NetworkConnectionEvent nce;
+	while(NW_DequeueConnectionEvent(&nce))
+	{
+		switch(nce.type)
+		{
+		case NCE_ClientConnected:
+			Log_Info("Client %i connected", nce.client);
+			break;
+		case NCE_ClientDisconnected:
+			Log_Info("Client %i disconnected", nce.client);
+			break;
+		}
+	}
+
+	struct NetworkQueueItem nqi;
+	while(NW_DequeueData(&nqi))
+	{
+		u8* pBody = NULL;
+		int headerSize = 0;
+		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
+		switch(type)
+		{
+		case G2DPacket_RequestLevelData:
+			{
+				Log_Info("recieved level data request from client %i,", nqi.client);
+				/* handle request */
+				if(pData->levelDataRequestHandlerExtender)
+				{
+					struct BinarySerializer bs;
+					BS_CreateForLoadFromBuffer(pBody, nqi.pDataSize - headerSize, &bs);
+					pData->levelDataRequestHandlerExtender(pData, &bs);
+					BS_Finish(&bs); /* does nothing if BS_CreateForLoadFromBuffer but added anyway */
+
+				}
+				Log_Info("sending level data response to client %i,", nqi.client);
+				/* write response */
+				struct BinarySerializer bs;
+				BS_CreateForSaveToNetwork(&bs, nqi.client);
+				BS_SerializeU32(G2DPacket_LevelDataResponseData, &bs);
+				SaveLevelDataInternal(pData, &bs);
+				if(pData->levelDataPacketExtender)
+				{
+					pData->levelDataPacketExtender(pData, &bs);
+				}
+				BS_Finish(&bs);
+			}
+			break;
+		case G2DPacket_LevelDataResponseData:
+			EASSERT(false);
+			break;
+		case G2DPacket_RPC:
+			break;
+		case G2DPacket_WorldState:
+			break;
+		}
+	}
+}
+
+static void PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
+{
+	struct GameLayer2DData* pData = pLayer->userData;
+
+	struct NetworkConnectionEvent nce;
+	while(NW_DequeueConnectionEvent(&nce))
+	{
+		switch(nce.type)
+		{
+		case NCE_ClientConnected:
+			Log_Info("Client %i connected", nce.client);
+			break;
+		case NCE_ClientDisconnected:
+			Log_Info("Client %i disconnected", nce.client);
+			break;
+		}
+	}
+
+	struct NetworkQueueItem nqi;
+	while(NW_DequeueData(&nqi))
+	{
+		u8* pBody = NULL;
+		int headerSize = 0;
+		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
+		switch(type)
+		{
+		case G2DPacket_RequestLevelData:
+			EASSERT(false);
+			break;
+		case G2DPacket_LevelDataResponseData:
+			EASSERT(false);
+			break;
+		case G2DPacket_RPC:
+			break;
+		case G2DPacket_WorldState:
+			break;
+		}
+	}
+}
+
 static void Update(struct GameFrameworkLayer* pLayer, float deltaT)
 {
+	switch(NW_GetRole())
+	{
+	case GR_Client:
+		PollNetworkQueueClient(pLayer, deltaT);
+		break;
+	case GR_ClientServer:
+		PollNetworkQueueServer(pLayer, deltaT);
+		break;
+	}
 	struct GameLayer2DData* pData = pLayer->userData;
 	if (pData->bDebugLayerAttatched)
 	{
@@ -650,49 +833,6 @@ void Game2DLayer_SaveLevelFile(struct GameLayer2DData* pData, const char* output
 	struct BinarySerializer bs;
 	memset(&bs, 0, sizeof(struct BinarySerializer));
 	BS_CreateForSave(outputFilePath, &bs);
-	BS_SerializeU32(1, &bs);
-	
-	vec2 tl, br;
-	vec2 dims;
-	Entity2DQuadTree_GetDims(pData->hEntitiesQuadTree, tl, &dims[0], &dims[1]);
-	glm_vec2_add(tl, dims, br);
-	
-	
-	
-	/* data needed to init quadtree */
-	BS_SerializeFloat(tl[0], &bs);
-	BS_SerializeFloat(tl[1], &bs);
-	BS_SerializeFloat(br[0], &bs);
-	BS_SerializeFloat(br[1], &bs);
-
-	int numLayers = VectorSize(pData->tilemap.layers);
-	BS_SerializeU32(numLayers, &bs);
-	int onObjectLayer = 0;
-	for(int i=0; i<numLayers; i++)
-	{
-		BS_SerializeU32(pData->tilemap.layers[i].type, &bs); // type of layer
-		struct TileMapLayer* pLayer = &pData->tilemap.layers[i];
-		switch(pLayer->type)
-		{
-		case 1: // tile layer
-			BS_SerializeU32(pLayer->widthTiles, &bs);
-			BS_SerializeU32(pLayer->heightTiles, &bs);
-			BS_SerializeU32(pLayer->transform.position[1], &bs);
-			BS_SerializeU32(pLayer->transform.position[1], &bs);
-			BS_SerializeU32(pLayer->tileWidthPx, &bs);
-			BS_SerializeU32(pLayer->tileHeightPx, &bs);
-			BS_SerializeU32(2, &bs); // no compression
-
-			// serialize the layer tiles
-			BS_SerializeBytesNoLen(pLayer->Tiles, pLayer->widthTiles * pLayer->heightTiles * sizeof(TileIndex), &bs);
-			break;
-		case 2: // object layer
-			BS_SerializeU32(pLayer->drawOrder, &bs);
-			Et2D_SerializeEntities(&pData->entities, &bs, pData, onObjectLayer++);
-			break;
-		default:
-			EASSERT(false);
-		}
-	}
+	SaveLevelDataInternal(pData, &bs);
 	BS_Finish(&bs);
 }

@@ -1,7 +1,7 @@
 #ifndef GAME2DLAYER_NETWORK_H
 #define GAME2DLAYER_NETWORK_H
 
-
+#include "IntTypes.h"
 struct GameFrameworkLayer;
 struct BinarySerializer;
 /* Networking layer specific to game 2d layer */
@@ -25,6 +25,6 @@ void G2D_Extend_RequestLevelDataMessage(PacketExtensionNoArgsFn fn);
 
 void G2D_Enqueue_RequestLevelData();
 
-//void LoadLevelDataFromSe
+enum G2DPacketType G2D_ParsePacket(u8* pPacket, u8** pOutBody, int* outHeaderSize);
 
 #endif
