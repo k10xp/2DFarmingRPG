@@ -96,4 +96,6 @@ struct Component2D* WfGetPlayerAnimationLayerComponent(struct Entity2D* pPlayer,
 
 void WfSetPlayerOverlayAnimations(enum WfDirection dir, struct GameFrameworkLayer* pLayer, struct WfPlayerEntData* pPlayerEntData, struct Entity2D* pEnt);
 
+void WfPlayerGetGroundContactPoint(struct Entity2D* pEnt, vec2 outPos);
+
 #endif

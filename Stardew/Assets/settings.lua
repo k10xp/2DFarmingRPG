@@ -26,9 +26,10 @@ function GetSettingsViewModel()
 			return self._zoomVal
 		end,
 		Set_ZoomVal = function(self, val)
-			print(val)
 			self._zoomVal = val
             SetGameLayerZoom(self._zoomVal, self._pGamelayer)
+            px, py = WfGetPlayerLocation(self._pGamelayer)
+            CenterCameraAt(px, py, self._pGamelayer)
             WfSavePreferences(self._pGamelayer) -- save to the persistant game data object 
 		end,
 

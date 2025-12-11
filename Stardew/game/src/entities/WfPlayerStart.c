@@ -14,7 +14,14 @@ struct WfPlayerStartData
     char thisLocation[64];
 };
 
+static HEntity2D hCurrentLocalPlayer = NULL_HANDLE;
+
 static OBJECT_POOL(struct WfPlayerStartData) gPlayerStartDataPool;
+
+HEntity2D WfGetCurrentLocalPlayer()
+{
+    return hCurrentLocalPlayer;
+}
 
 void WfInitPlayerStart()
 {
@@ -28,10 +35,9 @@ void WfPlayerStartEntityOnInit(struct Entity2D* pEnt, struct GameFrameworkLayer*
     
     if(strcmp(WfWorld_GetCurrentLocationName(), gPlayerStartDataPool[pEnt->user.hData].from) == 0)
     {
-        
         struct Entity2D ent;
         WfMakeIntoPlayerEntity(&ent, pLayer, pEnt->transform.position);
-        Et2D_AddEntity(&pLayerData->entities, &ent);
+        hCurrentLocalPlayer = Et2D_AddEntity(&pLayerData->entities, &ent);
         WfWorld_SetCurrentLocationName(gPlayerStartDataPool[pEnt->user.hData].thisLocation);
     }
 }

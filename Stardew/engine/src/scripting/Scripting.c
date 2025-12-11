@@ -15,6 +15,7 @@
 #include "main.h"
 #include "Game2DLayer.h"
 #include "Log.h"
+#include "Camera2D.h"
 
 #define GAME_LUA_MINOR_VERSION 1
 
@@ -299,6 +300,37 @@ static int L_GetGamelayerZoom(lua_State* L)
 	return 1;
 }
 
+static int L_CenterCameraAt(lua_State* L)
+{
+	int top = lua_gettop(L);
+	if(top != 3)
+	{
+		Log_Error("L_CenterCameraAt Wrong number of args");
+		return 0;
+	}
+	if(!lua_isnumber(L,1))
+	{
+		Log_Error("L_CenterCameraAt Wrong type of arg, arg 1 number expected");
+		return 0;
+	}
+	if(!lua_isnumber(L,2))
+	{
+		Log_Error("L_CenterCameraAt Wrong type of arg, arg 2 number expected");
+		return 0;
+	}
+	if(!lua_islightuserdata(L,3))
+	{
+		Log_Error("L_CenterCameraAt Wrong type of arg, arg 3 ptr to gamelayerdata expected");
+		return 0;
+	}
+	float x = lua_tonumber(L, 1);
+	float y = lua_tonumber(L, 2);
+	struct GameLayer2DData* pData = lua_touserdata(L, 3);
+	CenterCameraAt(x, y, &pData->camera, pData->windowW, pData->windowH);
+	UpdateCameraClamp(pData);
+	return 0;
+}
+
 static int L_SetGamelayerZoom(lua_State* L)
 {
 	int top = lua_gettop(L);
@@ -347,6 +379,7 @@ void Sc_InitScripting()
 	Sc_RegisterCFunction("GetButtonPress", &L_GetButtonPress);
 	Sc_RegisterCFunction("GetGameLayerZoom", &L_GetGamelayerZoom);
 	Sc_RegisterCFunction("SetGameLayerZoom", &L_SetGamelayerZoom);
+	Sc_RegisterCFunction("CenterCameraAt", &L_CenterCameraAt);
 
 }
 

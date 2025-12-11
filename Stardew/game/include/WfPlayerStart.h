@@ -1,6 +1,7 @@
 #ifndef WFPLAYER_START_H
 #define WFPLAYER_START_H
 
+#include "HandleDefs.h"
 struct BinarySerializer;
 struct Entity2D;
 struct GameLayer2DData;
@@ -10,5 +11,7 @@ void WfDeSerializePlayerStartEntity(struct BinarySerializer* bs, struct Entity2D
 void WfSerializePlayerStartEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData);
 
 void WfInitPlayerStart();
+
+HEntity2D WfGetCurrentLocalPlayer();
 
 #endif

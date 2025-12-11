@@ -332,6 +332,16 @@ float WfGetPlayerSortPosition(struct Entity2D* pEnt)
     return pEnt->transform.position[1] - gPlayerEntDataPool[pEnt->user.hData].groundColliderCenter2EntTransform[1];
 }
 
+void WfPlayerGetGroundContactPoint(struct Entity2D* pEnt, vec2 outPos)
+{
+    struct WfPlayerEntData* pPlayerEntData = &gPlayerEntDataPool[pEnt->user.hData];
+    vec2 pos2ground = {
+        -pPlayerEntData->groundColliderCenter2EntTransform[0],
+        -pPlayerEntData->groundColliderCenter2EntTransform[1],
+    };
+    glm_vec2_add(pEnt->transform.position, pos2ground, outPos);
+}
+
 void WfPlayerPostPhys(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, float deltaT)
 {
     struct WfPlayerEntData* pPlayerEntData = &gPlayerEntDataPool[pEnt->user.hData];
@@ -344,7 +354,10 @@ void WfPlayerPostPhys(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, 
     Ph_PhysicsCoords2PixelCoords(pLayerData->hPhysicsWorld, physPos, pixelsPos);
     glm_vec2_add(pixelsPos, pPlayerEntData->groundColliderCenter2EntTransform, pEnt->transform.position);
 
-    CenterCameraAt(pixelsPos[0], pixelsPos[1], &pLayerData->camera, pLayerData->windowW, pLayerData->windowH);
+    if(!pPlayerEntData->bNetworkControlled)
+    {
+        CenterCameraAt(pixelsPos[0], pixelsPos[1], &pLayerData->camera, pLayerData->windowW, pLayerData->windowH);
+    }
 }
 
 void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
