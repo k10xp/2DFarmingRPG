@@ -325,11 +325,13 @@ static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float delt
 				struct BinarySerializer bs;
 				BS_CreateForSaveToNetwork(&bs, nqi.client);
 				BS_SerializeU32(G2DPacket_LevelDataResponseData, &bs);
-				SaveLevelDataInternal(pData, &bs);
+				
 				if(pData->levelDataPacketExtender)
 				{
 					pData->levelDataPacketExtender(pData, &bs);
 				}
+
+				SaveLevelDataInternal(pData, &bs);
 				BS_Finish(&bs);
 			}
 			break;

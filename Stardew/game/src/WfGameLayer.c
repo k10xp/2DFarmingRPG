@@ -15,6 +15,7 @@
 #include "GameFrameworkEvent.h"
 #include "WfPersistantGameData.h"
 #include "Network.h"
+#include "WfNetwork.h"
 
 static void WfPublishInventoryChangedEvent()
 {
@@ -87,6 +88,7 @@ void WfGameLayerOnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawConte
 void WfPreLoadLevel(struct GameLayer2DData* pEngineLayer)
 {
     WfInitGameLayerData(pEngineLayer, (struct WfGameLayerData*)pEngineLayer->pUserData);
+    WfNetworkInit(pEngineLayer);
 }
 
 void WfGameLayerOnPop(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, InputContext* inputContext)
