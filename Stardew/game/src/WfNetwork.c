@@ -3,7 +3,17 @@
 #include "Game2DLayerNetwork.h"
 #include "BinarySerializer.h"
 
-
+/*
+    Going forwards from the point of initial data exchange with the server a continual exchange will take place.
+    - Each client is trusted by the server with regards to the state of its player entity to ensure a responsive feeling game
+    - the server continually relays to the player the state of all other players (including its own)
+    - both these exchanges will take place via the G2DPacket_WorldState type packet. 
+    - A generic handler for G2DPacket_WorldState packets will update entities from the serialized data based on net ids, if it doesn't find the entity with that ID
+      it'll create it on the server, if the suggested net id is taken as far as the server is concerned it will send a packet back to the client requiring it to be changed.
+      It's likely the one the client has suggested will be correct but a race condition could emerge if two clients spawn entities at the same time, so the server must arbitrate the net IDS.
+      The client doesn't have to wait for its netID to be verified, it can continue on so long as it later updates the ID.
+    - entity serialization functions can be tuned to pack data tighter if the context is serializing to network
+*/
 
 static void Client_ExtendRequestLevelData(struct BinarySerializer* pBS)
 {
@@ -15,7 +25,7 @@ static void Server_HandleExtraRequestLevelData(struct GameLayer2DData* pGameLaye
     // handle the clients persistent data on the server here. It will stash it and then add it after to the end of the networked clients list.
     // When the client has created a player entity for itself it will serialize it and send it to the server and the serialization method below should I think 
     // mean that it has a correct persistent data index as far as the server is concerned.
-}
+} 
 
 static void Server_LevelDataPacketExtender(struct GameLayer2DData* pGameLayerData, struct BinarySerializer* pBS)
 {
