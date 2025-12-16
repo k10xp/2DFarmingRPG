@@ -24,6 +24,8 @@ void WfWorld_LoadLocation(const char* locationName, DrawContext* pDC);
 
 const char* WfWorld_GetCurrentLocationName();
 
+const char* WfWorld_GetPreviousLocationName();
+
 void WfWorld_SetCurrentLocationName(const char* name);
 
 void WfWorldInit();

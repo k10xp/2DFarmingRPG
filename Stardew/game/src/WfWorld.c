@@ -7,6 +7,8 @@
 struct WfWorld
 {
     struct HashMap locationsHashMap;
+    char previousLocation[MAX_LOCATION_NAME_LEN];
+
     char currentLocation[MAX_LOCATION_NAME_LEN];
 };
 
@@ -38,9 +40,15 @@ const char* WfWorld_GetCurrentLocationName()
     return gWorld.currentLocation;
 }
 
+const char* WfWorld_GetPreviousLocationName()
+{
+    return gWorld.previousLocation;
+}
+
 void WfWorld_SetCurrentLocationName(const char* name)
 {
     EASSERT(strlen(name) < MAX_LOCATION_NAME_LEN);
+    strcpy(gWorld.previousLocation, gWorld.currentLocation);
     strcpy(gWorld.currentLocation, name);
 }
 

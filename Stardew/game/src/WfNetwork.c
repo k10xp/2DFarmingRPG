@@ -6,6 +6,7 @@
 #include "Network.h"
 #include "Log.h"
 #include "AssertLib.h"
+#include "WfWorld.h"
 #include <string.h>
 
 /*
@@ -77,7 +78,7 @@ static void Server_LevelDataPacketExtender(struct GameLayer2DData* pGameLayerDat
     }
     struct WfPersistantData* pData = WfGetLocalPlayerPersistantGameData();
     WfSavePersistantDataFileInternal(pBS, pData);
-    
+    BS_SerializeString(WfWorld_GetPreviousLocationName(), pBS);
     /*
         Add the connected client we stashed before - this is stupid, TODO: fix it
     */
@@ -111,6 +112,9 @@ static void Client_LevelDataHandlerExtender(struct GameLayer2DData* pGameLayerDa
                 struct WfPersistantData* pData = WfGetNetworkPlayerPersistantGameData(i);
                 WfLoadPersistantDataFileInternal(pBS, pData);
             }
+            char currentLocation[MAX_LOCATION_NAME_LEN];
+            BS_DeSerializeStringInto(currentLocation, pBS);
+            WfWorld_SetCurrentLocationName(currentLocation);
         }
         break;
     default:
