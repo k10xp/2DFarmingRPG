@@ -56,7 +56,7 @@ static void LoadLevelDataV1(struct TileMap* pTileMap, struct BinarySerializer* p
 	u32 numLayers = 0;
 	u32 objectLayer = 0;
 	BS_DeSerializeU32(&numLayers, pBS);
-	Log_Info("Num layers %i", numLayers);
+	Log_Verbose("Num layers %i", numLayers);
 	pTileMap->layers = VectorResize(pTileMap->layers, numLayers);
 	for (int i = 0; i < numLayers; i++)
 	{
@@ -67,7 +67,7 @@ static void LoadLevelDataV1(struct TileMap* pTileMap, struct BinarySerializer* p
 		switch(type)
 		{
 		case 1: // tile layer
-			Log_Info("Deserializing tile layer...");
+			Log_Verbose("Deserializing tile layer...");
 			u32 width, height, x, y, compression, tw, th;
 			BS_DeSerializeU32(&width, pBS);
 			BS_DeSerializeU32(&height, pBS);
