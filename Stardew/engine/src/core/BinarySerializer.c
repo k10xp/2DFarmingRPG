@@ -6,6 +6,7 @@
 #include "DynArray.h"
 #include "AssertLib.h"
 #include "Network.h"
+#include "Log.h"
 
 void BS_CreateForLoadFromBuffer(void* buf, int size, struct BinarySerializer* pOutSerializer)
 {
@@ -74,9 +75,11 @@ void BS_Finish(struct BinarySerializer* pOutSerializer)
 			struct NetworkQueueItem nci;
 			nci.bReliable = true; /* TODO: MAKE OPTIONAL */
 			nci.client = pOutSerializer->toClient;
-			nci.pData = Sptr_New(pOutSerializer->pDataSize, NULL);
-			nci.pDataSize = pOutSerializer->pDataSize;
-			memcpy(nci.pData, pOutSerializer->pData, pOutSerializer->pDataSize);
+			nci.pData = Sptr_New(VectorSize(pOutSerializer->pData), NULL);
+			nci.pDataSize = VectorSize(pOutSerializer->pData);
+			Log_Info("BS_Finish saving to network size: %i", VectorSize(pOutSerializer->pData));
+			
+			memcpy(nci.pData, pOutSerializer->pData, VectorSize(pOutSerializer->pData));
 			NW_EnqueueData(&nci);
 			DestoryVector(pOutSerializer->pData);
 		}

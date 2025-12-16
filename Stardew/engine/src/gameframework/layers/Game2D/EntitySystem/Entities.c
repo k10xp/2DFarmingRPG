@@ -237,8 +237,11 @@ HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D
 
 static void DeserializeEntityV1(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer)
 {
+    Log_Info("Deserializing entity");
+
     u32 entityType;
     BS_DeSerializeU32(&entityType, bs);
+    Log_Info("Deserializing entity type: %i", entityType);
     struct Entity2D ent;
     memset(&ent, 0, sizeof(struct Entity2D));
     ent.nextSibling = NULL_HANDLE;
@@ -263,6 +266,7 @@ static void LoadEntitiesV1(struct BinarySerializer* bs, struct GameLayer2DData* 
 {
     u32 numEntities = 0;
     BS_DeSerializeU32(&numEntities, bs);
+    Log_Info("numEntities: %i", numEntities);
     for(int i=0; i<numEntities; i++)
     {
         DeserializeEntityV1(pCollection, bs, pData, objectLayer);
@@ -286,17 +290,29 @@ static void LoadEntities(struct BinarySerializer* bs, struct GameLayer2DData* pD
     }
 }
 
-static u32 NumEntsToSerialize(struct Entity2DCollection* pCollection)
+static u32 NumEntsToSerialize(struct Entity2DCollection* pCollection, struct BinarySerializer* bs)
 {
     int i = 0;
     HEntity2D hOn = pCollection->gEntityListHead;
     while(hOn != NULL_HANDLE)
     {
         struct Entity2D* pOn = &pCollection->pEntityPool[hOn];
-        if(pOn->bSerializeToDisk)
+        switch(bs->ctx)
         {
-            i++;
+        case SCTX_ToFile:
+            if(pOn->bSerializeToDisk)
+            {
+                i++;
+            }
+            break;
+		case SCTX_ToNetwork:
+            if(pOn->bSerializeToNetwork)
+            {
+                i++;
+            }
+            break;
         }
+        
         hOn = pOn->nextSibling;
     }
     return i;
@@ -306,7 +322,8 @@ static void SaveEntities(struct Entity2DCollection* pCollection, struct BinarySe
 {
     EASSERT(bs->bSaving);
     BS_SerializeU32(1, bs);
-    BS_SerializeU32(NumEntsToSerialize(pCollection), bs);
+    Log_Info("Saving %i entities", NumEntsToSerialize(pCollection, bs));
+    BS_SerializeU32(NumEntsToSerialize(pCollection, bs), bs);
     HEntity2D hOn = pCollection->gEntityListHead;
     while(hOn != NULL_HANDLE)
     {
@@ -324,6 +341,7 @@ static void SaveEntities(struct Entity2DCollection* pCollection, struct BinarySe
         if(bSerialize)
         {
             BS_SerializeU32(pOn->type, bs);
+            Log_Info("Entity type: %i", pOn->type);
             Et2D_SerializeCommon(bs, pOn);
             if(pOn->type < VectorSize(pSerializers))
             {

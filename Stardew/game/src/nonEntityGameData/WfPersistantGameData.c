@@ -3,84 +3,113 @@
 #include "WfItem.h"
 #include "BinarySerializer.h"
 #include "AssertLib.h"
+#include <string.h>
 
-struct WfPersistantData
+static struct WfPersistantData gPersistantData;
+
+static struct WfPersistantData gNetworkPlayersPersistantData[3];
+
+static int gOccupiedSpots = 0;
+
+int WfGetNumNetworkPlayerPersistentDataSlots()
 {
-    struct WfInventory inventory;
-    struct WfPlayerPreferences preferences;
-};
+    return gOccupiedSpots;
+}
 
-struct WfPersistantData gPersistantData;
+void WfSetNumNetworkPlayerPersistentDataSlots(int num)
+{
+    gOccupiedSpots = num;
+}
 
-struct WfPersistantData gNetworkPlayersPersistantData[3];
+struct WfPersistantData* WfGetLocalPlayerPersistantGameData()
+{
+    return &gPersistantData;
+}
 
+struct WfPersistantData* WfGetNetworkPlayerPersistantGameData(int playerNum)
+{
+    return &gNetworkPlayersPersistantData[playerNum];
+}
 
 void WfPersistantDataInit()
 {
+    memset(&gPersistantData, 0, sizeof(struct WfPersistantData));
     gPersistantData.inventory.pItems = NEW_VECTOR(struct WfInventoryItem);
+    memset(&gNetworkPlayersPersistantData, 0, sizeof(struct WfPersistantData) * 3);
+    for(int i=0; i<3; i++)
+    {
+        gNetworkPlayersPersistantData->inventory.pItems = NEW_VECTOR(struct WfInventoryItem);
+    }
 }
 
-void WfLoadPersistantDataFileV1(struct BinarySerializer* pBS)
+void WfLoadPersistantDataFileV1(struct BinarySerializer* pBS, struct WfPersistantData* pData)
 {
-    BS_DeSerializeI32(&gPersistantData.inventory.selectedItem, pBS);
+    BS_DeSerializeI32(&pData->inventory.selectedItem, pBS);
     u32 size = 0;
     BS_DeSerializeU32(&size, pBS);
-    gPersistantData.inventory.pItems = VectorResize(gPersistantData.inventory.pItems, size);
-    gPersistantData.inventory.pItems = VectorClear(gPersistantData.inventory.pItems);
+    pData->inventory.pItems = VectorResize(pData->inventory.pItems, size);
+    pData->inventory.pItems = VectorClear(pData->inventory.pItems);
     for(int i = 0; i < size; i++)
     {
         struct WfInventoryItem item;
         BS_DeSerializeI32(&item.itemIndex, pBS);
         BS_DeSerializeI32(&item.quantity, pBS);
-        gPersistantData.inventory.pItems = VectorPush(gPersistantData.inventory.pItems, &item);
+        pData->inventory.pItems = VectorPush(pData->inventory.pItems, &item);
     }
 
-    BS_DeSerializeFloat(&gPersistantData.preferences.zoomLevel, pBS);
+    BS_DeSerializeFloat(&pData->preferences.zoomLevel, pBS);
+}
+
+void WfLoadPersistantDataFileInternal(struct BinarySerializer* pBS, struct WfPersistantData* pData)
+{
+    u32 version = 0;
+    BS_DeSerializeU32(&version, pBS);
+    switch (version)
+    {
+    case 1:
+        WfLoadPersistantDataFileV1(pBS, pData);
+        break;
+    default:
+        EASSERT(false);
+        break;
+    }
 }
 
 void WfLoadPersistantDataFile(const char* path)
 {
 	struct BinarySerializer bs;
     BS_CreateForLoad(path, &bs);
-    u32 version = 0;
-    BS_DeSerializeU32(&version, &bs);
-    switch (version)
-    {
-    case 1:
-        WfLoadPersistantDataFileV1(&bs);
-        break;
-    default:
-        EASSERT(false);
-        break;
-    }
+    WfLoadPersistantDataFileInternal(&bs, &gPersistantData);
 
     BS_Finish(&bs);
+}
+
+void WfSavePersistantDataFileInternal(struct BinarySerializer* pBS, struct WfPersistantData* pGameData)
+{
+    BS_SerializeU32(1, pBS); /* version */
+
+    /* Inventory */
+
+    BS_SerializeI32(pGameData->inventory.selectedItem, pBS);
+
+    int sz = VectorSize(pGameData->inventory.pItems);
+    BS_SerializeU32(sz, pBS);
+
+    for(int i=0; i<VectorSize(pGameData->inventory.pItems); i++)
+    {
+        BS_SerializeI32(pGameData->inventory.pItems[i].itemIndex, pBS);
+        BS_SerializeI32(pGameData->inventory.pItems[i].quantity, pBS);
+    }
+
+    /* Preferences */
+    BS_SerializeFloat(pGameData->preferences.zoomLevel, pBS);
 }
 
 void WfSavePersistantDataFile(const char* path)
 {
     struct BinarySerializer bs;
     BS_CreateForSave(path, &bs);
-
-    BS_SerializeU32(1, &bs); /* version */
-
-    /* Inventory */
-
-    BS_SerializeI32(gPersistantData.inventory.selectedItem, &bs);
-
-    int sz = VectorSize(gPersistantData.inventory.pItems);
-    BS_SerializeU32(sz, &bs);
-
-    for(int i=0; i<VectorSize(gPersistantData.inventory.pItems); i++)
-    {
-        BS_SerializeI32(gPersistantData.inventory.pItems[i].itemIndex, &bs);
-        BS_SerializeI32(gPersistantData.inventory.pItems[i].quantity, &bs);
-    }
-
-    /* Preferences */
-
-    BS_SerializeFloat(gPersistantData.preferences.zoomLevel, &bs);
-
+    WfSavePersistantDataFileInternal(&bs, &gPersistantData);
     BS_Finish(&bs);
 }
 

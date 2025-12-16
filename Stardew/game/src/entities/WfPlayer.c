@@ -438,7 +438,7 @@ void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer
     pEnt->bKeepInQuadtree = false;
     pEnt->bKeepInDynamicList = true;
     pEnt->bSerializeToDisk = false;
-    pEnt->bSerializeToNetwork = true;
+    pEnt->bSerializeToNetwork = false;
 
     struct WfInventory* pInv = WfGetPlayerInventory(pEntData);
     struct WfInventoryItem* pItem = &pInv->pItems[pInv->selectedItem];

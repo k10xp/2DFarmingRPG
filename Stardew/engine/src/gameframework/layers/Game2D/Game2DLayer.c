@@ -56,6 +56,7 @@ static void LoadLevelDataV1(struct TileMap* pTileMap, struct BinarySerializer* p
 	u32 numLayers = 0;
 	u32 objectLayer = 0;
 	BS_DeSerializeU32(&numLayers, pBS);
+	Log_Info("Num layers %i", numLayers);
 	pTileMap->layers = VectorResize(pTileMap->layers, numLayers);
 	for (int i = 0; i < numLayers; i++)
 	{
@@ -66,6 +67,7 @@ static void LoadLevelDataV1(struct TileMap* pTileMap, struct BinarySerializer* p
 		switch(type)
 		{
 		case 1: // tile layer
+			Log_Info("Deserializing tile layer...");
 			u32 width, height, x, y, compression, tw, th;
 			BS_DeSerializeU32(&width, pBS);
 			BS_DeSerializeU32(&height, pBS);
@@ -155,22 +157,26 @@ static void LoadLevelDataFromServer(struct TileMap* pTileMap, DrawContext* pDC, 
 connected:
 	Log_Info("game2d client connected, sending level request");
 	G2D_Enqueue_RequestLevelData();
+	Log_Info("Enqueued request");
+
 	struct NetworkQueueItem nci;
 	while(true)
 	{
 		while(NW_DequeueData(&nci))
 		{
+			Log_Info("Dequeued data size %i", nci.pDataSize);
 			u8* pBody = NULL;
 			int headerSize = 0;
 			enum G2DPacketType type = G2D_ParsePacket(nci.pData, &pBody, &headerSize);
 			struct BinarySerializer bs;
 			EASSERT(type == G2DPacket_LevelDataResponseData);
 			BS_CreateForLoadFromBuffer(pBody, nci.pDataSize - headerSize, &bs);
-			LoadLevelDataInternal(pTileMap, &bs, pDC, atlas, pData);
 			if(pData->levelDataHandlerExtender)
 			{
 				pData->levelDataHandlerExtender(pData, &bs);
 			}
+			LoadLevelDataInternal(pTileMap, &bs, pDC, atlas, pData);
+			
 			free(nci.pData);
 			goto level_loaded;
 		}
@@ -304,6 +310,7 @@ static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float delt
 	struct NetworkQueueItem nqi;
 	while(NW_DequeueData(&nqi))
 	{
+		Log_Info("Recieved data from client %i", nqi.client);
 		u8* pBody = NULL;
 		int headerSize = 0;
 		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
@@ -342,6 +349,9 @@ static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float delt
 			DoServerRPCs(pLayer, deltaT);
 			break;
 		case G2DPacket_WorldState:
+			break;
+		default:
+			Log_Error("Game2DLayer server recieved unknown packet type (%i)");
 			break;
 		}
 	}
