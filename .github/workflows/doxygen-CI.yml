@@ -18,6 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Generate .dox files
+        id: build
+        run: |
+          cd ./Stardew/engine/scripts
+          python3 CreateDoxFiles.py
+
       - name: Build static files
         id: build
         run: |
