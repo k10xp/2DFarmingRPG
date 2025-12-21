@@ -1,5 +1,10 @@
 name: Doxygen CI
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  
 on:
   push:
     branches: [ "master" ]
