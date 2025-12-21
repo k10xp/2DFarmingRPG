@@ -111,6 +111,7 @@ struct AnimatedSprite
     struct Transform2D transform;
 };
 
+/// @brief An entity component tagged union - there are a fixed number built into the engine
 struct Component2D
 {
     enum ComponentType type;
@@ -140,14 +141,31 @@ enum EngineBuiltinEntityType
 
 struct BinarySerializer;
 
+/// @brief Games using the engine should call this to add types of entity to be serialized
+/// @param typeID Entity type
+/// @param pair pair of functions to serialize and deserialize
 void Et2D_RegisterEntityType(u32 typeID, struct EntitySerializerPair* pair);
 
 void Et2D_Init(RegisterGameEntitiesFn registerGameEntities);
 
+/// @brief 
+/// @param pCollection - collection to add to
+/// @param pEnt - Entity to add
+/// @param bOwned - Does this host own the entity or is it owned by another player on the network, no effect if single player
+/// @return Entity handle
 HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt);
 
+/// @brief 
+/// @param pLayer 
+/// @param pCollection 
+/// @param hEnt 
 void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollection* pCollection, HEntity2D hEnt);
 
+
+/// @brief 
+/// @param pCollection 
+/// @param hEnt 
+/// @return - entity handle
 struct Entity2D* Et2D_GetEntity(struct Entity2DCollection* pCollection, HEntity2D hEnt);
 
 /* both serialize and deserialize */

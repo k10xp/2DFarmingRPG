@@ -3,9 +3,9 @@
 
 struct GameLayer2DData;
 
-/*
-    callbacks for Game2DLayer networking
-*/
+
+/// @brief callbacks for Game2DLayer networking
+/// @param pLayer 
 void WfNetworkInit(struct GameLayer2DData* pLayer);
 
 #endif

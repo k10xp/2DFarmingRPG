@@ -11,6 +11,7 @@
 #include "ObjectPool.h"
 #include "Network.h"
 #include "Log.h"
+#include "NetworkID.h"
 
 static VECTOR(struct EntitySerializerPair) pSerializers = NULL;
 
@@ -192,20 +193,17 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
     pEnt->onDestroy(pEnt, pLayer);
     pCollection->gNumEnts--;
     FreeObjectPoolIndex(pCollection->pEntityPool, hEnt);
-    //FreeObjectPool(pCollection->dynamicEntities.pDynamicListItemPool);
 }
 
 HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt)
 {
-    static int netID = 0;
-
     /* 
         - assign new ID at this point if we're the server.
-        - if we're the client it will be serialized 
+        - if we're the client it might be serialized or it might be "guessed" by the client depending on context
     */
     if(NW_GetRole() == GR_ClientServer)
     {
-        pEnt->networkID = netID++;
+        pEnt->networkID = NetID_GetID();
     }
 
     HEntity2D hEnt = NULL_HANDLE;
@@ -393,6 +391,7 @@ void Et2D_DeserializeCommon(struct BinarySerializer* bs, struct Entity2D* pOutEn
         if(bs->ctx == SCTX_ToNetwork)
         {
             BS_DeSerializeI32(&pOutEnt->networkID, bs);
+            NetID_DeserializedNewID(pOutEnt->networkID);
         }
 
         Et2D_PopulateCommonHandlers(pOutEnt);
@@ -435,7 +434,6 @@ void Et2D_IterateEntities(struct Entity2DCollection* pCollection, Entity2DIterat
             break;
         hOnEnt = pEntity->nextSibling;
     }
-    volatile int e = 0;
 }
 
 float Entity2DGetSortVal(struct Entity2D* pEnt)

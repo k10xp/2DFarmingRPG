@@ -393,6 +393,9 @@ static void WfPrintPlayerInfo(struct Entity2D* pEnt)
     );
 }
 
+#include "Network.h"
+#include "NetworkID.h"
+
 void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
 {
     struct GameLayer2DData* pData = pLayer->userData;
@@ -411,6 +414,10 @@ void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer
     pEntData->state = WfWalking;
     pEntData->bNetworkControlled = bNetworkControlled;
     pEntData->networkPlayerNum = networkPlayerNum - 1;
+    if(!bNetworkControlled && NW_GetRole() == GR_Client)
+    {
+        pEnt->networkID = NetID_GetID();
+    }
 
     pEnt->numComponents = 0;
     pEnt->type = WfEntityType_Player;
