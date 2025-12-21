@@ -59,28 +59,24 @@ struct WidgetScale
 	float scaleY;
 };
 
-/*
-	some are relative to their parent. In which case these should be relative to THEIR parent, fixed, or the top level window.
-*/
+/// @brief 	some are relative to their parent. In which case these should be relative to THEIR parent, fixed, or the top level window.
 enum WidgetDimType
 {
-	/* take as much space as it naturally takes */
+	/// @brief take as much space as it naturally takes
 	WD_Auto,
-	/* stretch to fill all available space */
+	/// @brief stretch to fill all available space
 	WD_Stretch,
-	/* a literal value */
+	/// @brief a literal value
 	WD_Pixels,
-	/*
-		a fraction that's relative with other children.
-		meaning this:
-
-		width: 1* ------|
-		width: 2* -----------|
-		              | a |   b  |
-		ui element a is twice the width of ui element b, and together they take up the entirety of their parents width
-	*/
+	
+	/// @brief a fraction that's relative with other children.
+	///	meaning this:
+	/// width: 1* ------|
+	/// width: 2* -----------|
+	///               | a |   b  |
+	/// ui element a is twice the width of ui element b, and together they take up the entirety of their parents width
 	WD_StretchFraction,
-	/* a percentage of parents dimension but as a decimal between 0 and 1 */
+	/// @brief a percentage of parents dimension but as a decimal between 0 and 1 
 	WD_Percentage
 };
 
@@ -143,9 +139,7 @@ typedef void (*WidgetMousePosCallbackFn)(struct UIWidget* pWidget, float x, floa
 typedef void (*WidgetMouseBtnCallbackFn)(struct UIWidget* pWidget, float x, float y, int btn);
 typedef void (*WidgetFocusChangeCallbackFn)(struct UIWidget* pWidget);
 
-/// <summary>
-/// this isn't some "hungarian notation" shit - the name refers to widget callbacks defined as C functions!
-/// </summary>
+/// @brief this isn't some "hungarian notation" shit - the name refers to widget callbacks defined as C functions!
 struct CWidgetMouseCallback
 {
 	enum WidgetCallbackTypes type;
@@ -154,10 +148,8 @@ struct CWidgetMouseCallback
 		WidgetMousePosCallbackFn mousePosFn;
 		WidgetMouseBtnCallbackFn mouseBtnFn;
 		WidgetFocusChangeCallbackFn focusChangeFn;
-		/*
-			here, check this out...
-			A random value we can check is zero to determine if the callback is set
-		*/
+
+		/// @brief A random value we can check is zero to determine if the callback is set
 		u64 bActive;
 	}callback;
 };
@@ -268,21 +260,18 @@ float UI_ResolveWidthDimPxls(struct UIWidget* pWidget, const struct WidgetDim* d
 
 float UI_ResolveHeightDimPxls(struct UIWidget* pWidget, const struct WidgetDim* dim);
 
-/// <summary>
-/// Init common attributes that all widgets can have
-///		- "the base class constructor"
-/// </summary>
-/// <param name="pInNode"></param>
-/// <param name="outWidget"></param>
+
+/// @brief Init common attributes that all widgets can have
+/// - "the base class constructor"
+/// @param pInNode 
+/// @param outWidget 
 void UI_WidgetCommonInit(struct DataNode* pInNode, struct UIWidget* outWidget);
 
-/// <summary>
-/// print a text representation of the widget tree.
+/// @brief print a text representation of the widget tree.
 /// Falls appart if a widget fails to implement its debug print hook correctly.
-/// Shit.
-/// </summary>
-/// <param name="inWidget"></param>
-/// <param name="pPrintfFn"></param>
+/// Shit. DON'T USE
+/// @param inWidget 
+/// @param pPrintfFn 
 void UI_DebugPrintCommonWidgetInfo(const struct UIWidget* inWidget, PrintfFn pPrintfFn);
 
 void* UI_Helper_OnOutputVerts(struct UIWidget* pWidget, VECTOR(WidgetVertex) pOutVerts);
@@ -291,77 +280,54 @@ void UI_Helper_OnLayoutChildren(struct UIWidget* pWidget, struct UIWidget* pPare
 
 void UI_GetWidgetSize(HWidget hWidget, float* pOutW, float* pOutH);
 
-/// <summary>
-/// get top left BEFORE padding is applied (the raw top left)
-/// </summary>
-/// <param name="hWidget"></param>
-/// <param name="pOutLeft"></param>
-/// <param name="pOutTop"></param>
+/// @brief get top left BEFORE padding is applied (the raw top left)
+/// @param hWidget 
+/// @param pOutLeft 
+/// @param pOutTop 
 void UI_GetWidgetTopLeft(HWidget hWidget, float* pOutLeft, float* pOutTop);
 
 void UI_GetWidgetPadding(HWidget hWidget, float* pOutPaddingTop, float* pOutPaddingBottom, float* pOutPaddingLeft, float* pOutPaddingRight);
 
-/// <summary>
-/// send a mouse event to the widget that will be handled either by either or both a lua function and a 
+/// @brief send a mouse event to the widget that will be handled either by either or both a lua function and a 
 /// c function. If both the C function is called first
-/// </summary>
-/// <param name="pWidget"></param>
-/// <param name=""></param>
-/// <param name="pMouseInfo">
-///		data about the event
-/// </param>
+/// @param pWidget 
+/// @param  
+/// @param pMouseInfo data about the event
 void UI_SendWidgetMouseEvent(struct UIWidget* pWidget, enum WidgetCallbackTypes type, struct WidgetMouseInfo* pMouseInfo);
 
-/// <summary>
-/// Get the AABB of the widget, excluding padding.
-/// </summary>
-/// <param name="outRect"></param>
-/// <param name="hWidget"></param>
+/// @brief Get the AABB of the widget, excluding padding.
+/// @param outRect 
+/// @param hWidget 
 void UI_GetHitBox(GeomRect outRect, HWidget hWidget);
 
-/// <summary>
-/// is the value of an xml attribute property
+/// @brief 
+/// @param attributeValue 
+/// @return is the value of an xml attribute property
 /// an absolute value (return false) or is it deferrred to
 /// a getter on the lua viewmodel (return true).
 /// Special syntax for this is to surround the name of a view model property with "{" and "}"
-/// </summary>
 bool UI_IsAttributeStringABindingExpression(const char* attributeValue);
 
-/// <summary>
-/// Add a bound string property entry to the widget
+/// @brief Add a bound string property entry to the widget
 /// and initialise a value by calling the binding getter function
-/// </summary>
-/// <param name="pWidget">
-///		theWidget to add the property binding. When the value changes 
+/// @param pWidget theWidget to add the property binding. When the value changes 
 ///		the property of the widget will change when OnPropertyChanged is called.
 ///     2 way bindings will also be introduced for sliders, text entry fields, ect
-/// </param>
-/// <param name="inBoundPropertyName">
-///		bound property name - as it appears in the viewmodel lua table
-/// </param>
-/// <param name="inBindingExpression">
-///		the incoming binding expression, i.e. {spritename}
-/// </param>
-/// <param name="pOutData">
-///		the value returned from calling the lua string getter - allocates a string setting the pointer.
+/// @param inBoundPropertyName bound property name - as it appears in the viewmodel lua table
+/// @param inBindingExpression the incoming binding expression, i.e. {spritename}
+/// @param pOutData the value returned from calling the lua string getter - allocates a string setting the pointer.
 ///		user must deallocate
-/// </param>
-/// <param name="viewmodelTableIndex">
-///		the index in the lua registry that contains the lua table containing the function to call
-/// </param>
+/// @param viewmodelTableIndex the index in the lua registry that contains the lua table containing the function to call
 void UI_AddStringPropertyBinding(struct UIWidget* pWidget, char* inBoundPropertyName, char* inBindingExpression, char** pOutData, int viewmodelTableIndex);
 
 void UI_AddIntPropertyBinding(struct UIWidget* pWidget, char* inBoundPropertyName, char* inBindingExpression, int* pOutData, int viewmodelTableIndex);
 
 void UI_AddFloatPropertyBinding(struct UIWidget* pWidget, char* inBoundPropertyName, char* inBindingExpression, float* pOutData, int viewmodelTableIndex);
 
-/// <summary>
-/// USER MUST FREE RETURNED PTR
+/// @brief USER MUST FREE RETURNED PTR
 /// append Get_ to the start of the string.
-/// Gett
-/// </summary>
-/// <param name="inBindingName"></param>
-/// <returns></returns>
+/// @param inBindingName 
+/// @return 
 char* UI_MakeBindingGetterFunctionName(const char* inBindingName);
 
 char* UI_MakeBindingSetterFunctionName(const char* inBindingName);

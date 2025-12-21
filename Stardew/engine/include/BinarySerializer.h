@@ -20,7 +20,9 @@ extern "c" {
 		char* pReadPtr;
 		char* pPath;
 		enum SerializationContext ctx;
-		int toClient; /* only valid if saving to network as a server */
+		
+		/** @brief only valid if saving to network as a server */
+		int toClient; 
 	};
 
 	void BS_CreateForLoadFromBuffer(void* buf, int size, struct BinarySerializer* pOutSerializer);

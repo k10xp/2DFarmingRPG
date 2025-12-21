@@ -6,6 +6,11 @@
 struct XMLUIData;
 struct DataNode;
 
+/// @brief Create a new button that displays a string of text
+/// @param hParent 
+/// @param pXMLNode 
+/// @param pUILayerData 
+/// @return 
 HWidget TextButtonWidgetNew(HWidget hParent, struct DataNode* pXMLNode, struct XMLUIData* pUILayerData);
 
 

@@ -1,4 +1,6 @@
-/*
+/**
+    @file DataNode.h
+    @brief
     Provides an abstraction layer between widget constructors and the data they need
     which can come from either an xml node or from the lua table on the top of the 
     lua stack (global for now) 
@@ -30,13 +32,13 @@ typedef bool (*GetDNBoolFn)(struct DataNode* pNode, const char* propName);
 typedef size_t (*GetDNStrlenFn)(struct DataNode* pNode, const char* propName);
 typedef void (*GetDNStrcpyFn)(struct DataNode* pNode, const char* propName, char* dest);
 
-/*
+/** @brief
     returns true if the property named propName on pNode is a string and matches cmpTo
 */
 typedef bool (*GetDNStrCmpFn)(struct DataNode* pNode, const char* propName, const char* cmpTo);
 
 
-/*
+/** @brief
     For the XML node implementation, these functions operate on the content of the node itself.
     For the lua one they operatoe on a property called "content"
 */
@@ -60,7 +62,8 @@ struct DataNode
     GetDNStrcpyContentFn fnGetContentStrcpy;
     GetDNStrCmpContentFn fnContentStrCmp;
 
-    void* pData; // xmlNode* or NULL for lua table on top of stack
+    /// @brief xmlNode* or NULL for lua table on top of stack
+    void* pData; 
 };
 
 #endif

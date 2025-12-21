@@ -8,6 +8,8 @@ extern "C" {
 
 #include <stdbool.h>
 
+/// @brief A hash map with strings for keys and any type for values
+/// doubles in size when the load factor is met, keeps KVPs as a linked list
 struct HashMap
 {
 	int capacity;
@@ -19,20 +21,46 @@ struct HashMap
 	float fLoadFactor;
 };
 
+/// @brief initializes the hashmap struct to a decfault value. you can change fLoadFactor afterwards but it sets it to a default value
+/// @param pMap 
+/// @param capacity 
+/// @param valSize size of individual values
 void HashmapInit(struct HashMap* pMap, int capacity, int valSize);
+
+/// @brief same as HashmapInit but sets load factor as well
+/// @param pMap 
+/// @param capacity 
+/// @param valSize 
+/// @param loadFactor size of individual values
 void HashmapInitWithLoadFactor(struct HashMap* pMap, int capacity, int valSize, float loadFactor);
+
+/// @brief Search for a key in the hash map, returns a pointer to the value or NULL if not present
+/// @param pMap 
+/// @param key 
+/// @return 
 void* HashmapSearch(struct HashMap* pMap, char* key);
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="pMap"></param>
-/// <param name="key"></param>
-/// <param name="pVal"></param>
-/// <returns> true if a new key and inserted, false if an existing key and value overwritten </returns>
+
+/// @brief 
+/// @param pMap 
+/// @param key 
+/// @param pVal 
+/// @return true if a new key and inserted, false if an existing key and value overwritten
 void* HashmapInsert(struct HashMap* pMap, char* key, void* pVal);
+
+/// @brief 
+/// @param pMap 
+/// @param key 
+/// @return 
 bool HashmapDeleteItem(struct HashMap* pMap, char* key);
+
+/// @brief 
+/// @param pMap 
 void HashmapDeInit(struct HashMap* pMap);
+
+/// @brief 
+/// @param pMap 
+/// @param hashMapName 
 void HashmapPrintEntries(struct HashMap* pMap, const char* hashMapName);
 
 struct HashmapKeyIterator
@@ -41,7 +69,12 @@ struct HashmapKeyIterator
 	struct KVP* pOnKVP;
 };
 
+/// @brief Get an iterator object that you can call "NextHashmapKey" with to iterate through the hashmaps keys
 struct HashmapKeyIterator GetKeyIterator(struct HashMap* pHashMap);
+
+/// @brief 
+/// @param  
+/// @return 
 char* NextHashmapKey(struct HashmapKeyIterator*);
 
 #ifdef __cplusplus

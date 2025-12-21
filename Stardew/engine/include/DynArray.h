@@ -18,13 +18,13 @@ void* VectorClear(void* vector);
 //unsigned int VectorSize(void* vector);
 void DestoryVector(void* vector);
 
+/// @brief 16 byte aligned
 typedef struct
 {
 	u32 itemSize;
 	u32 capacity;
 	u32 size;
 	u32 _padding;
-	// 16 byte aligned
 } VectorData;
 
 #define VectorSize(vector) ((((VectorData*)vector) - 1)->size)

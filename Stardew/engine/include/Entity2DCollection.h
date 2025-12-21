@@ -4,7 +4,8 @@
 #include "HandleDefs.h"
 #include "ObjectPool.h"
 
-/*
+/**
+    @brief
     Entities that are moving dynamically, we keep in a list so we can cull with brute force.
     The overhead of removing and inserting them from the quadtree every time they move is too much,
     while the quadtree remains a good option for static entities 

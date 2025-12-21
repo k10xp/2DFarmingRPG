@@ -7,8 +7,9 @@
 extern "C" {
 #endif
 
-/*
-	Event system used for sending messages between game layers.
+/**
+	@file GameFrameworkEvent.h
+	@brief system used for sending messages between game layers.
 */
 
 struct GameFrameworkEventListener;

@@ -30,7 +30,8 @@ float WidgetQuadHeight(const WidgetQuad* pInQuad);
 void ScaleWidgetQuad(float scaleX, float scaleY, WidgetQuad* pOutQuad);
 void SetWidgetQuadColour(WidgetQuad* pQuad, float r, float g, float b, float a);
 
-// clip any polys on output to be within this region
+/// @brief clip any polys on output to be within this region
+/// @param clipRect
 void SetClipRect(GeomRect clipRect);
 void UnsetClipRect();
 #endif

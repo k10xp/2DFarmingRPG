@@ -47,7 +47,8 @@ struct GameFrameworkLayer
 	OnPopFn onPop;
 	OnWindowDimsChangedFn onWindowDimsChanged;
 	unsigned int flags;
-	void* userData; // this is the game freamework users responsiblity to alloc and free
+	/// @brief it is the game framework users responsiblity to alloc and free
+	void* userData; 
 	enum GameFrameworkLayerType type;
 };
 
@@ -65,7 +66,8 @@ void GF_InputGameFramework(InputContext* context);
 void GF_DrawGameFramework(DrawContext* context);
 void GF_OnWindowDimsChanged(int newW, int newH);
 
-/*
+/**
+	@brief
 	Returns NULL if no layer below
 */
 struct GameFrameworkLayer* GF_GetLayerBelow(struct GameFrameworkLayer* pLayer);

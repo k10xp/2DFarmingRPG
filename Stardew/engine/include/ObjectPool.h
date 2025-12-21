@@ -14,13 +14,13 @@ void FreeObjectPoolIndex(void* pObjectPool, int indexToFree);
 
 void* FreeObjectPool(void* pObjectPool);
 
+/// @brief 16 byte aligned
 struct ObjectPoolData
 {
 	i64 objectSize;
 	i64 capacity;
 	i64 freeObjectsArraySize;
 	u64* freeObjectIndicessArray;
-	// 16 byte aligned
 };
 
 #define OBJECT_POOL(a) a*

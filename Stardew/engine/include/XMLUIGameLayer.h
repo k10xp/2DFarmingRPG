@@ -22,30 +22,35 @@ struct DataNode;
 
 struct XMLUIGameLayerOptions
 {
+	/// @brief draw context (should really just be globally accessible: TODO: fix)
 	DrawContext* pDc;
+
+	/// @brief path to xml file defining the UI
 	const char* xmlPath;
-	bool bLoadImmediately; // eg, when XMLUIGameLayer_Get is called, do we load the xml file?
+
+	/// @brief eg, when XMLUIGameLayer_Get is called, do we load the xml file?
+	bool bLoadImmediately;
 };
 
+/// @brief Function pointer typedef for adding a new widget, described by pDataNode as a child of hParent
+/// should return a handle to the created widget
 typedef HWidget(*AddChildFn)(HWidget hParent, struct DataNode* pDataNode, struct XMLUIData* pUILayerData);
 
 #define XML_UI_MAX_PATH 256
 #define MAX_FOCUSED_WIDGETS 16
 
 
-/*
-	its a "request" because if an ancenstor of the requesting widget 
-	also requests then the request is overruled
-*/
+/// @brief its a "request" because if an ancenstor of the requesting widget 
+/// also requests then the request is overruled
 struct WidgetChildrenChangeRequest
 {
-	/* Registry index of the viewmodel table the function will be called on */
+	/// @brief Registry index of the viewmodel table the function will be called on
 	int regIndex;
 
-	/* Function that will generate new children for the widget */
+	/// @brief Function that will generate new children for the widget
 	const char* funcName;
 
-	/* Widget that will have new children */
+	/// @brief Widget that will have new children
 	HWidget hWidget;
 };
 
@@ -70,6 +75,9 @@ typedef struct XMLUIData
 }XMLUIData;
 
 
+/// @brief Get and possibly load (if bLoadImmediately) a ui layer defined by xml
+/// @param pLayer (Out) layer to turn into an xml ui layer
+/// @param pOptions options for creation
 void XMLUIGameLayer_Get(struct GameFrameworkLayer* pLayer, struct XMLUIGameLayerOptions* pOptions);
 
 void XMLUI_PushGameFrameworkLayer(const char* xmlPath);

@@ -10,10 +10,11 @@ extern "C" {
 struct SDTimer;
 
 
-// return true for the timer to be removed
+/// @brief return true for the timer to be removed
 typedef bool(*TimerCallbackFn)(struct SDTimer*);
 
-struct SDTimer // SD == stardew to avoid name collisions
+/// @brief SD == stardew to avoid name collisions
+struct SDTimer
 {
     bool bActive;
     bool bRepeat;

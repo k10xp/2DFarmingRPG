@@ -25,12 +25,14 @@ struct BinarySerializer;
 typedef void (*PreFirstInitFn)(struct GameLayer2DData* pGameLayerData);
 typedef void (*PreLoadLevelFn)(struct GameLayer2DData* pGameLayerData);
 
-/*
+/**
+	@brief
 	Extend the writing of the level data packet that servers send to clients
 */
 typedef void (*LevelDataPacketExtenderFn)(struct GameLayer2DData* pGameLayerData, struct BinarySerializer* pBS);
 
-/*
+/**
+	@brief
 	- Extend the handling of a level data request packet that the server reciever
 	- the client can send extra data by extending the G2D_Enqueue_RequestLevelData function by calling G2D_Extend_RequestLevelDataMessage and
 	registering an extender 
@@ -88,100 +90,100 @@ struct TileMap
 
 struct GameLayer2DData
 {
-	/* for convenience, a reference back to the layer */
+	/** @brief for convenience, a reference back to the layer */
 	struct GameFrameworkLayer* pLayer;
 
-	/* The top node of a quad tree that holds references to static sprites for culling */
+	/** @brief The top node of a quad tree that holds references to static sprites for culling */
 	HEntity2DQuadtreeNode hEntitiesQuadTree;
 
-	/* handle to atlas containing sprite data */
+	/** @brief handle to atlas containing sprite data */
 	hAtlas hAtlas;
 
-	/* tilemap comprised of a list of tilemap layers */
+	/** @brief tilemap comprised of a list of tilemap layers */
 	struct TileMap tilemap;
 
-	/* mostly pointless */
+	/** @brief mostly pointless */
 	bool bLoaded;
 
-	/*
+	/** @brief
 		When in this mode the game is paused and you have
 		a different set of controls to freely move the camera around,
 		in future I might add editing
 	*/
 	bool bFreeLookMode;
 
-	/* the one and only camera */
+	/** @brief the one and only camera */
 	struct Transform2D camera;
 
-	/*
+	/** @brief
 		Which layer, if any, is the camera clamped to.
 		If it is not clamped (the default) then this should be -1 
 	*/
 	int cameraClampedToTilemapLayer;
 
-	/*
+	/** @brief
 		controls for free look mode
 	*/
 	struct FreeLookCameraModeControls freeLookCtrls;
 
-	/*
+	/** @brief
 		buffers of vertices and indices populated each frame
 	*/
 	VECTOR(struct Worldspace2DVert) pWorldspaceVertices;
 	VECTOR(VertIndexT) pWorldspaceIndices;
 	H2DWorldspaceVertexBuffer vertexBuffer;
 
-	/*
+	/** @brief
 		Path of loaded atlas file
 	*/
 	char atlasFilePath[MAX_GAME_LAYER_ASSET_FILE_PATH_LEN];
 	
-	/*
+	/** @brief
 		path of loaded level file
 	*/
 	char tilemapFilePath[MAX_GAME_LAYER_ASSET_FILE_PATH_LEN];
 
-	/*
+	/** @brief
 		flag for whether the debug overlay is pushed on top of the game
 	*/
 	bool bDebugLayerAttatched;
 
-	/*
+	/** @brief
 		A message to display on the screen when the debug overlay is on top of the game2dlayer
 	*/
 	char debugMsg[256];
 
-	/*
+	/** @brief
 		Listens for the debug overlay game framework layer being pushed
 	*/
 	struct GameFrameworkEventListener* pDebugListener;
 
-	/*
+	/** @brief
 		Window width
 	*/
 	int windowW;
 
-	/*
+	/** @brief
 		Window height
 	*/
 	int windowH;
 
-	/*
+	/** @brief
 		Physics world handle
 	*/
 	HPhysicsWorld hPhysicsWorld;
 
-	/*
+	/** @brief
 		Entities collection
 	*/
 	struct Entity2DCollection entities;
 
-	/*
-		Game specifi data
+	/** @brief
+		Game specific data
 	*/
 	void* pUserData;
 
-	/* 
+	/** @brief 
 		a callback called when the layer is pushed, and the level and all entities are loaded, but have not had their init methods called yet. 
 		An opportunity for your game to load sprite handles from the atlas that the entities will use in their init methods.
 	*/
@@ -189,8 +191,8 @@ struct GameLayer2DData
 
 	PreLoadLevelFn preLoadLevelFn;
 
-	/*
-		HACK:
+	/** @brief
+		HACK :
 		todo: sort out the availabilty of these draw and input contexts
 		todo: use global getter for draw context
 	*/
@@ -201,19 +203,19 @@ struct GameLayer2DData
 	*/
 	bool bSkipDraw;
 
-	/*
+	/** @brief
 		Current location has changed in such a way that it needs to be saved, when a new area is moved to or you sleep
 	*/
 	bool bCurrentLocationIsDirty;
 
-	/*
-		AS THE SERVER:
+	/** @brief
+		AS THE SERVER :
 		Write extra game specific data to the level data packet the server sends initially to each client
 	*/
 	LevelDataPacketExtenderFn levelDataPacketExtender;
 
-	/*
-		AS THE SERVER:
+	/** @brief
+		AS THE SERVER :
 		Read extra game specific data from the level data request packet the client sends to the server
 
 		- extra data is written by extending the G2D_Enqueue_RequestLevelData function by calling G2D_Extend_RequestLevelDataMessage and
@@ -221,8 +223,8 @@ struct GameLayer2DData
 	*/
 	LevelDataRequestHandlerExtenderFn levelDataRequestHandlerExtender;
 
-	/*
-		AS THE CLIENT:
+	/** @brief
+		AS THE CLIENT :
 		Read extra game specific data the server has written to the initial level data packet
 	*/
 	LevelDataHandlerExtenderFn levelDataHandlerExtender;

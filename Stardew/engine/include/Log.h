@@ -28,7 +28,7 @@ int Log_Init();
 
 void Log_DeInit();
 
-/* logs with a level lower than this will be dropped */
+/** @brief logs with a level lower than this will be dropped */
 void Log_SetLevel(enum LogLvl lvl);
 
 #endif

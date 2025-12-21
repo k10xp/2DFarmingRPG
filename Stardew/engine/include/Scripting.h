@@ -43,20 +43,12 @@ void Sc_InitScripting();
 void Sc_DeInitScripting();
 bool Sc_OpenFile(const char* path);
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="funcName"></param>
-/// <param name="pArgs"></param>
-/// <param name="numArgs"></param>
-/// <param name="pAllocationFor">
-/// 
-/// What C memory allocation is the tables lifetime tied to. this value will be used for the reg table key.
-/// This is global and shared among other lua libraries, to get a unique key to store things in we use the pointer for a C memory 
-/// allocation. When the memory is deallocated the table should be deleted by calling Sc_DeleteTableInReg
-/// 
-/// </param>
-/// <returns> key to the table returned, stored in the registry table. 0 if failed </returns>
+
+/// @brief call a global lua function that returns a table, and store the table in the lua registry (lua_LGetRef)
+/// @param funcName 
+/// @param pArgs 
+/// @param numArgs 
+/// @return key to the table returned, stored in the registry table. 0 if failed
 int Sc_CallGlobalFuncReturningTableAndStoreResultInReg(const char* funcName, struct ScriptCallArgument* pArgs, int numArgs);
 
 void Sc_CallFuncInRegTableEntryTable(int regIndex, const char* funcName, struct ScriptCallArgument* pArgs, int numArgs, int numReturnVals);
@@ -71,10 +63,9 @@ size_t Sc_StackTopStringLen();
 void Sc_StackTopStrCopy(char* pOutString);
 void Sc_ResetStack();
 
-/// <summary>
-/// 
-/// </summary>
-/// <param name="index"> delete a table stored in the lua registry </param>
+
+/// @brief delete a table stored in the lua registry
+/// @param index 
 void Sc_DeleteTableInReg(int index);
 
 int Sc_Int();
@@ -99,13 +90,10 @@ bool Sc_StringCmp(const char* cmpTo);
 
 void Sc_DumpStack();
 
-/*
-	I only intend this to be used for unit testing, and in any games linking to the engine
-*/
+/// @brief only intended for unit testing, and in games linking to the engine
 typedef struct lua_State lua_State;
 void Sc_RegisterCFunction(const char* name, int(*fn)(lua_State*));
 
-/* will add these as and when needed for the game */
 void Sc_NewTableOnStack(int arrayElementHint, int nonArrayElementHint);
 void Sc_SetIntAtTableIndex(int index, int value);
 void Sc_SetIntAtTableKey(const char* key, int val);
@@ -114,12 +102,11 @@ void Sc_SetPointerAtTableKey(const char* key, void* ptr);
 int Sc_RefTable();
 void Sc_UnRefTable(int ref);
 
-/* 
-	(stack on table)
-	push index onto stack
-	push something to set at the index
-	call this to set the value at the index
-*/
+
+/// @brief (stack on table)
+/// push index onto stack
+/// push something to set at the index
+/// call this to set the value at the index
 void Sc_SetTable();
 
 void Sc_PushInt(int i);

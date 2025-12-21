@@ -38,7 +38,15 @@ void* TextWidget_OutputVerts(float left, float top, const struct WidgetPadding* 
 
 void TextWidget_Destroy(struct TextWidgetData* pData);
 
-// overlay a charcter at a given letter in the string
+/// @brief overlay a charcter at a given letter in the string
+/// @param left 
+/// @param top 
+/// @param padding 
+/// @param pData 
+/// @param charOverlay 
+/// @param letterOverlay 
+/// @param pOutVerts 
+/// @return 
 void* TextWidget_OutputAtLetter(float left, float top, const struct WidgetPadding* padding, struct TextWidgetData* pData, char charOverlay, int letterOverlay, VECTOR(WidgetVertex) pOutVerts);
 
 #endif // ! TEXTWIDGET_H

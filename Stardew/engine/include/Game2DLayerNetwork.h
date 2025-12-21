@@ -5,7 +5,12 @@
 struct GameFrameworkLayer;
 struct BinarySerializer;
 struct GameLayer2DData;
-/* Networking layer specific to game 2d layer */
+/**
+    @file Game2DLayerNetwork.h
+    @brief
+    Networking layer specific to game 2d layer 
+    
+*/
 
 enum G2DPacketType
 {

@@ -3,12 +3,11 @@
 
 #include "HandleDefs.h"
 
-/*
-
-A widget with fixed dimensions, optionally set in terms of its parents dims.
-Arranges its children according to docking position
-
-
+/**
+	@file CanvasWidget.h
+	@brief
+	A widget with fixed dimensions, optionally set in terms of its parents dims.
+	Arranges its children according to docking position
 */
 #include <stdbool.h>
 #include "Geometry.h"

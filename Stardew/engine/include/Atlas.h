@@ -101,13 +101,12 @@ hAtlas At_LoadAtlasEx(xmlNode* child0, struct DrawContext* pDC, struct EndAtlasO
 
 hSprite At_TilemapIndexToSprite(hAtlas atlas, TileIndex tileIndex);
 
-/// <param name="pSerializer">
-/// binary serialzier to load or save
-/// </param>
-/// <param name="atlas">
+/// @brief 
+/// @param pSerializer binary serialzier to load or save
+/// @param atlas 
 /// If loading, point to an unititialized handle to output the new handle
 /// If saving point to the handle of the atlas you want to save
-/// </param>
+/// @param pDC 
 void At_SerializeAtlas(struct BinarySerializer* pSerializer, hAtlas* atlas, struct DrawContext* pDC);
 
 void At_BeginTileset(int beginI);

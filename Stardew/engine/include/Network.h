@@ -5,9 +5,10 @@
 #include "SharedPtr.h"
 #include <stdlib.h>
 
-/*
-
-    - game can be started with command line args to configure it as a server or a client (or singleplayer)
+/**
+    @file Network.h
+    @brief
+     - game can be started with command line args to configure it as a server or a client (or singleplayer)
     - if server or client is chosen a thread is spawned to recieve date too and from the socket
     - it communicates with the game thread through 3 thread safe queues (named from the game threads perspective):
         - recieve data packets
@@ -31,7 +32,8 @@
 
 struct NetworkQueueItem
 {
-    /*
+    /**
+        @brief 
         if its a server recieve queue this is the sending client
         if its a server transmit queue then this is what client it should be sent to.
 

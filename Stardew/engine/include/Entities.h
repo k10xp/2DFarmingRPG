@@ -21,7 +21,7 @@ typedef void (*Entity2DInputFn)(struct Entity2D* pEnt, struct GameFrameworkLayer
 typedef void (*Entity2DOnDestroyFn)(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer);
 typedef void (*Entity2DGetBoundingBoxFn)(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 outTL, vec2 outBR);
 
-/* lower values drawn first */
+/** @brief lower values drawn first */
 typedef float (*Entity2DGetPreDrawSortValueFn)(struct Entity2D* pEnt);
 
 
@@ -46,7 +46,7 @@ typedef i32 EntityType;
 
 #define MAX_COMPONENTS 16
 
-/* types built into the engine */
+/** @brief types built into the engine */
 enum ComponentType
 {
     ETE_Sprite,
@@ -69,7 +69,7 @@ struct StaticCollider
     H2DBody id;
     struct PhysicsShape2D shape;
     bool bIsSensor;
-    /* If this is a non-sensor, does it generate sensor overlap events? Best for performance to only enable this if necessary */
+    /** @brief If this is a non-sensor, does it generate sensor overlap events? Best for performance to only enable this if necessary */
     bool bGenerateSensorEvents; 
     OnSensorShapeOverlapBeginFn onSensorOverlapBegin;
     OnSensorShapeOverlapEndFn onSensorOverlapEnd;
@@ -81,7 +81,7 @@ struct DynamicCollider
     struct PhysicsShape2D shape;
     struct KinematicBodyOptions options;
     bool bIsSensor;
-    /* If this is a non-sensor, does it generate sensor overlap events? Best for performance to only enable this if necessary */
+    /** @brief If this is a non-sensor, does it generate sensor overlap events? Best for performance to only enable this if necessary */
     bool bGenerateSensorEvents;
     OnSensorShapeOverlapBeginFn onSensorOverlapBegin;
     OnSensorShapeOverlapEndFn onSensorOverlapEnd;
@@ -168,9 +168,9 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
 /// @return - entity handle
 struct Entity2D* Et2D_GetEntity(struct Entity2DCollection* pCollection, HEntity2D hEnt);
 
-/* both serialize and deserialize */
+/** @brief both serialize and deserialize */
 
-/* return value == should continue iterating */
+/** @brief return value == should continue iterating */
 typedef bool(*Entity2DIterator)(struct Entity2D* pEnt, int i, void* pUser);
 
 
@@ -204,13 +204,13 @@ struct Entity2D
     
     union
     {
-        /* data */
+        /** @brief data */
         void* pData;
         HGeneric hData;
     }user;
     
     
-    /* just for convenience - this entities handle */
+    /** @brief just for convenience - this entities handle */
     HEntity2D thisEntity;
 
     HEntity2D nextSibling;
@@ -221,22 +221,22 @@ struct Entity2D
 
     bool bKeepInQuadtree;
 
-    /*  */
+    /** @brief  reference to the entity in the quad tree needed to remove it */
     HEntity2DQuadtreeEntityRef hQuadTreeRef;
 
-    /* keep in the dynamic list of brute force culled entities */
+    /** @brief keep in the dynamic list of brute force culled entities */
     bool bKeepInDynamicList;
 
-    /**/
+    /** @brief reference to the entity in the dynamic entities list needed to remove it */
     HDynamicEntityListItem hDynamicListRef;
 
-    /* 
+    /** @brief 
         Which object layer of the scene is it in? 
         Effects the order they are drawn in
     */
     int inDrawLayer;
 
-    /* do we serialize when the level is serialized? */
+    /** @brief do we serialize when the level is serialized? */
     bool bSerializeToDisk;
 
     bool bSerializeToNetwork;
@@ -244,7 +244,7 @@ struct Entity2D
     int networkID;
 };
 
-/*
+/** @brief
     Default base implementations, override with own behavior and then call these at the end
 */
 void Entity2DOnInit(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, DrawContext* pDrawCtx, InputContext* pInputCtx);

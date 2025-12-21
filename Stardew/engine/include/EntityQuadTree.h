@@ -5,6 +5,14 @@
 #include <cglm/cglm.h>
 #define VECTOR(a) a*
 
+/**
+ * @file EntityQuadTree.h
+ * @brief static entities are stored in here for fast querying to be rendered
+ * TODO: maybe rewrite this and replace with simpler binary space partioning
+ * dynamic entities are stored in a simple linked list and are linearly AABBB checked against
+ * the screen camera rectangle
+ */
+
 struct GameFrameworkLayer;
 
 struct Entity2DCollection;

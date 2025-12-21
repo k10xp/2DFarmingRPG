@@ -12,7 +12,9 @@ struct RootWidgetData
 
 bool GetRootWidgetIsDirty(HWidget hRootWidget);
 
-// if dirty, a whole tree rebuild will be triggered
+/// @brief  if dirty, a whole tree rebuild will be triggered
+/// @param hRootWidget 
+/// @param bIsDirty 
 void SetRootWidgetIsDirty(HWidget hRootWidget, bool bIsDirty);
 
 HWidget NewRootWidget();
