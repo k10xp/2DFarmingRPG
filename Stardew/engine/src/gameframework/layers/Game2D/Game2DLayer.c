@@ -787,7 +787,6 @@ void GameLayer2D_OnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawCont
 	};
 	Et2D_IterateEntities(&pData->entities, &InitEntities, &ctx);
 	pData->pDebugListener = Ev_SubscribeEvent("onDebugLayerPushed", &OnDebugLayerPushed, pData);
-	//XMLUI_PushGameFrameworkLayer("./Assets/debug_overlay.xml");
 
 	/*
 		HACK:

@@ -16,6 +16,7 @@
 #include "GameFrameworkEvent.h"
 #include "Scripting.h"
 #include <string.h>
+#include "Log.h"
 
 #define WALKING_UP_MALE "walk-base-male-up"
 #define WALKING_DOWN_MALE "walk-base-male-down"
@@ -41,8 +42,37 @@ void WfInitPlayer()
 
 static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, DrawContext* pDrawCtx, InputContext* pInputCtx)
 {
-    Entity2DOnInit(pEnt,pLayer, pDrawCtx, pInputCtx);
     struct WfPlayerEntData* pPlayerEntData = &gPlayerEntDataPool[pEnt->user.hData];
+    pPlayerEntData->bMovingThisFrame = false;
+    pPlayerEntData->bMovingLastFrame = false;
+    pPlayerEntData->metersPerSecondWalkSpeedBase = 100.0f;
+    pPlayerEntData->speedMultiplier = 3.0f;
+
+    /* 
+        we can't leave this uninitialized for a network controlled player, its fine to do so for a locally
+        controlled one as the input function sets it in all cases, but we set it in all cases anyway as it should just
+        have been initialized
+     */
+    pPlayerEntData->movementVector[0] = 0.0f;
+    pPlayerEntData->movementVector[1] = 0.0f; 
+    
+    if(pPlayerEntData->bNetworkControlled)
+    {
+        WfMakeIntoPlayerEntityBase(pEnt, pLayer, pPlayerEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos, true, pPlayerEntData->createNetPlayerOnInitArgs.netPlayerSlot);
+        Entity2DOnInit(pEnt,pLayer, pDrawCtx, pInputCtx);
+        vec2 vel = {0,0};
+        Ph_SetDynamicBodyVelocity(
+            pEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider.id,
+            vel
+        );
+        return;
+    }
+
+    Entity2DOnInit(pEnt,pLayer, pDrawCtx, pInputCtx);
+
+    pPlayerEntData->bNetworkControlled = false;
+    pPlayerEntData->networkPlayerNum = -1;
+
     pPlayerEntData->movementVector[0] = 0.0f;
     pPlayerEntData->movementVector[1] = 0.0f;
     pPlayerEntData->moveUpBinding    = In_FindButtonMapping(pInputCtx, "playerMoveUp");
@@ -64,12 +94,7 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
     In_ActivateButtonBinding(pPlayerEntData->prevItemBinding, &pPlayerEntData->playerControlsMask);
 
     In_SetMask(&pPlayerEntData->playerControlsMask, pInputCtx);
-    pPlayerEntData->bMovingThisFrame = false;
-    pPlayerEntData->bMovingLastFrame = false;
-    pPlayerEntData->bNetworkControlled = false;
-    pPlayerEntData->networkPlayerNum = -1;
-    pPlayerEntData->metersPerSecondWalkSpeedBase = 100.0f;
-    pPlayerEntData->speedMultiplier = 3.0f;
+    
     ClampCameraToTileLayer(pLayer->userData, 0);
 }
 
@@ -270,8 +295,13 @@ static void ChangeItem(struct GameFrameworkLayer* pLayer, struct Entity2D* pEnt,
 
 static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, InputContext* context)
 {
-    Entity2DInput(pEnt, pLayer, context);
     struct WfPlayerEntData* pPlayerEntData = &gPlayerEntDataPool[pEnt->user.hData];
+    if(pPlayerEntData->bNetworkControlled)
+    {
+        return;
+    }
+
+    Entity2DInput(pEnt, pLayer, context);
     pPlayerEntData->movementVector[0] = 0.0f;
     pPlayerEntData->movementVector[1] = 0.0f;
     pPlayerEntData->bMovingLastFrame = pPlayerEntData->bMovingThisFrame;
@@ -319,13 +349,7 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
     glm_vec2_normalize(pPlayerEntData->movementVector);
 }
 
-void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
-{
-}
 
-void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData)
-{
-}
 
 float WfGetPlayerSortPosition(struct Entity2D* pEnt)
 {
@@ -360,12 +384,25 @@ void WfPlayerPostPhys(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, 
     }
 }
 
+static void WfPrintPlayerInfo(struct Entity2D* pEnt)
+{
+    struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pEnt->user.hData];
+    Log_Info("Network controlled? : %s Network player number: %i",
+        pEntData->bNetworkControlled ? "true" : "false",
+        pEntData->networkPlayerNum
+    );
+}
+
 void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
 {
     struct GameLayer2DData* pData = pLayer->userData;
-    pEnt->nextSibling = NULL_HANDLE;
-    pEnt->previousSibling = NULL_HANDLE;
-    gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pEnt->user.hData);
+    //pEnt->nextSibling = NULL_HANDLE;
+    //pEnt->previousSibling = NULL_HANDLE;
+    if(pEnt->user.hData == NULL_HANDLE)
+    {
+        gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pEnt->user.hData);
+    }
+    
     struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pEnt->user.hData];
     pEntData->directionFacing = Down;
     pEntData->groundColliderCenter2EntTransform[0] = -32;
@@ -373,7 +410,7 @@ void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer
     pEntData->animationSet.layersMask = 0;
     pEntData->state = WfWalking;
     pEntData->bNetworkControlled = bNetworkControlled;
-    pEntData->networkPlayerNum = networkPlayerNum;
+    pEntData->networkPlayerNum = networkPlayerNum - 1;
 
     pEnt->numComponents = 0;
     pEnt->type = WfEntityType_Player;
@@ -435,10 +472,11 @@ void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer
     pEnt->getSortPos = &WfGetPlayerSortPosition;
     pEnt->postPhys = &WfPlayerPostPhys;
     pEnt->input = &OnInputPlayer;
+    pEnt->printEntityInfo = &WfPrintPlayerInfo;
     pEnt->bKeepInQuadtree = false;
     pEnt->bKeepInDynamicList = true;
     pEnt->bSerializeToDisk = false;
-    pEnt->bSerializeToNetwork = false;
+    pEnt->bSerializeToNetwork = true;
 
     struct WfInventory* pInv = WfGetPlayerInventory(pEntData);
     struct WfInventoryItem* pItem = &pInv->pItems[pInv->selectedItem];
@@ -446,6 +484,51 @@ void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer
     {
         struct WfItemDef* pDef = WfGetItemDef(pItem->itemIndex);
         pDef->onMakeCurrent(pEnt, pLayer);
+    }
+}
+
+void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData)
+{
+    /* 
+        to serialize:
+            - ground position
+            - persistent data index
+    */
+    BS_SerializeU32(1, bs); /* version */
+    vec2 out;
+    WfPlayerGetGroundContactPoint(pInEnt, out);
+    BS_SerializeFloat(out[0], bs);
+    BS_SerializeFloat(out[1], bs);
+    /* get the index of the next network player */
+    int numSlots = WfGetNumNetworkPlayerPersistentDataSlots();
+    BS_SerializeI32(numSlots, bs);
+}
+
+void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
+{
+    u32 val;
+    BS_DeSerializeU32(&val, bs);
+    switch(val)
+    {
+    case 1:
+        {
+            Log_Info("WfDeSerializePlayerEntity");
+            vec2 groundPoint = {0.0f, 0.0f};
+            i32 slotNum = 0;
+            gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pOutEnt->user.hData);
+            struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pOutEnt->user.hData];
+            BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], bs);
+            BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], bs);
+            BS_DeSerializeI32(&pEntData->createNetPlayerOnInitArgs.netPlayerSlot, bs);
+            pEntData->bNetworkControlled = true;
+            pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
+            Log_Info("Player pos: x %.2f, y %.2f. Player slot %i", 
+                pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], 
+                pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], slotNum);
+        }
+        break;
+    default:
+        Log_Error("DeserializePlayer unknown schema version %u", val);
     }
 }
 

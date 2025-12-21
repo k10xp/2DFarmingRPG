@@ -7,6 +7,8 @@
 #include "GameFramework.h"
 #include "WfWorld.h"
 #include "string.h"
+#include "Log.h"
+#include "Network.h"
 
 struct WfPlayerStartData
 {
@@ -32,12 +34,18 @@ void WfPlayerStartEntityOnInit(struct Entity2D* pEnt, struct GameFrameworkLayer*
 {
     struct GameLayer2DData* pLayerData = pLayer->userData;
     Entity2DOnInit(pEnt, pLayer, pDrawCtx, pInputCtx);
+    Log_Info("init playerstart entity");
     
     if(strcmp(WfWorld_GetCurrentLocationName(), gPlayerStartDataPool[pEnt->user.hData].from) == 0)
     {
+        Log_Info("Spawning local player");
         struct Entity2D ent;
+        ent.user.hData = NULL_HANDLE;
+        ent.nextSibling = NULL_HANDLE;
+        ent.previousSibling = NULL_HANDLE;
         WfMakeIntoPlayerEntity(&ent, pLayer, pEnt->transform.position);
         hCurrentLocalPlayer = Et2D_AddEntity(&pLayerData->entities, &ent);
+        Log_Info("Local player entity ID %i", hCurrentLocalPlayer);
         WfWorld_SetCurrentLocationName(gPlayerStartDataPool[pEnt->user.hData].thisLocation);
     }
 }

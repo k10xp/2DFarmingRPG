@@ -9,6 +9,7 @@
 #include "EntityQuadTree.h"
 #include "AnimatedSprite.h"
 #include "ObjectPool.h"
+#include "Network.h"
 #include "Log.h"
 
 static VECTOR(struct EntitySerializerPair) pSerializers = NULL;
@@ -25,8 +26,7 @@ bool DestroyCollectionItr(struct Entity2D* pEnt, int i, void* pUser)
 
 void Et2D_DestroyCollection(struct Entity2DCollection* pCollection, struct GameFrameworkLayer* pLayer)
 {
-    Et2D_IterateEntities(pCollection, &DestroyCollectionItr, pLayer);
-    
+    Et2D_IterateEntities(pCollection, &DestroyCollectionItr, pLayer);    
     pCollection->pEntityPool = FreeObjectPool(pCollection->pEntityPool);
 }
 
@@ -194,8 +194,6 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
     FreeObjectPoolIndex(pCollection->pEntityPool, hEnt);
     //FreeObjectPool(pCollection->dynamicEntities.pDynamicListItemPool);
 }
-
-#include "Network.h"
 
 HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt)
 {
@@ -455,4 +453,24 @@ void Et2D_PopulateCommonHandlers(struct Entity2D* pEnt)
     pEnt->onDestroy = &Entity2DOnDestroy;
     pEnt->getBB = &Entity2DGetBoundingBox;
     pEnt->getSortPos = &Entity2DGetSortVal;
+}
+
+bool PrintCollectionItr(struct Entity2D* pEnt, int i, void* pUser)
+{
+    int* pCount = pUser;
+    Log_Info("ENTITY ID: %i NET ID: %i TYPE: %i", pEnt->thisEntity, pEnt->networkID, pEnt->type);
+    if(pEnt->printEntityInfo)
+    {
+        pEnt->printEntityInfo(pEnt);
+    }
+    (*pCount)++;
+    return true;
+}
+
+void Et2D_PrintEntitiesInfo(struct Entity2DCollection* pCollection)
+{
+    int count = 0;
+    Et2D_IterateEntities(pCollection, &PrintCollectionItr, &count);
+    Log_Info("Num entities: %i", count);
+    EASSERT(count == pCollection->gNumEnts);
 }

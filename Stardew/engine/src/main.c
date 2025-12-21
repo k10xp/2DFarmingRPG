@@ -243,7 +243,17 @@ int EngineStart(int argc, char** argv, GameInitFn init)
 #endif
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Stardew Engine", NULL, NULL);
+    const char* windowTitle = "Stardew Engine";
+    switch(NW_GetRole())
+    {
+    case GR_Client:
+        windowTitle = "Stardew Engine (Client)";
+        break;
+    case GR_ClientServer:
+        windowTitle = "Stardew Engine (Server)";
+        break;
+    }
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, windowTitle, NULL, NULL);
     if (window == NULL)
     {
         /*std::cout << "Failed to create GLFW window" << std::endl;*/

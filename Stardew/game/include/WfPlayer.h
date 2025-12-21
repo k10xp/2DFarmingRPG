@@ -70,6 +70,18 @@ struct WfPlayerEntData
 
     enum WfPlayerState state;
 
+    /* 
+        its shit having to have this, the position to spawn the network player when it is initialized.
+        The network player is created in two steps, first they're deserialized into a player entity then the player entity is initialized.
+        We have to call WfMakeIntoPlayerEntityBase when it is initialized, and so must serialize args for it in the deserialize stage
+    */
+    struct 
+    {
+        vec2 netPlayerSpawnAtPos; 
+        int netPlayerSlot;
+    } createNetPlayerOnInitArgs;
+    
+
     int networkPlayerNum;
 
     /* flags section */

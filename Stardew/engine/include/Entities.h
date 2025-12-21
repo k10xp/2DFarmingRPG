@@ -34,6 +34,8 @@ typedef void(*RegisterGameEntitiesFn)(void);
 typedef void(*OnSensorShapeOverlapBeginFn)(struct GameFrameworkLayer* pLayer, HEntity2D hOverlappingEntity, HEntity2D thisSensorEntity);
 typedef void(*OnSensorShapeOverlapEndFn)(struct GameFrameworkLayer* pLayer, HEntity2D hOverlappingEntity, HEntity2D thisSensorEntity);
 
+typedef void(*PrintEntityInfoExtenderFn)(struct Entity2D* pInEnt);
+
 struct EntitySerializerPair
 {
     EntityDeserializeFn deserialize;
@@ -164,6 +166,8 @@ void Et2D_SerializeCommon(struct BinarySerializer* bs, struct Entity2D* pInEnt);
 void Et2D_InitCollection(struct Entity2DCollection* pCollection);
 void Et2D_DestroyCollection(struct Entity2DCollection* pCollection, struct GameFrameworkLayer* pLayer);
 
+void Et2D_PrintEntitiesInfo(struct Entity2DCollection* pCollection);
+
 struct Entity2D
 {
     /* handler functions */
@@ -175,6 +179,7 @@ struct Entity2D
     Entity2DOnDestroyFn onDestroy;
     Entity2DGetBoundingBoxFn getBB;
     Entity2DGetPreDrawSortValueFn getSortPos;
+    PrintEntityInfoExtenderFn printEntityInfo;
 
     struct Transform2D transform;
     EntityType type;
