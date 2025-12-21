@@ -4,7 +4,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  
+
 on:
   push:
     branches: [ "master" ]
@@ -21,6 +21,7 @@ jobs:
       - name: Build static files
         id: build
         run: |
+          sudo apt-get install graphviz
           sudo apt-get install doxygen
           doxygen
 
