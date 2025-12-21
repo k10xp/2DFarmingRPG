@@ -1,10 +1,14 @@
 # run this to populate the sha and build time defines in the WfVersion.h file, only run it in CI.
-# Written as a python script so it should hopefully work on windows 
+# and don't touch WfVersion.h except to increment the major minor and revision version numbers
+# Written as a python script so it works on windows 
 import subprocess
 import time
 
 def get_git_sha():
     return subprocess.check_output(["git", "log", "-1", "--format=%H"]).decode().strip()
+
+def get_git_branch():
+    return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode().strip()
 
 def main():
     data = ""
@@ -14,8 +18,12 @@ def main():
         print(f"sha: {sha}")
         formatted_time = time.strftime("%x-%X", time.gmtime())
         print(f"time: {formatted_time}")
-        data = data.replace("#define BUILD_SHA \"<local_build>\"", f"#define BUILD_SHA \"{sha}\"")
+        branch = get_git_branch()
+        print(f"branch: {branch}")
+        data = data.replace("BUILD_SHA \"<local_build>\"", f"BUILD_SHA \"{sha}\"")
         data = data.replace("BUILD_TIME \"<local_build>\"", f"BUILD_TIME \"{formatted_time}\"")
+        data = data.replace("WF_BRANCH \"main\"", f"WF_BRANCH \"{branch}\"")
+
     with open("./include/WfVersion.h", "w") as file:
         file.write(data)
 
