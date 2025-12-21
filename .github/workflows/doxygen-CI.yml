@@ -8,8 +8,11 @@ permissions:
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    paths:
+      - './Stardew/engine/src/**.c'
+      - './Stardew/engine/include/**.h'
+      - './Stardew/game/src/**.c'
+      - './Stardew/game/include/**.h'
 
 jobs:
   # Build job
