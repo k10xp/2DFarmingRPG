@@ -18,7 +18,12 @@ jobs:
     - name: Get Dependencies
       run: |
         cd Stardew
-        bash GetDependencies.sh 
+        bash GetDependencies.sh
+
+    - name: Create version
+      run: |
+        cd Stardew/game
+        python3 make_release_version_header.py 
 
     - name: Build
       run: |

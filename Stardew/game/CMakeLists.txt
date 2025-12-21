@@ -28,6 +28,7 @@ add_executable( WarFarmer
     src/items/WfBasicScythe.c
     src/items/WfBasicSword.c
     src/ui/WfUI.c
+    src/WfVersion.c
 )
 
 target_include_directories(WarFarmer PRIVATE include)

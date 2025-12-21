@@ -20,7 +20,12 @@ jobs:
       run: |
         cd Stardew
         cmd /c "GetDependenciesConan.bat"
-    
+
+    - name: Create version
+      run: |
+        cd Stardew/game
+        python make_release_version_header.py 
+
     - name: Build
       run: |
         cd Stardew

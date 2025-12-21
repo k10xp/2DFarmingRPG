@@ -20,6 +20,7 @@
 #include "WfScriptFunctions.h"
 #include "ANSIColourCodes.h"
 #include "Log.h"
+#include "WfVersion.h"
 
 /* A policy of containment means we must keep this function static, lest the spectre of communism haunt other translation units. */
 static void KarlMarx()
@@ -64,6 +65,11 @@ static void KarlMarx()
     printf(marx);
 }
 
+void WfPrintVersion()
+{
+    Log_Info(WfGetVersionString());
+}
+
 
 void WfEngineInit()
 {
@@ -77,6 +83,7 @@ void WfEngineInit()
 void GameInit(InputContext* pIC, DrawContext* pDC)
 {
     KarlMarx();
+    WfPrintVersion();
     WfGameInit();
     WfEngineInit();
     WfInit();
