@@ -62,3 +62,4 @@ int main(int argc, char** argv)
 If you use the built in Game2DLayer your game can register entity types with asset tooling and the entity system.
 
 For more information on this see Entities.md and Assets.md
+
