@@ -5,10 +5,15 @@ A 2D Game engine and farming RPG for windows and Linux.
 
 # Engine Docs
 
+engine/docs folder:
+
 - [Asset Tools](Stardew/engine/docs/AssetTools.md)
 - [Entities](Stardew/engine/docs/Entities.md)
 - [Game](Stardew/engine/docs/Game.md)
 - [UI](Stardew/engine/docs/UI.md)
+
+doxygen docs:
+https://jimmarshall35.github.io/2DFarmingRPG/
 
 # Build
 
