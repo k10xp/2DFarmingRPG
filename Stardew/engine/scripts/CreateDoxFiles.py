@@ -5,7 +5,7 @@ import os
 
 template = """
 
-/** \\page <<PAGE_NAME>>
+/** \\mainpage Docs
  
 <<PAGE_CONTENT>>
  
@@ -14,6 +14,7 @@ template = """
 """
 
 def main():
+    data = ""
     for file in os.listdir("../docs"):
         path = os.path.join("../docs", file)
         outPath = os.path.join("../src", file).replace(".md", ".dox")
@@ -23,8 +24,11 @@ def main():
             md = f.read()
             r = template.replace("<<PAGE_NAME>>", file[:-3])
             r = r.replace("<<PAGE_CONTENT>>", md)
-        with open(outPath, "w") as f:
-            f.write(r)
+            data += r
+            data += "\n"
+
+    with open("../src/mainpage.dox", "w") as f:
+        f.write(r)
     pass
 
 main()
