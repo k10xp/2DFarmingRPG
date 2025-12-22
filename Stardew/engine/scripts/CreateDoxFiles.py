@@ -5,7 +5,7 @@ import os
 
 template = """
 
-/** \page <<PAGE_NAME>>
+/** \\page <<PAGE_NAME>>
  
 <<PAGE_CONTENT>>
  
