@@ -28,7 +28,7 @@ def main():
             data += "\n"
 
     with open("../src/mainpage.dox", "w") as f:
-        f.write(r)
+        f.write(data)
     pass
 
 main()
