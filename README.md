@@ -18,6 +18,7 @@ To Build:
       - MSVC toolchain
       - Conan package manager
       - CMake
+      - Python 3
   - Run GetDependenciesConan.bat
   - Run BuildRelease.bat
   - Run compile_assets.bat (this likely won't as it hasn't been maintained - copy the linux .sh one)
@@ -26,6 +27,7 @@ To Build:
   - Buildtime Dependencies
     - GCC toolchain
     - CMake
+    - Python 3
   - Run GetDependencies.sh
   - Run BuildDebug.sh
   - Run compile_assets.sh
