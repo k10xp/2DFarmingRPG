@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate .dox files
-        id: gen dox
+        id: gen_dox
         run: |
           cd ./Stardew/engine/scripts
           python3 CreateDoxFiles.py
