@@ -15,6 +15,26 @@ engine/docs folder:
 doxygen docs:
 https://jimmarshall35.github.io/2DFarmingRPG/
 
+# Runtime Dependencies
+
+System supplied:
+(Should exist as system packages on linux, or gotten through conan package manager for windows build - version numbers are the versions conan fetches)
+- libxml2/2.13.8 
+- freetype/2.13.3
+- lua/5.4.7
+- glfw/3.4
+- gtest/1.16.0
+
+Future work will be to make the linux build use conan for consistency, I don't mind having the vendored libraries
+
+Vendored:
+- Box2D
+- cJSON
+- glad
+- CGLM
+- netcode
+
+
 # Build
 
 To Build:
