@@ -28,7 +28,6 @@ static void LoadTilesUncompressedV1(struct TileMapLayer* pLayer, struct BinarySe
 	BS_BytesRead(pBS, allocSize, (char*)pLayer->Tiles);
 }
 
-
 void TilemapLayer_GetTLBR(vec2 tl, vec2 br, struct TileMapLayer* pTMLayer)
 {
 
@@ -289,6 +288,24 @@ static void DoServerRPCs(struct GameFrameworkLayer* pLayer, float deltaT)
 
 }
 
+struct NetworkQueueItem* GetLatestStateUpdate(VECTOR(struct NetworkQueueItem) dequeuedStateUpdates)
+{
+	struct NetworkQueueItem* latest = NULL;
+	if(VectorSize(dequeuedStateUpdates))
+	{
+		latest = &dequeuedStateUpdates[0];
+		/* we're only interested in the latest one.  */
+		for(int i=0; i<VectorSize(dequeuedStateUpdates); i++)
+		{
+			if(dequeuedStateUpdates[i].sequenceNumber > latest->sequenceNumber)
+			{
+				latest = &dequeuedStateUpdates[i];
+			}
+		}	
+	}
+	return latest;
+}
+
 static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 {
 	struct GameLayer2DData* pData = pLayer->userData;
@@ -305,6 +322,12 @@ static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float delt
 			Log_Info("Client %i disconnected", nce.client);
 			break;
 		}
+	}
+
+	static VECTOR(struct NetworkQueueItem) dequeuedStateUpdates = NULL;
+	if(!dequeuedStateUpdates)
+	{
+		dequeuedStateUpdates = NEW_VECTOR(struct NetworkQueueItem);
 	}
 
 	struct NetworkQueueItem nqi;
@@ -349,12 +372,20 @@ static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float delt
 			DoServerRPCs(pLayer, deltaT);
 			break;
 		case G2DPacket_WorldState:
+			VectorPush(dequeuedStateUpdates, &nqi);
 			break;
 		default:
 			Log_Error("Game2DLayer server recieved unknown packet type (%i)");
 			break;
 		}
 	}
+	struct NetworkQueueItem* pNqi = GetLatestStateUpdate(dequeuedStateUpdates);
+	if(pNqi)
+	{
+		/* apply the latest state update */
+		dequeuedStateUpdates = VectorClear(dequeuedStateUpdates);
+	}
+	
 }
 
 static void PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
@@ -362,6 +393,13 @@ static void PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float delt
 	struct GameLayer2DData* pData = pLayer->userData;
 
 	struct NetworkConnectionEvent nce;
+
+	static VECTOR(struct NetworkQueueItem) dequeuedStateUpdates = NULL;
+	if(!dequeuedStateUpdates)
+	{
+		dequeuedStateUpdates = NEW_VECTOR(struct NetworkQueueItem);
+	}
+
 	while(NW_DequeueConnectionEvent(&nce))
 	{
 		switch(nce.type)
@@ -392,8 +430,15 @@ static void PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float delt
 		case G2DPacket_RPC:
 			break;
 		case G2DPacket_WorldState:
+			VectorPush(dequeuedStateUpdates, &nqi);
 			break;
 		}
+	}
+	struct NetworkQueueItem* pNqi = GetLatestStateUpdate(dequeuedStateUpdates);
+	if(pNqi)
+	{
+		/* apply the latest state update */
+		dequeuedStateUpdates = VectorClear(dequeuedStateUpdates);
 	}
 }
 

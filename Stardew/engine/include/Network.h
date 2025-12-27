@@ -3,6 +3,7 @@
 
 #include "ThreadSafeQueue.h"
 #include "SharedPtr.h"
+#include "IntTypes.h"
 #include <stdlib.h>
 
 /**
@@ -43,6 +44,7 @@ struct NetworkQueueItem
     SHARED_PTR(void) pData;
     int pDataSize;
     bool bReliable;
+    u64 sequenceNumber;
 };
 
 enum NetworkConnectionEventType

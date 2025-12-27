@@ -442,6 +442,7 @@ static void RecievePacketsBase(void* serverOrClient, struct NetworkThreadQueues*
                 {
                     
                     struct NetworkQueueItem qItem;
+                    qItem.sequenceNumber = packet_sequence;
                     qItem.client = client_index;
                     qItem.pData = malloc(payloadSize);
                     qItem.pDataSize = payloadSize;
@@ -638,11 +639,8 @@ static void DoTXQueueBase(struct NetworkThreadQueues* pQueues, void* serverOrCli
                 Sptr_RemoveRef(item.pData);
             }
         }
-        
     }
 }
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Client
 
@@ -738,8 +736,6 @@ DECLARE_THREAD_PROC(ClientThread, arg)
     netcode_client_connect( client, connect_token );
 
     bool quit = false;
-
-    
 
     while ( !quit )
     {
