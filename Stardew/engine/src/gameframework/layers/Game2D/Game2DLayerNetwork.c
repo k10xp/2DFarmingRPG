@@ -124,7 +124,7 @@ void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 			EASSERT(false);
 			break;
 		case G2DPacket_RPC:
-			G2D_DoRPC(pLayer->userData, pBody, nqi.client);
+			G2D_DoRPC(pLayer, pLayer->userData, pBody, nqi.client);
 			break;
 		case G2DPacket_WorldState:
 			VectorPush(dequeuedStateUpdates, &nqi);
@@ -183,7 +183,7 @@ void G2D_PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
 			EASSERT(false);
 			break;
 		case G2DPacket_RPC:
-			G2D_DoRPC(pLayer->userData, pBody, nqi.client);
+			G2D_DoRPC(pLayer, pLayer->userData, pBody, nqi.client);
 			break;
 		case G2DPacket_WorldState:
 			VectorPush(dequeuedStateUpdates, &nqi);
@@ -352,7 +352,7 @@ void G2D_SendRPC(int client, enum Game2DRPCType type, void* pRPCData)
     BS_Finish(&bs);
 }
 
-void G2D_DoRPC(struct GameLayer2DData* pData, u8* pRPCData, int client)
+void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData, u8* pRPCData, int client)
 {
 	u8* rpcPacketBody = NULL;
 	enum Game2DRPCType type = G2D_ParseRPCPacket(pRPCData, &rpcPacketBody);
@@ -409,7 +409,10 @@ void G2D_DoRPC(struct GameLayer2DData* pData, u8* pRPCData, int client)
                         } 
                     }
 
-                    Et2D_AddEntity(&pData->entities, &ent);
+					/* TODO: perhaps init-ing entities should take place at a given point in the loop */
+                    HEntity2D hEnt = Et2D_AddEntityNoNewNetID(&pData->entities, &ent);
+					struct Entity2D* pEnt = Et2D_GetEntity(&pData->entities, hEnt);
+					pEnt->init(pEnt, pLayer, pData->pDrawContext, NULL);
                 }
                 break;
             default:

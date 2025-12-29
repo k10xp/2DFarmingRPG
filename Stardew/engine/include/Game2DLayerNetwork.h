@@ -86,11 +86,17 @@ enum Game2DRPCType G2D_ParseRPCPacket(u8* packet, u8** pOutBody);
 /// @param pData 
 /// @param pRPCData 
 /// @param client the number of the client who has sent the RPC, or -1 if the server has sent it and you are a client
-void G2D_DoRPC(struct GameLayer2DData* pData, u8* pRPCData, int client);
+void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData, u8* pRPCData, int client);
 
 void G2D_PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT);
 
 void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT);
+
+/// @brief Send an RPC
+/// @param client client to send to - send -1 if you're a client yourself
+/// @param type type of rpc to send
+/// @param pRPCData a struct appropriate to construct the rpc message - see src 
+void G2D_SendRPC(int client, enum Game2DRPCType type, void* pRPCData);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////// RPC data structs
 

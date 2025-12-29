@@ -148,12 +148,19 @@ void Et2D_RegisterEntityType(u32 typeID, struct EntitySerializerPair* pair);
 
 void Et2D_Init(RegisterGameEntitiesFn registerGameEntities);
 
-/// @brief 
+/// @brief Add, but don't initialize, the entity. If you're the server, a new net ID will be assigned
 /// @param pCollection - collection to add to
 /// @param pEnt - Entity to add
 /// @param bOwned - Does this host own the entity or is it owned by another player on the network, no effect if single player
 /// @return Entity handle
 HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt);
+
+/// @brief Add, but don't initialize, the entity. If you're the server, a new net ID won't be assigned
+/// @param pCollection - collection to add to
+/// @param pEnt - Entity to add
+/// @param bOwned - Does this host own the entity or is it owned by another player on the network, no effect if single player
+/// @return Entity handle
+HEntity2D Et2D_AddEntityNoNewNetID(struct Entity2DCollection* pCollection, struct Entity2D* pEnt);
 
 /// @brief 
 /// @param pLayer 

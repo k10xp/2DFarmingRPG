@@ -195,13 +195,13 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
     FreeObjectPoolIndex(pCollection->pEntityPool, hEnt);
 }
 
-HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt)
+static HEntity2D Et2D_AddEntityBase(struct Entity2DCollection* pCollection, struct Entity2D* pEnt, bool bAssignNetID)
 {
     /* 
         - assign new ID at this point if we're the server.
         - if we're the client it might be serialized or it might be "guessed" by the client depending on context
     */
-    if(NW_GetRole() == GR_ClientServer)
+    if(NW_GetRole() == GR_ClientServer && bAssignNetID)
     {
         pEnt->networkID = NetID_GetID();
     }
@@ -229,6 +229,16 @@ HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D
     }
     pCollection->gNumEnts++;
     return hEnt;
+}
+
+HEntity2D Et2D_AddEntityNoNewNetID(struct Entity2DCollection* pCollection, struct Entity2D* pEnt)
+{
+    return Et2D_AddEntityBase(pCollection, pEnt, false);
+}
+
+HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D* pEnt)
+{
+    return Et2D_AddEntityBase(pCollection, pEnt, true);
 }
 
 void Et2D_DeserializeEntityV1Base(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer, struct Entity2D* pOutEnt)

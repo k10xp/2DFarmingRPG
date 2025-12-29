@@ -17,6 +17,8 @@
 #include "Scripting.h"
 #include <string.h>
 #include "Log.h"
+#include "Network.h"
+#include "Game2DLayerNetwork.h"
 
 #define WALKING_UP_MALE "walk-base-male-up"
 #define WALKING_DOWN_MALE "walk-base-male-down"
@@ -96,6 +98,18 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
     In_SetMask(&pPlayerEntData->playerControlsMask, pInputCtx);
     
     ClampCameraToTileLayer(pLayer->userData, 0);
+
+    if(NW_GetRole() == GR_Client && !pPlayerEntData->bNetworkControlled)
+    {
+        /* client has made their player entity, cause it to be created on server + other clients */
+        struct CreateEntity_RPC rpc = 
+        {
+            .pData = pLayer->userData,
+            .pEnt = pEnt
+        };
+        Log_Info("Sending G2DRPC_CreateEntity for clients player entity");
+        G2D_SendRPC(-1, G2DRPC_CreateEntity, &rpc);
+    }
 }
 
 static void OnDestroyPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pData)
@@ -527,6 +541,7 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
             BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], bs);
             BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], bs);
             BS_DeSerializeI32(&pEntData->createNetPlayerOnInitArgs.netPlayerSlot, bs);
+            Log_Info("WfDeSerializePlayerEntity Player slot: %i", pEntData->createNetPlayerOnInitArgs.netPlayerSlot);
             pEntData->bNetworkControlled = true;
             pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
             Log_Info("Player pos: x %.2f, y %.2f. Player slot %i", 
