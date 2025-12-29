@@ -168,12 +168,14 @@ void Et2D_DestroyEntity(struct GameFrameworkLayer* pLayer, struct Entity2DCollec
 /// @return - entity handle
 struct Entity2D* Et2D_GetEntity(struct Entity2DCollection* pCollection, HEntity2D hEnt);
 
-/** @brief both serialize and deserialize */
 
-/** @brief return value == should continue iterating */
+/// @brief iterator function for Et2D_IterateEntities. Return true to continue iterating or false to break. pUser is value passed as pUser to Et2D_IterateEntities
 typedef bool(*Entity2DIterator)(struct Entity2D* pEnt, int i, void* pUser);
 
-
+/// @brief A convenient helper to iterate through the entity collection
+/// @param pCollection collection to iterate
+/// @param itr iterator function ptr
+/// @param pUser user data to pass to iterator fn
 void Et2D_IterateEntities(struct Entity2DCollection* pCollection, Entity2DIterator itr, void* pUser);
 
 void Et2D_SerializeEntities(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer);
@@ -258,5 +260,18 @@ float Entity2DGetSortVal(struct Entity2D* pEnt);
 
 void Et2D_PopulateCommonHandlers(struct Entity2D* pEnt);
 
+/// @brief Deserialize an entity from the binary serializer using the version 1 method
+/// @param pCollection
+/// @param bs 
+/// @param pData game layer data
+/// @param objectLayer object layer to set the entity to be in
+/// @param pOutEnt entity to populate
+void Et2D_DeserializeEntityV1Base(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer, struct Entity2D* pOutEnt);
+
+/// @brief Serialize a single entity
+/// @param pOn 
+/// @param bs 
+/// @param pData 
+void Et2D_SerializeEntityV1Base(struct Entity2D* pOn, struct BinarySerializer* bs, struct GameLayer2DData* pData);
 
 #endif

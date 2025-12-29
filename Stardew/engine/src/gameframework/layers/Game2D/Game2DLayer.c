@@ -235,7 +235,7 @@ static bool UpdateEntities(struct Entity2D* pEnt, int i, void* pUser)
 	return true;
 }
 
-static void SaveLevelDataInternal(struct GameLayer2DData* pData, struct BinarySerializer* pBS)
+void G2D_SaveLevelDataInternal(struct GameLayer2DData* pData, struct BinarySerializer* pBS)
 {
 	BS_SerializeU32(1, pBS);
 	
@@ -282,175 +282,15 @@ static void SaveLevelDataInternal(struct GameLayer2DData* pData, struct BinarySe
 }
 
 
-
-static void DoServerRPCs(struct GameFrameworkLayer* pLayer, float deltaT)
-{
-
-}
-
-struct NetworkQueueItem* GetLatestStateUpdate(VECTOR(struct NetworkQueueItem) dequeuedStateUpdates)
-{
-	struct NetworkQueueItem* latest = NULL;
-	if(VectorSize(dequeuedStateUpdates))
-	{
-		latest = &dequeuedStateUpdates[0];
-		/* we're only interested in the latest one.  */
-		for(int i=0; i<VectorSize(dequeuedStateUpdates); i++)
-		{
-			if(dequeuedStateUpdates[i].sequenceNumber > latest->sequenceNumber)
-			{
-				latest = &dequeuedStateUpdates[i];
-			}
-		}	
-	}
-	return latest;
-}
-
-static void PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
-{
-	struct GameLayer2DData* pData = pLayer->userData;
-
-	struct NetworkConnectionEvent nce;
-	while(NW_DequeueConnectionEvent(&nce))
-	{
-		switch(nce.type)
-		{
-		case NCE_ClientConnected:
-			Log_Info("Client %i connected", nce.client);
-			break;
-		case NCE_ClientDisconnected:
-			Log_Info("Client %i disconnected", nce.client);
-			break;
-		}
-	}
-
-	static VECTOR(struct NetworkQueueItem) dequeuedStateUpdates = NULL;
-	if(!dequeuedStateUpdates)
-	{
-		dequeuedStateUpdates = NEW_VECTOR(struct NetworkQueueItem);
-	}
-
-	struct NetworkQueueItem nqi;
-	while(NW_DequeueData(&nqi))
-	{
-		Log_Info("Recieved data from client %i", nqi.client);
-		u8* pBody = NULL;
-		int headerSize = 0;
-		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
-		switch(type)
-		{
-		case G2DPacket_RequestLevelData:
-			{
-				Log_Info("recieved level data request from client %i,", nqi.client);
-				/* handle request */
-				if(pData->levelDataRequestHandlerExtender)
-				{
-					struct BinarySerializer bs;
-					BS_CreateForLoadFromBuffer(pBody, nqi.pDataSize - headerSize, &bs);
-					pData->levelDataRequestHandlerExtender(pData, &bs);
-					BS_Finish(&bs); /* does nothing if BS_CreateForLoadFromBuffer but added anyway */
-				}
-				Log_Info("sending level data response to client %i,", nqi.client);
-				/* write response */
-				struct BinarySerializer bs;
-				BS_CreateForSaveToNetwork(&bs, nqi.client);
-				BS_SerializeU32(G2DPacket_LevelDataResponseData, &bs);
-				
-				if(pData->levelDataPacketExtender)
-				{
-					pData->levelDataPacketExtender(pData, &bs);
-				}
-
-				SaveLevelDataInternal(pData, &bs);
-				BS_Finish(&bs);
-			}
-			break;
-		case G2DPacket_LevelDataResponseData:
-			EASSERT(false);
-			break;
-		case G2DPacket_RPC:
-			DoServerRPCs(pLayer, deltaT);
-			break;
-		case G2DPacket_WorldState:
-			VectorPush(dequeuedStateUpdates, &nqi);
-			break;
-		default:
-			Log_Error("Game2DLayer server recieved unknown packet type (%i)");
-			break;
-		}
-	}
-	struct NetworkQueueItem* pNqi = GetLatestStateUpdate(dequeuedStateUpdates);
-	if(pNqi)
-	{
-		/* apply the latest state update */
-		dequeuedStateUpdates = VectorClear(dequeuedStateUpdates);
-	}
-	
-}
-
-static void PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
-{
-	struct GameLayer2DData* pData = pLayer->userData;
-
-	struct NetworkConnectionEvent nce;
-
-	static VECTOR(struct NetworkQueueItem) dequeuedStateUpdates = NULL;
-	if(!dequeuedStateUpdates)
-	{
-		dequeuedStateUpdates = NEW_VECTOR(struct NetworkQueueItem);
-	}
-
-	while(NW_DequeueConnectionEvent(&nce))
-	{
-		switch(nce.type)
-		{
-		case NCE_ClientConnected:
-			Log_Info("Client %i connected", nce.client);
-			break;
-		case NCE_ClientDisconnected:
-			Log_Info("Client %i disconnected", nce.client);
-			break;
-		}
-	}
-
-	struct NetworkQueueItem nqi;
-	while(NW_DequeueData(&nqi))
-	{
-		u8* pBody = NULL;
-		int headerSize = 0;
-		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
-		switch(type)
-		{
-		case G2DPacket_RequestLevelData:
-			EASSERT(false);
-			break;
-		case G2DPacket_LevelDataResponseData:
-			EASSERT(false);
-			break;
-		case G2DPacket_RPC:
-			break;
-		case G2DPacket_WorldState:
-			VectorPush(dequeuedStateUpdates, &nqi);
-			break;
-		}
-	}
-	struct NetworkQueueItem* pNqi = GetLatestStateUpdate(dequeuedStateUpdates);
-	if(pNqi)
-	{
-		/* apply the latest state update */
-		dequeuedStateUpdates = VectorClear(dequeuedStateUpdates);
-	}
-}
-
 static void Update(struct GameFrameworkLayer* pLayer, float deltaT)
 {
 	switch(NW_GetRole())
 	{
 	case GR_Client:
-		PollNetworkQueueClient(pLayer, deltaT);
+		G2D_PollNetworkQueueClient(pLayer, deltaT);
 		break;
 	case GR_ClientServer:
-		PollNetworkQueueServer(pLayer, deltaT);
+		G2D_PollNetworkQueueServer(pLayer, deltaT);
 		break;
 	}
 	struct GameLayer2DData* pData = pLayer->userData;
@@ -900,6 +740,6 @@ void Game2DLayer_SaveLevelFile(struct GameLayer2DData* pData, const char* output
 	struct BinarySerializer bs;
 	memset(&bs, 0, sizeof(struct BinarySerializer));
 	BS_CreateForSave(outputFilePath, &bs);
-	SaveLevelDataInternal(pData, &bs);
+	G2D_SaveLevelDataInternal(pData, &bs);
 	BS_Finish(&bs);
 }

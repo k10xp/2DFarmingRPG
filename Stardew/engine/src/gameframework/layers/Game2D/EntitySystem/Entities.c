@@ -231,30 +231,37 @@ HEntity2D Et2D_AddEntity(struct Entity2DCollection* pCollection, struct Entity2D
     return hEnt;
 }
 
-static void DeserializeEntityV1(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer)
+void Et2D_DeserializeEntityV1Base(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer, struct Entity2D* pOutEnt)
 {
-    Log_Verbose("Deserializing entity");
-
-    u32 entityType;
+    u32 entityType = 0;
     BS_DeSerializeU32(&entityType, bs);
     Log_Verbose("Deserializing entity type: %i", entityType);
-    struct Entity2D ent;
-    memset(&ent, 0, sizeof(struct Entity2D));
-    ent.nextSibling = NULL_HANDLE;
-    ent.previousSibling = NULL_HANDLE;
-    ent.inDrawLayer = objectLayer;
-    ent.type = entityType;
+    
+    pOutEnt->nextSibling = NULL_HANDLE;
+    pOutEnt->previousSibling = NULL_HANDLE;
+    pOutEnt->inDrawLayer = objectLayer;
+    pOutEnt->type = entityType;
 
-    Et2D_DeserializeCommon(bs, &ent);
+    Et2D_DeserializeCommon(bs, pOutEnt);
 
-    if(ent.type < VectorSize(pSerializers))
+    if(pOutEnt->type < VectorSize(pSerializers))
     {
-        pSerializers[ent.type].deserialize(bs, &ent, pData);
+        pSerializers[pOutEnt->type].deserialize(bs, pOutEnt, pData);
     }
     else 
     {
-        Log_Error("DESERIALIZE: Entity Serializer type %i out of range\n", ent.type);
+        Log_Error("DESERIALIZE: Entity Serializer type %i out of range\n", pOutEnt->type);
     }
+}
+
+
+static void DeserializeEntityV1(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer)
+{
+
+    struct Entity2D ent;
+    memset(&ent, 0, sizeof(struct Entity2D));
+    Et2D_DeserializeEntityV1Base(pCollection, bs, pData, objectLayer, &ent);
+    
     Et2D_AddEntity(pCollection, &ent);
 }
 
@@ -314,40 +321,45 @@ static u32 NumEntsToSerialize(struct Entity2DCollection* pCollection, struct Bin
     return i;
 }
 
+void Et2D_SerializeEntityV1Base(struct Entity2D* pOn, struct BinarySerializer* bs, struct GameLayer2DData* pData)
+{
+    bool bSerialize = false;
+    switch(bs->ctx)
+    {
+    case SCTX_ToFile:
+        bSerialize = pOn->bSerializeToDisk;
+        break;
+    case SCTX_ToNetwork:
+        bSerialize = pOn->bSerializeToNetwork;
+        break;
+    }
+    if(bSerialize)
+    {
+        BS_SerializeU32(pOn->type, bs);
+        Log_Verbose("Entity type: %i", pOn->type);
+        Et2D_SerializeCommon(bs, pOn);
+        if(pOn->type < VectorSize(pSerializers))
+        {
+            pSerializers[pOn->type].serialize(bs, pOn, pData);
+        }
+        else 
+        {
+            Log_Error("Entity Serializer type %i out of range\n", pOn->type);
+        }
+    }
+}
+
 static void SaveEntities(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData)
 {
     EASSERT(bs->bSaving);
-    BS_SerializeU32(1, bs);
+    BS_SerializeU32(1, bs); /* version number */
     Log_Verbose("Saving %i entities", NumEntsToSerialize(pCollection, bs));
     BS_SerializeU32(NumEntsToSerialize(pCollection, bs), bs);
     HEntity2D hOn = pCollection->gEntityListHead;
     while(hOn != NULL_HANDLE)
     {
         struct Entity2D* pOn = &pCollection->pEntityPool[hOn];
-        bool bSerialize = false;
-        switch(bs->ctx)
-        {
-        case SCTX_ToFile:
-            bSerialize = pOn->bSerializeToDisk;
-            break;
-		case SCTX_ToNetwork:
-            bSerialize = pOn->bSerializeToNetwork;
-            break;
-        }
-        if(bSerialize)
-        {
-            BS_SerializeU32(pOn->type, bs);
-            Log_Verbose("Entity type: %i", pOn->type);
-            Et2D_SerializeCommon(bs, pOn);
-            if(pOn->type < VectorSize(pSerializers))
-            {
-                pSerializers[pOn->type].serialize(bs, pOn, pData);
-            }
-            else 
-            {
-                Log_Error("Entity Serializer type %i out of range\n", pOn->type);
-            }
-        }
+        Et2D_SerializeEntityV1Base(pOn, bs, pData);
         hOn = pOn->nextSibling;
     }
 }

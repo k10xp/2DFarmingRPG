@@ -1,3 +1,4 @@
+#include <string.h>
 #include "WfTree.h"
 #include "BinarySerializer.h"
 #include "Entities.h"

@@ -249,6 +249,11 @@ void GameLayer2D_OnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawCont
 
 void Game2DLayer_OnPop(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, InputContext* inputContext);
 
+/// @brief 
+/// @param pData 
+/// @param pBS 
+void G2D_SaveLevelDataInternal(struct GameLayer2DData* pData, struct BinarySerializer* pBS);
+
 #ifdef __cplusplus
 }
 #endif
