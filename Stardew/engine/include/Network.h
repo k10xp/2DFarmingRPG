@@ -41,7 +41,9 @@ struct NetworkQueueItem
         On the client this is meaningless as communicaiton is always to and from the server
     */
     int client;
-    SHARED_PTR(void) pData;
+
+    /** @brief shared pointer when sent from game thread, malloced pointer when returned to game thread */
+    SHARED_PTR(void) pData; 
     int pDataSize;
     bool bReliable;
     u64 sequenceNumber;

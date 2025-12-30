@@ -12,6 +12,7 @@ extern "C" {
 #include "InputContext.h"
 #include "FreeLookCameraMode.h"
 #include "Entity2DCollection.h"
+#include "TimerPool.h"
 
 #define MAX_GAME_LAYER_ASSET_FILE_PATH_LEN 128
 
@@ -229,6 +230,12 @@ struct GameLayer2DData
 		Read extra game specific data the server has written to the initial level data packet
 	*/
 	LevelDataHandlerExtenderFn levelDataHandlerExtender;
+
+	/// @brief Use this to register timers that will be called after a given time, optionally on repeat
+	struct SDTimerPool timerPool; 
+
+	/// @brief handler for timer that calls G2D_Enqueue_Worldstate_Packet
+	HTimer hNetworkStateUpdateTimer;
 };
 
 struct Game2DLayerOptions

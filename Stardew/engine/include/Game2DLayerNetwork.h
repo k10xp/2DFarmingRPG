@@ -8,6 +8,7 @@
 #ifndef GAME2DLAYER_NETWORK_H
 #define GAME2DLAYER_NETWORK_H
 
+#include <stdbool.h>
 #include "IntTypes.h"
 struct GameFrameworkLayer;
 struct BinarySerializer;
@@ -75,7 +76,7 @@ void G2D_Enqueue_RequestLevelData();
 
 enum G2DPacketType G2D_ParsePacket(u8* pPacket, u8** pOutBody, int* outHeaderSize);
 
-/// @brief Enqueue an update consisting of a list of tiles that have changed, a list of entities that have changed
+/// @brief Enqueue a packet that will cause all entities with bSerializeInNetworkUpdate == true to be saved into a packet, the serializer context will be SCTX_NetworkUpdate
 /// @param pData The Game2dLayer
 /// @param clientI The client index to send to - only relevant if you're the server
 void G2D_Enqueue_Worldstate_Packet(struct GameLayer2DData* pData, int clientI);
@@ -107,6 +108,11 @@ void G2D_SendRPC(int client, enum Game2DRPCType type, void* pRPCData);
 /// @param netID netID to search for
 /// @return NULL if not found
 struct Entity2D* G2D_FindEntityWithNetID(struct Entity2DCollection* pCollection, int netID);
+
+/// @brief call from the game thread if you're the server to determine if a client is connected
+/// @param i 
+/// @return 
+bool G2D_IsClientConnected(int i);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////// RPC data structs
 

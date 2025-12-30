@@ -52,6 +52,7 @@ void BS_CreateForSaveToNetwork(struct BinarySerializer* pOutSerializer, int clie
 
 void BS_Finish(struct BinarySerializer* pOutSerializer)
 {
+	bool bReliable = true;
 	switch (pOutSerializer->ctx)
 	{
 	case SCTX_ToFile:
@@ -69,20 +70,22 @@ void BS_Finish(struct BinarySerializer* pOutSerializer)
 		EASSERT(pOutSerializer->pPath);
 		free(pOutSerializer->pPath);
 		break;
+	case SCTX_ToNetworkUpdate:
+		bReliable = false; /* intentional fallthrough */
 	case SCTX_ToNetwork:
 		if (pOutSerializer->bSaving)
 		{
 			struct NetworkQueueItem nci;
-			nci.bReliable = true; /* TODO: MAKE OPTIONAL */
+			nci.bReliable = bReliable; /* TODO: MAKE OPTIONAL */
 			nci.client = pOutSerializer->toClient;
 			nci.pData = Sptr_New(VectorSize(pOutSerializer->pData), NULL);
 			nci.pDataSize = VectorSize(pOutSerializer->pData);
-			Log_Info("BS_Finish saving to network size: %i", VectorSize(pOutSerializer->pData));
 			
 			memcpy(nci.pData, pOutSerializer->pData, VectorSize(pOutSerializer->pData));
 			NW_EnqueueData(&nci);
 			DestoryVector(pOutSerializer->pData);
 		}
+		break;
 	default:
 		break;
 	}

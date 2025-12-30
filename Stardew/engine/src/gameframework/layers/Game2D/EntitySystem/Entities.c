@@ -374,9 +374,16 @@ void Et2D_SerializeEntityV1Base(struct Entity2D* pOn, struct BinarySerializer* b
     }
     if(bSerialize)
     {
-        BS_SerializeU32(pOn->type, bs);
-        Log_Verbose("Entity type: %i", pOn->type);
-        Et2D_SerializeCommon(bs, pOn);
+        if(bs->ctx != SCTX_ToNetworkUpdate)
+        {
+            BS_SerializeU32(pOn->type, bs);
+            Log_Verbose("Entity type: %i", pOn->type);
+            Et2D_SerializeCommon(bs, pOn);
+        }
+        else
+        {
+            BS_SerializeI32(pOn->networkID, bs);
+        }
         if(pOn->type < VectorSize(pSerializers))
         {
             pSerializers[pOn->type].serialize(bs, pOn, pData);
@@ -426,6 +433,11 @@ void Et2D_RegisterEntityType(u32 typeID, struct EntitySerializerPair* pair)
 
 void Et2D_DeserializeCommon(struct BinarySerializer* bs, struct Entity2D* pOutEnt)
 {
+    if(bs->ctx == SCTX_ToNetworkUpdate)
+    {
+        return; /* network updates serialize and deserialize a minimal amount of data */
+    }
+
     u32 version = 0;
     BS_DeSerializeI32(&version, bs);
     switch(version)
@@ -452,6 +464,10 @@ void Et2D_DeserializeCommon(struct BinarySerializer* bs, struct Entity2D* pOutEn
 
 void Et2D_SerializeCommon(struct BinarySerializer* bs, struct Entity2D* pInEnt)
 {
+    if(bs->ctx == SCTX_ToNetworkUpdate)
+    {
+        return; /* network updates serialize and deserialize a minimal amount of data */
+    }
     u32 version = 1;
     BS_SerializeI32(version, bs);
     BS_SerializeFloat(pInEnt->transform.position[0], bs);

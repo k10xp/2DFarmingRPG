@@ -167,17 +167,22 @@ connected:
 			u8* pBody = NULL;
 			int headerSize = 0;
 			enum G2DPacketType type = G2D_ParsePacket(nci.pData, &pBody, &headerSize);
-			struct BinarySerializer bs;
-			EASSERT(type == G2DPacket_LevelDataResponseData);
-			BS_CreateForLoadFromBuffer(pBody, nci.pDataSize - headerSize, &bs);
-			if(pData->levelDataHandlerExtender)
+			bool bLoaded = false;
+			if(type == G2DPacket_LevelDataResponseData)
 			{
-				pData->levelDataHandlerExtender(pData, &bs);
+				struct BinarySerializer bs;
+				BS_CreateForLoadFromBuffer(pBody, nci.pDataSize - headerSize, &bs);
+				if(pData->levelDataHandlerExtender)
+				{
+					pData->levelDataHandlerExtender(pData, &bs);
+				}
+				LoadLevelDataInternal(pTileMap, &bs, pDC, atlas, pData);
+				bLoaded = true;
 			}
-			LoadLevelDataInternal(pTileMap, &bs, pDC, atlas, pData);
-			
+
 			free(nci.pData);
-			goto level_loaded;
+			if(bLoaded)
+				goto level_loaded;
 		}
 	}
 level_loaded:
@@ -294,6 +299,9 @@ static void Update(struct GameFrameworkLayer* pLayer, float deltaT)
 		break;
 	}
 	struct GameLayer2DData* pData = pLayer->userData;
+
+	TP_DoTimers(&pData->timerPool, deltaT);
+	
 	if (pData->bDebugLayerAttatched)
 	{
 		PublishDebugMessage(pData);
@@ -651,6 +659,29 @@ static void OnDebugLayerPushed(void* pUserData, void* pEventData)
 	struct GameLayer2DData* pData = pUserData;
 	pData->bDebugLayerAttatched = true;
 }
+ 
+static void NetworkUpdateWorldstateCallback(struct SDTimer* pTimer)
+{
+	switch(NW_GetRole())
+	{
+	case GR_Client:
+		{
+			G2D_Enqueue_Worldstate_Packet(pTimer->pUserData, -1);
+		}
+		break;
+	case GR_ClientServer:
+		{
+			for(int i=0; i<3; i++)
+			{
+				if(G2D_IsClientConnected(i))
+				{
+					G2D_Enqueue_Worldstate_Packet(pTimer->pUserData, i);
+				}
+			}
+		}
+		break;
+	}
+}
 
 void GameLayer2D_OnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, InputContext* inputContext)
 {
@@ -680,6 +711,20 @@ void GameLayer2D_OnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawCont
 		todo sort out the availabilty of these draw and input contexts
 	*/
 	pData->pDrawContext = drawContext;
+
+	if(NW_GetRole() != GR_Singleplayer)
+	{
+		struct SDTimer timerDef = {
+			.bActive = true,
+			.bRepeat = true,
+			.bAutoReset = true,
+			.total = 0.1f,
+			.fnCallback = &NetworkUpdateWorldstateCallback,
+			.pUserData = pData,
+			.elapsed = 0.0
+		};
+		pData->hNetworkStateUpdateTimer = TP_GetTimer(&pData->timerPool, &timerDef);
+	}
 }
 
 void Game2DLayer_OnPop(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, InputContext* inputContext)
@@ -689,6 +734,7 @@ void Game2DLayer_OnPop(struct GameFrameworkLayer* pLayer, DrawContext* drawConte
 	Et2D_DestroyCollection(&pData->entities, pLayer);
 	Ev_UnsubscribeEvent(pData->pDebugListener);
 	Ph_DestroyPhysicsWorld(pData->hPhysicsWorld);
+	
 }
 
 static void OnWindowDimsChange(struct GameFrameworkLayer* pLayer, int newW, int newH)
@@ -721,6 +767,8 @@ void Game2DLayer_Get(struct GameFrameworkLayer* pLayer, struct Game2DLayerOption
 	pLayer->onPush = &GameLayer2D_OnPush;
 	pLayer->onPop = &Game2DLayer_OnPop;
 	pLayer->onWindowDimsChanged = &OnWindowDimsChange;
+	
+	pData->hNetworkStateUpdateTimer = NULL_HANDLE;
 
 	pData->camera.scale[0] = 1;
 	pData->camera.scale[1] = 1;
@@ -733,6 +781,8 @@ void Game2DLayer_Get(struct GameFrameworkLayer* pLayer, struct Game2DLayerOption
 	pData->windowW = pDC->screenWidth;
 
 	pData->bCurrentLocationIsDirty = false;
+
+	pData->timerPool = TP_InitTimerPool(16);
 }
 
 void Game2DLayer_SaveLevelFile(struct GameLayer2DData* pData, const char* outputFilePath)

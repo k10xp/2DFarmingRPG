@@ -69,6 +69,11 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
         );
         return;
     }
+    else if(NW_GetRole() != GR_Singleplayer)
+    {
+        /* serialize the local players entity in network game state updates */
+        pEnt->bSerializeInNetworkUpdate = true;
+    }
 
     Entity2DOnInit(pEnt,pLayer, pDrawCtx, pInputCtx);
 
@@ -516,13 +521,24 @@ void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEn
             - persistent data index
     */
     BS_SerializeU32(1, bs); /* version */
-    vec2 out;
-    WfPlayerGetGroundContactPoint(pInEnt, out);
-    BS_SerializeFloat(out[0], bs);
-    BS_SerializeFloat(out[1], bs);
-    /* get the index of the next network player */
-    int numSlots = WfGetNumNetworkPlayerPersistentDataSlots();
-    BS_SerializeI32(numSlots, bs);
+    if(bs->ctx == SCTX_ToNetworkUpdate)
+    {
+        struct DynamicCollider* pCollider = &pInEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider;
+        vec2 physPos;
+        Ph_GetDynamicBodyPosition(pCollider->id, physPos);
+        BS_SerializeFloat(physPos[0], bs);
+        BS_SerializeFloat(physPos[1], bs);
+    }
+    else
+    {
+        vec2 out;
+        WfPlayerGetGroundContactPoint(pInEnt, out);
+        BS_SerializeFloat(out[0], bs);
+        BS_SerializeFloat(out[1], bs);
+        /* get the index of the next network player */
+        int numSlots = WfGetNumNetworkPlayerPersistentDataSlots();
+        BS_SerializeI32(numSlots, bs);
+    }
 }
 
 void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
@@ -533,20 +549,31 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
     {
     case 1:
         {
-            Log_Info("WfDeSerializePlayerEntity");
-            vec2 groundPoint = {0.0f, 0.0f};
-            i32 slotNum = 0;
-            gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pOutEnt->user.hData);
-            struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pOutEnt->user.hData];
-            BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], bs);
-            BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], bs);
-            BS_DeSerializeI32(&pEntData->createNetPlayerOnInitArgs.netPlayerSlot, bs);
-            Log_Info("WfDeSerializePlayerEntity Player slot: %i", pEntData->createNetPlayerOnInitArgs.netPlayerSlot);
-            pEntData->bNetworkControlled = true;
-            pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
-            Log_Info("Player pos: x %.2f, y %.2f. Player slot %i", 
-                pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], 
-                pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], slotNum);
+            if(bs->ctx == SCTX_ToNetworkUpdate)
+            {
+                vec2 physPos;
+                BS_DeSerializeFloat(&physPos[0], bs);
+                BS_DeSerializeFloat(&physPos[1], bs);
+                struct DynamicCollider* pCollider = &pOutEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider;
+                Ph_SetDynamicBodyPosition(pCollider->id, physPos);
+            }
+            else
+            {
+                Log_Info("WfDeSerializePlayerEntity");
+                vec2 groundPoint = {0.0f, 0.0f};
+                i32 slotNum = 0;
+                gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pOutEnt->user.hData);
+                struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pOutEnt->user.hData];
+                BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], bs);
+                BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], bs);
+                BS_DeSerializeI32(&pEntData->createNetPlayerOnInitArgs.netPlayerSlot, bs);
+                Log_Info("WfDeSerializePlayerEntity Player slot: %i", pEntData->createNetPlayerOnInitArgs.netPlayerSlot);
+                pEntData->bNetworkControlled = true;
+                pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
+                Log_Info("Player pos: x %.2f, y %.2f. Player slot %i", 
+                    pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], 
+                    pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], slotNum);
+            }
         }
         break;
     default:

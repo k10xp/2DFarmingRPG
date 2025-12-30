@@ -280,3 +280,13 @@ void Ph_GetDynamicBodyPosition(H2DBody hBody, vec2 outPos)
     outPos[0] = b2Vec.x;
     outPos[1] = b2Vec.y;
 }
+
+void Ph_SetDynamicBodyPosition(H2DBody hBody, vec2 inPos)
+{
+    b2Rot rot = b2Body_GetRotation(g2DPhysBodyPool[hBody].bodyID);
+    b2Vec2 b2Vec2 = {
+        .x = inPos[0],
+        .y = inPos[1]
+    };
+    b2Body_SetTransform(g2DPhysBodyPool[hBody].bodyID, b2Vec2, rot);
+}

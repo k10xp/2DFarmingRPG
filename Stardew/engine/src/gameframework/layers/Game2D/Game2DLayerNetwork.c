@@ -52,7 +52,7 @@ static struct NetworkQueueItem* GetLatestStateUpdate(VECTOR(struct NetworkQueueI
 		/* free the rest. */
 		for(int i=0; i<VectorSize(dequeuedStateUpdates); i++)
 		{
-			if(dequeuedStateUpdates[i].pData != latest)
+			if(&dequeuedStateUpdates[i] != latest)
 			{
 				free(dequeuedStateUpdates[i].pData);
 			}
@@ -105,6 +105,7 @@ void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 	if(!dequeuedStateUpdates)
 	{
 		dequeuedStateUpdates = NEW_VECTOR(struct NetworkQueueItem);
+		dequeuedStateUpdates = VectorResize(dequeuedStateUpdates, 4);
 	}
 
 	struct NetworkQueueItem nqi;
@@ -150,7 +151,8 @@ void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 			G2D_DoRPC(pLayer, pLayer->userData, pBody, nqi.client);
 			break;
 		case G2DPacket_WorldState:
-			VectorPush(dequeuedStateUpdates, &nqi);
+			Log_Info("worldstate recieved");
+			dequeuedStateUpdates = VectorPush(dequeuedStateUpdates, &nqi);
 			bFreePacket = false;
 			break;
 		default:
@@ -171,8 +173,8 @@ void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
 		EASSERT(type == G2DPacket_WorldState);
 		struct BinarySerializer bs;
-		bs.ctx = SCTX_ToNetworkUpdate;
 		BS_CreateForLoadFromBuffer(pBody, pNqi->pDataSize - headerSize, &bs);
+		bs.ctx = SCTX_ToNetworkUpdate;
 		ApplyStateUpdate(pData, &bs);
 		BS_Finish(&bs); /* a pointless no-op */
 		free(pNqi->pData);
@@ -191,6 +193,7 @@ void G2D_PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
 	if(!dequeuedStateUpdates)
 	{
 		dequeuedStateUpdates = NEW_VECTOR(struct NetworkQueueItem);
+		dequeuedStateUpdates = VectorResize(dequeuedStateUpdates, 4);
 	}
 
 	while(NW_DequeueConnectionEvent(&nce))
@@ -211,6 +214,7 @@ void G2D_PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
 	{
 		u8* pBody = NULL;
 		int headerSize = 0;
+		bool bFreePacket = true;
 		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
 		switch(type)
 		{
@@ -224,8 +228,13 @@ void G2D_PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
 			G2D_DoRPC(pLayer, pLayer->userData, pBody, nqi.client);
 			break;
 		case G2DPacket_WorldState:
-			VectorPush(dequeuedStateUpdates, &nqi);
+			dequeuedStateUpdates = VectorPush(dequeuedStateUpdates, &nqi);
+			bFreePacket = false;
 			break;
+		}
+		if(bFreePacket)
+		{
+			free(nqi.pData);
 		}
 	}
 	struct NetworkQueueItem* pNqi = GetLatestStateUpdate(dequeuedStateUpdates);
@@ -237,8 +246,8 @@ void G2D_PollNetworkQueueClient(struct GameFrameworkLayer* pLayer, float deltaT)
 		enum G2DPacketType type = G2D_ParsePacket(nqi.pData, &pBody, &headerSize);
 		EASSERT(type == G2DPacket_WorldState);
 		struct BinarySerializer bs;
-		bs.ctx = SCTX_ToNetworkUpdate;
 		BS_CreateForLoadFromBuffer(pBody, pNqi->pDataSize - headerSize, &bs);
+		bs.ctx = SCTX_ToNetworkUpdate;
 		ApplyStateUpdate(pData, &bs);
 		BS_Finish(&bs); /* a pointless no-op */
 		free(pNqi->pData);
@@ -282,7 +291,10 @@ void G2D_Enqueue_Worldstate_Packet(struct GameLayer2DData* pData, int clientI)
 {
     struct BinarySerializer bs;
     BS_CreateForSaveToNetwork(&bs, clientI);
+	bs.ctx = SCTX_ToNetworkUpdate;
     BS_SerializeI32(G2DPacket_WorldState, &bs);
+	Et2D_SerializeEntities(&pData->entities, &bs, pData, -1);
+	BS_Finish(&bs);
 }
 
 enum Game2DRPCType G2D_ParseRPCPacket(u8* packet, u8** pOutBody)
@@ -524,3 +536,9 @@ void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData,
 	}
 	BS_Finish(&bs); /* should do nothing */
 }
+
+bool G2D_IsClientConnected(int i)
+{
+	return gClientsConnections[i].connected;
+}
+

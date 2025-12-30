@@ -4,6 +4,8 @@
 #include <cglm/cglm.h>
 #include "DynArray.h"
 
+// TODO: Document this file
+
 typedef vec2 Physics2DPoint;
 struct Transform2D;
 
@@ -73,6 +75,8 @@ void Ph_SetDynamicBodyVelocity(H2DBody hBody, vec2 velocity);
 void Ph_GetDynamicBodyVelocity(H2DBody hBody, vec2 outVelocity);
 
 void Ph_GetDynamicBodyPosition(H2DBody hBody, vec2 outPos);
+
+void Ph_SetDynamicBodyPosition(H2DBody hBody, vec2 inPos);
 
 void Ph_UnpackShapeUserData(void* pUserData, HEntity2D* pOutEnt, u16* pOutCompIndex, u16* pOutBodyType);
 
