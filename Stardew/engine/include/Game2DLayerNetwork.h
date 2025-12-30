@@ -65,8 +65,12 @@ void G2D_RegisterUserRPC(struct UserGame2DRPC* rpc);
 
 typedef void(*PacketExtensionNoArgsFn)(struct BinarySerializer*);
 
+/// @brief extend the packet that the client sends to request level data from the server. By default tile maps 
+/// and serialized entities are included, this callback is called before this Game2DLayer managed level data is serialized - see WfNetwork.c
+/// @param fn callback to call
 void G2D_Extend_RequestLevelDataMessage(PacketExtensionNoArgsFn fn);
 
+/// @brief TODO: should really be static to this file, probably 
 void G2D_Enqueue_RequestLevelData();
 
 enum G2DPacketType G2D_ParsePacket(u8* pPacket, u8** pOutBody, int* outHeaderSize);
@@ -75,7 +79,6 @@ enum G2DPacketType G2D_ParsePacket(u8* pPacket, u8** pOutBody, int* outHeaderSiz
 /// @param pData The Game2dLayer
 /// @param clientI The client index to send to - only relevant if you're the server
 void G2D_Enqueue_Worldstate_Packet(struct GameLayer2DData* pData, int clientI);
-
 
 /// @brief 
 /// @param packet
@@ -97,6 +100,13 @@ void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 /// @param type type of rpc to send
 /// @param pRPCData a struct appropriate to construct the rpc message - see src 
 void G2D_SendRPC(int client, enum Game2DRPCType type, void* pRPCData);
+
+
+/// @brief try to find the entity with a given net ID
+/// @param pCollection collection to search
+/// @param netID netID to search for
+/// @return NULL if not found
+struct Entity2D* G2D_FindEntityWithNetID(struct Entity2DCollection* pCollection, int netID);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////// RPC data structs
 

@@ -12,6 +12,7 @@
 #include "Network.h"
 #include "Log.h"
 #include "NetworkID.h"
+#include "Game2DLayerNetwork.h"
 
 static VECTOR(struct EntitySerializerPair) pSerializers = NULL;
 
@@ -263,16 +264,41 @@ void Et2D_DeserializeEntityV1Base(struct Entity2DCollection* pCollection, struct
         Log_Error("DESERIALIZE: Entity Serializer type %i out of range\n", pOutEnt->type);
     }
 }
+#include "LatinMacros.h"
 
-
-static void DeserializeEntityV1(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer)
+staticus vacuum DeserializeEntityV1(struct Entity2DCollection* pCollection, struct BinarySerializer* bs, struct GameLayer2DData* pData, int objectLayer)
 {
-
-    struct Entity2D ent;
-    memset(&ent, 0, sizeof(struct Entity2D));
-    Et2D_DeserializeEntityV1Base(pCollection, bs, pData, objectLayer, &ent);
     
-    Et2D_AddEntity(pCollection, &ent);
+    vimen(bs->ctx)
+    {
+    casu SCTX_ToFile:
+    casu SCTX_ToNetwork:
+        {
+            struct Entity2D ent;
+            memset(&ent, 0, sizeof(struct Entity2D));
+            Et2D_DeserializeEntityV1Base(pCollection, bs, pData, objectLayer, &ent);
+            Et2D_AddEntity(pCollection, &ent);    
+        }
+        interruptio;
+    casu SCTX_ToNetworkUpdate:
+        {
+            i32 netID = -1;
+            BS_DeSerializeI32(&netID, bs);
+            struct Entity2D* pEnt = G2D_FindEntityWithNetID(pCollection, netID);
+            if(pEnt)
+            {
+                pSerializers[pEnt->type].deserialize(bs, pEnt, pData);
+            }
+            else
+            {
+                Log_Error("entity with netID %i not found", netID);
+            }
+        }
+        interruptio;
+    }
+    
+    
+    
 }
 
 static void LoadEntitiesV1(struct BinarySerializer* bs, struct GameLayer2DData* pData, struct Entity2DCollection* pCollection, int objectLayer)
@@ -324,6 +350,11 @@ static u32 NumEntsToSerialize(struct Entity2DCollection* pCollection, struct Bin
                 i++;
             }
             break;
+        case SCTX_ToNetworkUpdate:
+            if(pOn->bSerializeInNetworkUpdate)
+            {
+                i++;
+            }
         }
         
         hOn = pOn->nextSibling;
@@ -342,6 +373,8 @@ void Et2D_SerializeEntityV1Base(struct Entity2D* pOn, struct BinarySerializer* b
     case SCTX_ToNetwork:
         bSerialize = pOn->bSerializeToNetwork;
         break;
+    case SCTX_ToNetworkUpdate:
+        bSerialize = pOn->bSerializeInNetworkUpdate;
     }
     if(bSerialize)
     {
@@ -409,7 +442,6 @@ void Et2D_DeserializeCommon(struct BinarySerializer* bs, struct Entity2D* pOutEn
         BS_DeSerializeFloat(&pOutEnt->transform.rotation, bs);
         BS_DeSerializeU32(&version, bs);
         pOutEnt->bKeepInQuadtree = version != 0;
-
         if(bs->ctx == SCTX_ToNetwork)
         {
             BS_DeSerializeI32(&pOutEnt->networkID, bs);

@@ -248,7 +248,11 @@ struct Entity2D
     /** @brief do we serialize when the level is serialized? */
     bool bSerializeToDisk;
 
+    /** @brief do we serialize when the initial level data is sent to clients */
     bool bSerializeToNetwork;
+
+    /** @brief do we serialize when the next network update is sent */
+    bool bSerializeInNetworkUpdate;
 
     int networkID;
 };

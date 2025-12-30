@@ -199,7 +199,8 @@ struct GameLayer2DData
 	DrawContext* pDrawContext;
 
 	/*
-		
+		@brief
+		don't draw
 	*/
 	bool bSkipDraw;
 
