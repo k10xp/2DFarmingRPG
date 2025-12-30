@@ -520,6 +520,7 @@ void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEn
             - ground position
             - persistent data index
     */
+    struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pInEnt->user.hData];
     BS_SerializeU32(1, bs); /* version */
     if(bs->ctx == SCTX_ToNetworkUpdate)
     {
@@ -528,6 +529,10 @@ void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEn
         Ph_GetDynamicBodyPosition(pCollider->id, physPos);
         BS_SerializeFloat(physPos[0], bs);
         BS_SerializeFloat(physPos[1], bs);
+
+        BS_SerializeFloat(pEntData->movementVector[0], bs);
+        BS_SerializeFloat(pEntData->movementVector[1], bs);
+        BS_SerializeBool(pEntData->bMovingThisFrame, bs);
     }
     else
     {
@@ -551,11 +556,17 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
         {
             if(bs->ctx == SCTX_ToNetworkUpdate)
             {
+                struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pOutEnt->user.hData];
                 vec2 physPos;
                 BS_DeSerializeFloat(&physPos[0], bs);
                 BS_DeSerializeFloat(&physPos[1], bs);
                 struct DynamicCollider* pCollider = &pOutEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider;
                 Ph_SetDynamicBodyPosition(pCollider->id, physPos);
+                BS_DeSerializeFloat(&pEntData->movementVector[0], bs);
+                BS_DeSerializeFloat(&pEntData->movementVector[1], bs);
+                bool b;
+                BS_DeSerializeBool(&b, bs);
+                pEntData->bMovingThisFrame = b;
             }
             else
             {
