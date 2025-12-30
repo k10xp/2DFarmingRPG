@@ -14,7 +14,7 @@ struct BinarySerializer;
 struct GameLayer2DData;
 struct Game2DLayerData;
 struct Entity2D;
-
+struct Entity2DCollection;
 
 enum G2DPacketType
 {
