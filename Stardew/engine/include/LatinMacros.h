@@ -13,18 +13,18 @@
 #define casu case
 #define defaltam default
 #define dum while
-#define facio do
+#define facite do
 #define enim for
 #define interruptio break
 #define continuare continue
 #define revenio return
-#define ire goto
+#define ite goto
 
 /* types */
 #define duplex double 
 #define supernato float
 #define parvus short
-#define magnus long
+#define longus long
 #define coniunctio union
 #define signati signed
 #define insignitus unsigned
@@ -35,5 +35,10 @@
 #define staticus static
 #define tabula register
 #define magnitudinem sizeof
+
+/* long forms of logic operators */
+#define et &&
+#define aut ||
+#define non !
 
 #endif
