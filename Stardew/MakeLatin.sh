@@ -49,7 +49,7 @@ for file in "${array[@]}"; do
     # prevent false matches from preprocessor directives
     perl -pi -e "s/#[ ]+if/#if/g" "$file"
     perl -pi -e "s/#[ ]+else/#else/g" "$file"
-    perl -pi -e "s/#[ ]+else#[ ]+if/#elif/g" "$file"
+    perl -pi -e "s/#[ ]+else[ ]+if/#elif/g" "$file"
 
     # replace keywords
     for i in "${!replacements[@]}"
@@ -57,7 +57,6 @@ for file in "${array[@]}"; do
         # replace 
         perl -pi -e "s/(?<=[\r\n\t \}\(])$i(?=[\n\t \(\{}])/${replacements[$i]}/g" "$file"
         perl -pi -e "s/^$i(?=[\n\t \(\{}])/${replacements[$i]}/g" "$file"
-
     done
 done 
 
