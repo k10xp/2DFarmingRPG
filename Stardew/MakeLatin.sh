@@ -62,8 +62,8 @@ for file in "${array[@]}"; do
     for i in "${!replacements[@]}"
     do
         # replace 
-        perl -pi -e "s/(?<=[\r\n\t \}\(])$i(?=[\*\n\t \(\{}])/${replacements[$i]}/g" "$file"
-        perl -pi -e "s/^$i(?=[\*\n\t \(\{}])/${replacements[$i]}/g" "$file"
+        perl -pi -e "s/(?<=[\r\n\t \}\(])$i(?=[\*\n\t \(\{])/${replacements[$i]}/g" "$file"
+        perl -pi -e "s/^$i(?=[\*\n\t \(\{])/${replacements[$i]}/g" "$file"
     done
 done 
 
