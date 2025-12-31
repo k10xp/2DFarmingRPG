@@ -703,7 +703,7 @@ void GameLayer2D_OnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawCont
 	};
 	Et2D_IterateEntities(&pData->entities, &InitEntities, &ctx);
 
-	Et2D_PrintEntitiesInfo(&pData->entities);
+	//Et2D_PrintEntitiesInfo(&pData->entities);
 	pData->pDebugListener = Ev_SubscribeEvent("onDebugLayerPushed", &OnDebugLayerPushed, pData);
 
 	/*

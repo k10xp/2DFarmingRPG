@@ -111,7 +111,6 @@ void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 	struct NetworkQueueItem nqi;
 	while(NW_DequeueData(&nqi))
 	{
-		Log_Info("Recieved data from client %i", nqi.client);
 		u8* pBody = NULL;
 		int headerSize = 0;
 		bool bFreePacket = true;
@@ -151,7 +150,6 @@ void G2D_PollNetworkQueueServer(struct GameFrameworkLayer* pLayer, float deltaT)
 			G2D_DoRPC(pLayer, pLayer->userData, pBody, nqi.client);
 			break;
 		case G2DPacket_WorldState:
-			Log_Info("worldstate recieved");
 			dequeuedStateUpdates = VectorPush(dequeuedStateUpdates, &nqi);
 			bFreePacket = false;
 			break;
@@ -424,7 +422,7 @@ void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData,
 	{
 	case G2DRPC_CreateEntity:
 		{
-			
+			Log_Info("Create entity RPC");
             u32 version = 0;
             BS_DeSerializeU32(&version, &bs);
             switch (version)
@@ -450,6 +448,7 @@ void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData,
                                 .newNetID = ent.networkID,
                                 .oldNetID = oldNetID
                             };
+							Log_Info("Create entity: Adjusting net ID from %i to %i", data.oldNetID, data.newNetID);
                             G2D_SendRPC(client, G2DRPC_AdjustNetworkID, &data);
                         }
                         /* relay rpc to other clients */
@@ -483,11 +482,11 @@ void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData,
     case G2DRPC_AdjustNetworkID:
         {
             EASSERT(NW_GetRole() == GR_Client);
-			
 			i32 oldEntID = -1;
 			i32 newEntID = -1;
             BS_DeSerializeI32(&oldEntID, &bs);
 			BS_DeSerializeI32(&newEntID, &bs);
+			Log_Info("Adjusting net id from %i to %i", oldEntID, newEntID);
 			struct Entity2D* pEnt = G2D_FindEntityWithNetID(&pData->entities, oldEntID);
 			if(pEnt)
 			{

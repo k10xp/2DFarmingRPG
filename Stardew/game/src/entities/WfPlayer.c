@@ -315,6 +315,11 @@ static void ChangeItem(struct GameFrameworkLayer* pLayer, struct Entity2D* pEnt,
 static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, InputContext* context)
 {
     struct WfPlayerEntData* pPlayerEntData = &gPlayerEntDataPool[pEnt->user.hData];
+
+    /* network players need to do this part too so that their sprite animation is reset when they stop moving,
+     but bMovingThisFrame and the movement vector is set from the network not input */
+    pPlayerEntData->bMovingLastFrame = pPlayerEntData->bMovingThisFrame;
+
     if(pPlayerEntData->bNetworkControlled)
     {
         return;
@@ -323,7 +328,6 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
     Entity2DInput(pEnt, pLayer, context);
     pPlayerEntData->movementVector[0] = 0.0f;
     pPlayerEntData->movementVector[1] = 0.0f;
-    pPlayerEntData->bMovingLastFrame = pPlayerEntData->bMovingThisFrame;
     pPlayerEntData->bMovingThisFrame = false;
     struct GameLayer2DData* pLayerData = pLayer->userData;
     
@@ -581,6 +585,9 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
                 Log_Info("WfDeSerializePlayerEntity Player slot: %i", pEntData->createNetPlayerOnInitArgs.netPlayerSlot);
                 pEntData->bNetworkControlled = true;
                 pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
+                pOutEnt->update = NULL;
+                pOutEnt->postPhys = NULL;
+                pOutEnt->draw = NULL;
                 Log_Info("Player pos: x %.2f, y %.2f. Player slot %i", 
                     pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], 
                     pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], slotNum);
