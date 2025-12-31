@@ -3,6 +3,8 @@
 # Translate C keywords to latin
 
 POSITIONAL_ARGS=()
+HEADER_PATH=""
+DIR=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -10,6 +12,11 @@ while [[ $# -gt 0 ]]; do
       DIR="$2"
       shift # past argument
       shift # past value
+      ;;
+    -h|--header_path)
+      HEADER_PATH="$2"
+      shift
+      shift 
       ;;
     *)
       POSITIONAL_ARGS+=("$1") # save positional arg
@@ -30,7 +37,7 @@ declare -A replacements=()
 while IFS=" " read -r a b; do
     replacements["$b"]="$a"
 done < <(
-    grep -E "#define (([a-z])\w+) (([a-z])\w+)" ./engine/include/LatinMacros.h | sed s/"#define "//g
+    grep -E "#define (([a-z])\w+) (([a-z])\w+)" "$HEADER_PATH" | sed s/"#define "//g
     )
 
 
@@ -55,8 +62,8 @@ for file in "${array[@]}"; do
     for i in "${!replacements[@]}"
     do
         # replace 
-        perl -pi -e "s/(?<=[\r\n\t \}\(])$i(?=[\n\t \(\{}])/${replacements[$i]}/g" "$file"
-        perl -pi -e "s/^$i(?=[\n\t \(\{}])/${replacements[$i]}/g" "$file"
+        perl -pi -e "s/(?<=[\r\n\t \}\(])$i(?=[\*\n\t \(\{}])/${replacements[$i]}/g" "$file"
+        perl -pi -e "s/^$i(?=[\*\n\t \(\{}])/${replacements[$i]}/g" "$file"
     done
 done 
 
