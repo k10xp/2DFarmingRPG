@@ -13,10 +13,10 @@
 #define casu case
 #define defaltam default
 #define dum while
-#define facite do
+#define fac do
 #define enim for
 #define interruptio break
-#define continuare continue
+#define perge continue
 #define revenio return
 #define ite goto
 
