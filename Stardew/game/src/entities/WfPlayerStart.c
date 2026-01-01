@@ -45,7 +45,7 @@ void WfPlayerStartEntityOnInit(struct Entity2D* pEnt, struct GameFrameworkLayer*
         ent.previousSibling = NULL_HANDLE;
         WfMakeIntoPlayerEntity(&ent, pLayer, pEnt->transform.position);
         hCurrentLocalPlayer = Et2D_AddEntity(&pLayerData->entities, &ent);
-        Log_Info("Local player entity ID %i", hCurrentLocalPlayer);
+        Log_Info("Local player entity ID %i, net id %i", hCurrentLocalPlayer, Et2D_GetEntity(&pLayerData->entities, hCurrentLocalPlayer)->networkID);
         WfWorld_SetCurrentLocationName(gPlayerStartDataPool[pEnt->user.hData].thisLocation);
     }
 }

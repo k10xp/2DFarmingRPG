@@ -4,7 +4,7 @@ static int gNetID = 0;
 
 void NetID_DeserializedNewID(int nextVal)
 {
-    if(nextVal > gNetID)
+    if((nextVal + 1) > gNetID)
         gNetID = nextVal + 1;
 }
 

@@ -470,6 +470,7 @@ void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData,
 					/* TODO: perhaps init-ing entities should take place at a given point in the loop */
                     HEntity2D hEnt = Et2D_AddEntityNoNewNetID(&pData->entities, &ent);
 					struct Entity2D* pEnt = Et2D_GetEntity(&pData->entities, hEnt);
+					Log_Info("%p new entity from rpc. net ID: %i. entity ID: %i", pEnt, pEnt->networkID, pEnt->thisEntity);
 					pEnt->init(pEnt, pLayer, pData->pDrawContext, NULL);
                 }
                 break;
@@ -486,6 +487,12 @@ void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData,
 			i32 newEntID = -1;
             BS_DeSerializeI32(&oldEntID, &bs);
 			BS_DeSerializeI32(&newEntID, &bs);
+			NetID_DeserializedNewID(newEntID);
+
+			if(G2D_IsNetIDTaken(newEntID, &pData->entities))
+			{
+				Log_Error("NEW net ID %i TAKEN!", newEntID);
+			}
 			Log_Info("Adjusting net id from %i to %i", oldEntID, newEntID);
 			struct Entity2D* pEnt = G2D_FindEntityWithNetID(&pData->entities, oldEntID);
 			if(pEnt)

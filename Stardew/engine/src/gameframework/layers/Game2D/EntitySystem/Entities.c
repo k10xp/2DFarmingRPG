@@ -142,7 +142,7 @@ void Entity2DGetBoundingBox(struct Entity2D* pEnt, struct GameFrameworkLayer* pL
     }
 }
 
-
+#include "NetworkID.h"
 void Et2D_Init(RegisterGameEntitiesFn registerGameEntities)
 {
     pSerializers = NEW_VECTOR(struct EntitySerializerPair);
@@ -208,11 +208,12 @@ static HEntity2D Et2D_AddEntityBase(struct Entity2DCollection* pCollection, stru
     }
 
     HEntity2D hEnt = NULL_HANDLE;
-    pEnt->nextSibling = NULL_HANDLE;
-    pEnt->previousSibling = NULL_HANDLE;
     pCollection->pEntityPool = GetObjectPoolIndex(pCollection->pEntityPool, &hEnt);
     EASSERT(hEnt != NULL_HANDLE);
     memcpy(&pCollection->pEntityPool[hEnt], pEnt, sizeof(struct Entity2D));
+    pEnt->nextSibling = NULL_HANDLE;
+    pEnt->previousSibling = NULL_HANDLE;
+
     pEnt = &pCollection->pEntityPool[hEnt];
     pEnt->thisEntity = hEnt;
     if(pCollection->gEntityListHead == NULL_HANDLE)
@@ -283,6 +284,7 @@ staticus vacuum DeserializeEntityV1(struct Entity2DCollection* pCollection, stru
         {
             i32 netID = -1;
             BS_DeSerializeI32(&netID, bs);
+            NetID_DeserializedNewID(netID);
             struct Entity2D* pEnt = G2D_FindEntityWithNetID(pCollection, netID);
             si(pEnt)
             {

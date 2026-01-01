@@ -582,9 +582,9 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
                 BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[0], bs);
                 BS_DeSerializeFloat(&pEntData->createNetPlayerOnInitArgs.netPlayerSpawnAtPos[1], bs);
                 BS_DeSerializeI32(&pEntData->createNetPlayerOnInitArgs.netPlayerSlot, bs);
-                Log_Info("WfDeSerializePlayerEntity Player slot: %i", pEntData->createNetPlayerOnInitArgs.netPlayerSlot);
+                Log_Info("WfDeSerializePlayerEntity Player slot: %i netID: %i", pEntData->createNetPlayerOnInitArgs.netPlayerSlot, pOutEnt->networkID);
                 pEntData->bNetworkControlled = true;
-                pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
+            pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
                 pOutEnt->update = NULL;
                 pOutEnt->postPhys = NULL;
                 pOutEnt->draw = NULL;
