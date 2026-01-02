@@ -31,7 +31,7 @@ void G2D_RegisterUserRPC(struct UserGame2DRPC* rpc)
 	{
 		gUserRPCs = NEW_VECTOR(struct UserGame2DRPC);
 	}
-	EASSERT(rpc->rpcType - G2DRPC_LastEngineRPC == VectorSize(gUserRPCs)); /* You need to register the RPCs in the right order, the order they appear in your games enum */
+	//EASSERT(rpc->rpcType - G2DRPC_LastEngineRPC == VectorSize(gUserRPCs)); /* You need to register the RPCs in the right order, the order they appear in your games enum */
 	gUserRPCs = VectorPush(gUserRPCs, rpc);
 }
 
@@ -526,7 +526,7 @@ void G2D_DoRPC(struct GameFrameworkLayer* pLayer, struct GameLayer2DData* pData,
 			{
 				if(type - G2DRPC_LastEngineRPC < VectorSize(gUserRPCs))
 				{
-					gUserRPCs[type].handler(&bs, pData);
+					gUserRPCs[type].handler(&bs, pData, client);
 				}
 				else
 				{

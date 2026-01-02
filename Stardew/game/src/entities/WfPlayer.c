@@ -19,6 +19,8 @@
 #include "Log.h"
 #include "Network.h"
 #include "Game2DLayerNetwork.h"
+#include "Network.h"
+#include "NetworkID.h"
 
 #define WALKING_UP_MALE "walk-base-male-up"
 #define WALKING_DOWN_MALE "walk-base-male-down"
@@ -299,7 +301,12 @@ static void ChangeItem(struct GameFrameworkLayer* pLayer, struct Entity2D* pEnt,
     arg.type = SCA_int;
     arg.val.i = pInv->selectedItem;
     struct LuaListenedEventArgs args = { .numArgs = 1, .args = &arg };
-    Ev_FireEvent("SelectedItemChanged", &args);
+    
+    if(!pPlayerEntData->bNetworkControlled)
+    {
+        Ev_FireEvent("SelectedItemChanged", &args);
+    }
+
     struct WfItemDef* pOldItem = WfGetItemDef(pInv->pItems[oldIndex].itemIndex);
     struct WfItemDef* pNewItem = WfGetItemDef(pInv->pItems[pInv->selectedItem].itemIndex);
     if(pOldItem)
@@ -415,9 +422,6 @@ static void WfPrintPlayerInfo(struct Entity2D* pEnt)
         pEntData->networkPlayerNum
     );
 }
-
-#include "Network.h"
-#include "NetworkID.h"
 
 void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
 {
@@ -537,6 +541,8 @@ void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEn
         BS_SerializeFloat(pEntData->movementVector[0], bs);
         BS_SerializeFloat(pEntData->movementVector[1], bs);
         BS_SerializeBool(pEntData->bMovingThisFrame, bs);
+        struct WfInventory* pInv = WfGetInventory();
+        BS_SerializeU8((u8)pInv->selectedItem, bs);
     }
     else
     {
@@ -571,6 +577,20 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
                 bool b;
                 BS_DeSerializeBool(&b, bs);
                 pEntData->bMovingThisFrame = b;
+                u8 selectedItem = 0;
+                BS_DeSerializeU8(&selectedItem, bs);
+                struct WfInventory* pInv = WfGetPlayerInventory(pEntData);
+                if(pInv->selectedItem != selectedItem)
+                {
+                    if(selectedItem > pInv->selectedItem)
+                    {
+                        ChangeItem(pData->pLayer, pOutEnt, pEntData, selectedItem - pInv->selectedItem);
+                    }
+                    else
+                    {
+                        ChangeItem(pData->pLayer, pOutEnt, pEntData, selectedItem - pInv->selectedItem);
+                    }   
+                }
             }
             else
             {
@@ -584,7 +604,7 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
                 BS_DeSerializeI32(&pEntData->createNetPlayerOnInitArgs.netPlayerSlot, bs);
                 Log_Info("WfDeSerializePlayerEntity Player slot: %i netID: %i", pEntData->createNetPlayerOnInitArgs.netPlayerSlot, pOutEnt->networkID);
                 pEntData->bNetworkControlled = true;
-            pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
+                pOutEnt->init = &OnInitPlayer; /* set this one and in the init function the rest will be bootstrapped */
                 pOutEnt->update = NULL;
                 pOutEnt->postPhys = NULL;
                 pOutEnt->draw = NULL;
@@ -620,7 +640,6 @@ struct WfPlayerEntData* WfGetPlayerEntData(struct Entity2D* pInEnt)
 {
     return &gPlayerEntDataPool[pInEnt->user.hData];
 }
-
 
 struct Component2D* WfGetPlayerAnimationLayerComponent(struct Entity2D* pPlayer, enum WfAnimationLayerNames layer)
 {

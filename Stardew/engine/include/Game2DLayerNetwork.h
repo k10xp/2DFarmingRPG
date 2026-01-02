@@ -45,7 +45,7 @@ enum Game2DRPCType
 typedef void(*RPCMessageConstructorFn)(struct BinarySerializer* pBS, void* pRPCStruct);
 
 /// @brief callback to handle an RPC message, to be read from the binary serializer, passed Game2DLayerData* so the RPC can do stuff
-typedef void(*RPCMessageHandlerFn)(struct BinarySerializer* pBS, struct GameLayer2DData* pData);
+typedef void(*RPCMessageHandlerFn)(struct BinarySerializer* pBS, struct GameLayer2DData* pData, int client);
 
 /// @brief An RPC implemented by a users game
 struct UserGame2DRPC

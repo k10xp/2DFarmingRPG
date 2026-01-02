@@ -686,6 +686,7 @@ static void NetworkUpdateWorldstateCallback(struct SDTimer* pTimer)
 void GameLayer2D_OnPush(struct GameFrameworkLayer* pLayer, DrawContext* drawContext, InputContext* inputContext)
 {
 	struct GameLayer2DData* pData = pLayer->userData;
+	pData->pLayer = pLayer;
 	Et2D_InitCollection(&pData->entities);
 	pData->hPhysicsWorld = Ph_GetPhysicsWorld(0, 0, 32.0f); // todo - pass these arguments in somehow
 	BindFreeLookControls(inputContext, pData);
@@ -752,7 +753,6 @@ void Game2DLayer_Get(struct GameFrameworkLayer* pLayer, struct Game2DLayerOption
 
 	pData->bSkipDraw = true;
 
-	pData->pLayer = pLayer;
 	pData->cameraClampedToTilemapLayer = -1;
 	pData->tilemap.layers = NEW_VECTOR(struct TileMapLayer);
 
