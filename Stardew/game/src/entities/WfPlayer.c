@@ -47,18 +47,10 @@ void WfInitPlayer()
 static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, DrawContext* pDrawCtx, InputContext* pInputCtx)
 {
     struct WfPlayerEntData* pPlayerEntData = &gPlayerEntDataPool[pEnt->user.hData];
-    pPlayerEntData->bMovingThisFrame = false;
     pPlayerEntData->bMovingLastFrame = false;
     pPlayerEntData->metersPerSecondWalkSpeedBase = 100.0f;
     pPlayerEntData->speedMultiplier = 3.0f;
-
-    /* 
-        we can't leave this uninitialized for a network controlled player, its fine to do so for a locally
-        controlled one as the input function sets it in all cases, but we set it in all cases anyway as it should just
-        have been initialized
-     */
-    pPlayerEntData->movementVector[0] = 0.0f;
-    pPlayerEntData->movementVector[1] = 0.0f; 
+    pPlayerEntData->movementBits = 0;
     
     if(pPlayerEntData->bNetworkControlled)
     {
@@ -82,8 +74,7 @@ static void OnInitPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLaye
     pPlayerEntData->bNetworkControlled = false;
     pPlayerEntData->networkPlayerNum = -1;
 
-    pPlayerEntData->movementVector[0] = 0.0f;
-    pPlayerEntData->movementVector[1] = 0.0f;
+    pPlayerEntData->movementBits = 0;
     pPlayerEntData->moveUpBinding    = In_FindButtonMapping(pInputCtx, "playerMoveUp");
     pPlayerEntData->moveDownBinding  = In_FindButtonMapping(pInputCtx, "playerMoveDown");
     pPlayerEntData->moveLeftBinding  = In_FindButtonMapping(pInputCtx, "playerMoveLeft");
@@ -128,7 +119,7 @@ static void OnDestroyPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pD
 static void SetBasePlayerAnimation(enum WfDirection dir, struct GameFrameworkLayer* pLayer, struct WfPlayerEntData* pPlayerEntData, struct Entity2D* pEnt)
 {
     struct AnimatedSprite* pSprite = &pEnt->components[PLAYER_SPRITE_COMP_INDEX].data.spriteAnimator;
-    pSprite->bIsAnimating = pPlayerEntData->bMovingThisFrame;
+    pSprite->bIsAnimating = pPlayerEntData->movementBits != 0;
     switch(dir)
     {
     case Up:
@@ -186,7 +177,7 @@ static void SetPlayerAnimation(struct GameFrameworkLayer* pLayer, struct WfPlaye
 {
     /* set the base animation */
     struct AnimatedSprite* pSprite = &pEnt->components[PLAYER_SPRITE_COMP_INDEX].data.spriteAnimator;
-    pSprite->bIsAnimating = pPlayerEntData->bMovingThisFrame;
+    pSprite->bIsAnimating = pPlayerEntData->movementBits != 0;
     for(int i=0; i<WfNumAnimationLayers; i++)
     {
         if(pPlayerEntData->animationSet.layersMask & (1 << i))
@@ -194,7 +185,7 @@ static void SetPlayerAnimation(struct GameFrameworkLayer* pLayer, struct WfPlaye
             pEnt->components[PLAYER_SPRITE_COMP_INDEX + 1 + i].data.spriteAnimator.bIsAnimating = pSprite->bIsAnimating;
         }
     }
-    if(!pPlayerEntData->bMovingThisFrame && pPlayerEntData->bMovingLastFrame)
+    if(!(pPlayerEntData->movementBits != 0) && pPlayerEntData->bMovingLastFrame)
     {
         pSprite->onSprite = 0;
         for(int i=0; i<WfNumAnimationLayers; i++)
@@ -205,34 +196,58 @@ static void SetPlayerAnimation(struct GameFrameworkLayer* pLayer, struct WfPlaye
             }
         }
     }
-    if(pPlayerEntData->movementVector[1] > 1e-5f)
+    if(pPlayerEntData->movementBits & WfPD_Down)
     {
         // moving down
         SetBasePlayerAnimation(Down, pLayer, pPlayerEntData, pEnt);
         WfSetPlayerOverlayAnimations(Down, pLayer, pPlayerEntData, pEnt);
         pPlayerEntData->directionFacing = Down;
     }
-    else if(pPlayerEntData->movementVector[1] < -1e-5f)
+    else if(pPlayerEntData->movementBits & WfPD_Up)
     {
         // moving up
         SetBasePlayerAnimation(Up, pLayer, pPlayerEntData, pEnt);
         WfSetPlayerOverlayAnimations(Up, pLayer, pPlayerEntData, pEnt);
         pPlayerEntData->directionFacing = Up;
     }
-    else if(pPlayerEntData->movementVector[0] > 1e-5f)
+    else if(pPlayerEntData->movementBits & WfPD_Right)
     {
         // moving right
         SetBasePlayerAnimation(Right, pLayer, pPlayerEntData, pEnt);
         WfSetPlayerOverlayAnimations(Right, pLayer, pPlayerEntData, pEnt);
         pPlayerEntData->directionFacing = Right;
     }
-    else if(pPlayerEntData->movementVector[0] < -1e-5f)
+    else if(pPlayerEntData->movementBits & WfPD_Left)
     {
         // moving left
         SetBasePlayerAnimation(Left, pLayer, pPlayerEntData, pEnt);
         WfSetPlayerOverlayAnimations(Left, pLayer, pPlayerEntData, pEnt);
         pPlayerEntData->directionFacing = Left;
     }
+}
+
+static void GetMovementVector(u8 movementBits, vec2 movementVec)
+{
+    movementVec[0] = 0.0f;
+    movementVec[1] = 0.0f;
+
+    if(movementBits & WfPD_Up)
+    {
+        movementVec[1] = -1.0f;
+    }
+    if(movementBits & WfPD_Down)
+    {
+        movementVec[1] = 1.0f;
+    }
+    if(movementBits & WfPD_Right)
+    {
+        movementVec[0] = 1.0f;
+    }
+    if(movementBits & WfPD_Left)
+    {
+        movementVec[0] = -1.0f;
+    }
+    glm_vec2_normalize(movementVec);
 }
 
 static void OnUpdatePlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, float deltaT)
@@ -242,9 +257,10 @@ static void OnUpdatePlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLa
     {
     case WfWalking:
         {
-            vec2 scaledMovement;
-            scaledMovement[0] = pPlayerEntData->movementVector[0] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
-            scaledMovement[1] = pPlayerEntData->movementVector[1] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
+            vec2 scaledMovement, mov;
+            GetMovementVector(pPlayerEntData->movementBits, mov);
+            scaledMovement[0] = mov[0] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
+            scaledMovement[1] = mov[1] * pPlayerEntData->metersPerSecondWalkSpeedBase * deltaT * pPlayerEntData->speedMultiplier;
             Ph_SetDynamicBodyVelocity(
                 pEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider.id,
                 scaledMovement
@@ -259,7 +275,6 @@ static void OnUpdatePlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLa
             if(!pSprite->bIsAnimating)
             {
                 pPlayerEntData->state = WfWalking;
-                pPlayerEntData->bMovingThisFrame = true;
                 SetBasePlayerAnimation(pPlayerEntData->directionFacing, pLayer, pPlayerEntData, pEnt);
                 WfSetPlayerOverlayAnimations(pPlayerEntData->directionFacing, pLayer, pPlayerEntData, pEnt);
             }
@@ -325,7 +340,7 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
 
     /* network players need to do this part too so that their sprite animation is reset when they stop moving,
      but bMovingThisFrame and the movement vector is set from the network not input */
-    pPlayerEntData->bMovingLastFrame = pPlayerEntData->bMovingThisFrame;
+    pPlayerEntData->bMovingLastFrame = pPlayerEntData->movementBits != 0;
 
     if(pPlayerEntData->bNetworkControlled)
     {
@@ -333,34 +348,24 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
     }
 
     Entity2DInput(pEnt, pLayer, context);
-    pPlayerEntData->movementVector[0] = 0.0f;
-    pPlayerEntData->movementVector[1] = 0.0f;
-    pPlayerEntData->bMovingThisFrame = false;
+    pPlayerEntData->movementBits = 0;
     struct GameLayer2DData* pLayerData = pLayer->userData;
     
     if(In_GetButtonValue(context, pPlayerEntData->moveUpBinding))
     {
-        vec2 add = {0.0f, -1.0f};
-        glm_vec2_add(pPlayerEntData->movementVector, add, pPlayerEntData->movementVector);
-        pPlayerEntData->bMovingThisFrame = true;
+        pPlayerEntData->movementBits |= WfPD_Up;
     }
     if(In_GetButtonValue(context, pPlayerEntData->moveDownBinding))
     {
-        vec2 add = {0.0f, 1.0f};
-        glm_vec2_add(pPlayerEntData->movementVector, add, pPlayerEntData->movementVector);   
-        pPlayerEntData->bMovingThisFrame = true;
+        pPlayerEntData->movementBits |= WfPD_Down;
     }
     if(In_GetButtonValue(context, pPlayerEntData->moveLeftBinding))
     {
-        vec2 add = {-1.0f, 0.0f};
-        glm_vec2_add(pPlayerEntData->movementVector, add, pPlayerEntData->movementVector);   
-        pPlayerEntData->bMovingThisFrame = true;
+        pPlayerEntData->movementBits |= WfPD_Left;
     }
     if(In_GetButtonValue(context, pPlayerEntData->moveRightBinding))
     {
-        vec2 add = {1.0f, 0.0f};
-        glm_vec2_add(pPlayerEntData->movementVector, add, pPlayerEntData->movementVector);   
-        pPlayerEntData->bMovingThisFrame = true;
+        pPlayerEntData->movementBits |= WfPD_Right;
     }
     if(In_GetButtonPressThisFrame(context, pPlayerEntData->settingsMenuBinding))
     {
@@ -375,8 +380,6 @@ static void OnInputPlayer(struct Entity2D* pEnt, struct GameFrameworkLayer* pLay
     {
         ChangeItem(pLayer, pEnt, pPlayerEntData, -1);
     }
-
-    glm_vec2_normalize(pPlayerEntData->movementVector);
 }
 
 
@@ -426,8 +429,7 @@ static void WfPrintPlayerInfo(struct Entity2D* pEnt)
 void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
 {
     struct GameLayer2DData* pData = pLayer->userData;
-    //pEnt->nextSibling = NULL_HANDLE;
-    //pEnt->previousSibling = NULL_HANDLE;
+    
     if(pEnt->user.hData == NULL_HANDLE)
     {
         gPlayerEntDataPool = GetObjectPoolIndex(gPlayerEntDataPool, &pEnt->user.hData);
@@ -535,14 +537,16 @@ void WfSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEn
         struct DynamicCollider* pCollider = &pInEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider;
         vec2 physPos;
         Ph_GetDynamicBodyPosition(pCollider->id, physPos);
+
+        /* physics position */
         BS_SerializeFloat(physPos[0], bs);
         BS_SerializeFloat(physPos[1], bs);
 
-        BS_SerializeFloat(pEntData->movementVector[0], bs);
-        BS_SerializeFloat(pEntData->movementVector[1], bs);
-        BS_SerializeBool(pEntData->bMovingThisFrame, bs);
+        /* pack movement bits and selected inventory item into an 8 bit val */
+        u8 val = pEntData->movementBits;
         struct WfInventory* pInv = WfGetInventory();
-        BS_SerializeU8((u8)pInv->selectedItem, bs);
+        val |= ((u8)pInv->selectedItem << 4);
+        BS_SerializeU8(val, bs);
     }
     else
     {
@@ -567,18 +571,22 @@ void WfDeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOu
             if(bs->ctx == SCTX_ToNetworkUpdate)
             {
                 struct WfPlayerEntData* pEntData = &gPlayerEntDataPool[pOutEnt->user.hData];
+                
+                /* physics position */
                 vec2 physPos;
                 BS_DeSerializeFloat(&physPos[0], bs);
                 BS_DeSerializeFloat(&physPos[1], bs);
                 struct DynamicCollider* pCollider = &pOutEnt->components[PLAYER_COLLIDER_COMP_INDEX].data.dynamicCollider;
                 Ph_SetDynamicBodyPosition(pCollider->id, physPos);
-                BS_DeSerializeFloat(&pEntData->movementVector[0], bs);
-                BS_DeSerializeFloat(&pEntData->movementVector[1], bs);
-                bool b;
-                BS_DeSerializeBool(&b, bs);
-                pEntData->bMovingThisFrame = b;
-                u8 selectedItem = 0;
-                BS_DeSerializeU8(&selectedItem, bs);
+                u8 val = 0;
+
+                /* movement enum and selected item */
+                BS_DeSerializeU8(&val, bs);
+                u8 movement = val & 0xf;
+                u8 selectedItem = (val >> 4);
+                pEntData->movementBits = movement;
+                
+
                 struct WfInventory* pInv = WfGetPlayerInventory(pEntData);
                 if(pInv->selectedItem != selectedItem)
                 {

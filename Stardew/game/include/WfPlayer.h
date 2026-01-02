@@ -43,6 +43,15 @@ enum WfPlayerState
     WfNumPlayerStates
 };
 
+enum WfPlayerDirection
+{
+    WfPD_Up = 1,
+    WfPD_Down = (1 << 1),
+    WfPD_Left = (1 << 2),
+    WfPD_Right = (1 << 3),
+};
+
+
 struct WfPlayerEntData
 {
     vec2 groundColliderCenter2EntTransform;
@@ -62,7 +71,7 @@ struct WfPlayerEntData
 
     float speedMultiplier;
 
-    vec2 movementVector;
+    u8 movementBits;
 
     struct WfAnimationSet animationSet;
 
@@ -85,7 +94,6 @@ struct WfPlayerEntData
     int networkPlayerNum;
 
     /* flags section */
-    u32 bMovingThisFrame : 1;
     u32 bMovingLastFrame : 1;
     u32 bNetworkControlled : 1;
 };
