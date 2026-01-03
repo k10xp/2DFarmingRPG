@@ -147,7 +147,7 @@ void Engine_ParseCmdArgs(int argc, char** argv, ArgHandlerFn handlerFn)
                 EASSERT(i + 1 < argc);
                 i++;
                 Log_Info("Cmd arg %i: %s", i, argv[i]);
-                gCmdArgs.serverAddress = argv[i];
+                gCmdArgs.clientAddress = argv[i];
             }
             else if(strcmp(argv[i], "--log_level") == 0 || strcmp(argv[i], "-l") == 0)
             {

@@ -35,6 +35,7 @@
 #define PLAYER_SPRITE_COMP_INDEX 1
 #define PLAYER_COLLIDER_COMP_INDEX 0
 
+static void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum);
 
 static OBJECT_POOL(struct WfPlayerEntData) gPlayerEntDataPool = NULL;
 
@@ -426,7 +427,7 @@ static void WfPrintPlayerInfo(struct Entity2D* pEnt)
     );
 }
 
-void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
+static void WfMakeIntoPlayerEntityBase(struct Entity2D* pEnt, struct GameFrameworkLayer* pLayer, vec2 spawnAtGroundPos, bool bNetworkControlled, int networkPlayerNum)
 {
     struct GameLayer2DData* pData = pLayer->userData;
     
