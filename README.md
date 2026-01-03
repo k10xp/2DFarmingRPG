@@ -46,7 +46,7 @@ To Build:
       - Python 3
   - Run GetDependenciesConan.bat
   - Run BuildRelease.bat
-  - Run compile_assets.bat (this likely won't as it hasn't been maintained - copy the linux .sh one)
+  - Run compile_assets.bat
   - Run BuildDebug.bat
 - Linux (Ubuntu)
   - Buildtime Dependencies
