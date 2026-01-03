@@ -11,14 +11,6 @@ python engine/scripts/MergeAtlases.py ./WfAssets/out/atlas.xml ./WfAssets/out/ex
 
 "game/Release/WarFarmer.exe" --outPersistantFile ./WfAssets/Saves/Dev/Persistant.game
 
-robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.tilemap
-robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.xml
-robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.lua
-robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.atlas
-robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.txt
-robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.game
-copy "./WfAssets/ImageFiles.json" "game\Release/WfAssets/ImageFiles.json" /a
-copy "./WfAssets/Keymap.json" "game\Release/WfAssets/Keymap.json" /a
-
+robocopy "./WfAssets/" "game\Release/WfAssets/" /E /XO
 
 pause
