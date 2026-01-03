@@ -17,8 +17,8 @@ robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.lua
 robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.atlas
 robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.txt
 robocopy "./WfAssets/" "game\Release/WfAssets/" /E *.game
-robocopy "./WfAssets/ImageFiles.json" "game\Release/WfAssets/ImageFiles.json" /E *.game
-robocopy "./WfAssets/Keymap.json" "game\Release/WfAssets/Keymap.json" /E *.game
+copy "./WfAssets/ImageFiles.json" "game\Release/WfAssets/ImageFiles.json" /a
+copy "./WfAssets/Keymap.json" "game\Release/WfAssets/Keymap.json" /a
 
 
 pause
