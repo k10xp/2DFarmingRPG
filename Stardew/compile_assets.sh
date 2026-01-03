@@ -19,7 +19,7 @@ python3 engine/scripts/MergeAtlases.py ./WfAssets/out/atlas.xml ./WfAssets/out/e
 ./build/atlastool/AtlasTool ./WfAssets/ui_atlas.xml -o ./WfAssets/ui_atlas.atlas -bmp UIAtlas.bmp
 
 # make a dev save file (temporary measure)
-./build/game/Warfarmer --outPersistantFile ./WfAssets/Saves/Dev/Persistant.game
+./build/game/WarFarmer --outPersistantFile ./WfAssets/Saves/Dev/Persistant.game
 
 # copy tilemap files into the dev save folder
 cp ./WfAssets/out/Farm.tilemap ./WfAssets/Saves/Dev
