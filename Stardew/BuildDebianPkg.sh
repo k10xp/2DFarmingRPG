@@ -11,10 +11,24 @@ EXE_NAME="WarFarmer"
 mkdir -p "./$DEB_PKG_NAME/usr/bin"
 mkdir -p "./$DEB_PKG_NAME/usr/lib"
 mkdir -p "./$DEB_PKG_NAME/usr/share"
+mkdir -p "./$DEB_PKG_NAME/usr/share/WfAssets"
 mkdir -p "./$DEB_PKG_NAME/DEBIAN"
 
 # install assets
-cp -R ./WfAssets "./$DEB_PKG_NAME/usr/share"
+#cp -R ./WfAssets "./$DEB_PKG_NAME/usr/share"
+cd ./WfAssets
+find . -name '*.txt' \
+    -o -name '*.tilemap'\
+    -o -name '*.atlas'\
+    -o -name '*.xml'\
+    -o -name '*.lua'\
+    -o -name '*.game'\
+    -o -name '*.txt'\
+    | cpio -pdm "../$DEB_PKG_NAME/usr/share/WfAssets"
+cd ..
+
+cp ./WfAssets/ImageFiles.json "./$DEB_PKG_NAME/usr/share/WfAssets/ImageFiles.json"
+cp ./WfAssets/Keymap.json "./$DEB_PKG_NAME/usr/share/WfAssets/Keymap.json"
 
 # install game exe
 cp "./build/game/$EXE_NAME" "./$DEB_PKG_NAME/usr/bin/$EXE_NAME"

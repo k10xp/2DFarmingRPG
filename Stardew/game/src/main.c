@@ -82,7 +82,7 @@ void WfEngineInit()
 
 void GameInit(InputContext* pIC, DrawContext* pDC)
 {
-    KarlMarx();
+    //KarlMarx();
     WfPrintVersion();
     WfGameInit();
     WfEngineInit();
