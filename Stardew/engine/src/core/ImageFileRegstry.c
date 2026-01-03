@@ -13,7 +13,7 @@ static VECTOR(struct ImageFile) gImageFiles;
 
 HImage IR_RegisterImagePath(const char* path)
 {
-    const char* assetsFolderPath = "./Assets/";
+    const char* assetsFolderPath = "./WfAssets/";
     HImage i = NULL_HIMAGE;
     struct ImageFile imagef;
     memset(&imagef, 0, sizeof(struct ImageFile));
@@ -124,7 +124,7 @@ void IR_InitImageRegistry(const char* jsonPath)
     char* data = jsonPath;
     if (jsonPath == NULL)
     {
-        data = LoadFile("./Assets/ImageFiles.json", &size);
+        data = LoadFile("./WfAssets/ImageFiles.json", &size);
     }
     
     if (!data)

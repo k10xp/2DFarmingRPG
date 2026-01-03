@@ -1,0 +1,28 @@
+<atlas>
+	<sprite source="./WfAssets/Image/kenney_ui-pack-scifi/PNG/Green/Default/bar_round_gloss_large.png" top="0" left="0" width="96" height="24" name="bar_round_gloss_large"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack-scifi/PNG/Green/Default/bar_round_gloss_large_square.png" top="0" left="0" width="24" height="24" name="bar_round_gloss_large_square"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack-scifi/PNG/Extra/Default/button_square.png" top="0" left="0" width="64" height="64" name="button_square"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack-scifi/PNG/Extra/Default/button_square_depth.png" top="0" left="0" width="64" height="64" name="button_square_depth"/>
+	<sprite source="./WfAssets/Image/example.png" top="0" left="0" width="32" height="32" name="fantasy_9Panel"/>
+	<sprite source="./WfAssets/Image/example_selected.png" top="0" left="0" width="32" height="32" name="fantasy_9Panel_selected"/>
+	<sprite source="./WfAssets/Image/2D_Bright_buttons/White/whiteNormal.png" top="0" left="0" width="64" height="64" name="defaultButton"/>
+	<sprite source="./WfAssets/Image/2D_Bright_buttons/White/whiteDown.png" top="0" left="0" width="64" height="64" name="defaultPressedButton"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/check_round_grey.png" top="0" left="0" width="32" height="32" name="radioUnchecked"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/check_round_round_circle.png" top="0" left="0" width="32" height="32" name="radioChecked"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/slide_vertical_color.png" top="0" left="0" width="16" height="96" name="defaultRailVertical"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/slide_vertical_color_section.png" top="0" left="0" width="16" height="16" name="defaultSliderVertical"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/slide_horizontal_color.png" top="0" left="0" width="96" height="16" name="defaultRailHorizontal"/>
+	<sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/slide_horizontal_color_section.png" top="0" left="0" width="16" height="16" name="defaultSliderHorizontal"/>
+	<font source="./WfAssets/Starzy_Darzy_lowercase_letters.ttf" name="default" options="normal">
+		<size type="pts" val="16"/>
+		<size type="pts" val="32"/>
+	</font>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="288" left="192" width="32" height="32" name="no-item"/>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="224" left="160" width="32" height="32" name="basic-axe"/>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="128" left="192" width="32" height="32" name="basic-sword"/>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="0"   left="96"  width="32" height="32" name="basic-pickaxe"/>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="288" left="96"  width="32" height="32" name="basic-scythe"/>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="256" left="128" width="32" height="32" name="basic-hoe"/>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="224" left="384" width="32" height="32" name="basic-fishing-rod"/>
+	<sprite source="./WfAssets/Image/LPC Submissions/Extensions/items1.png" top="32"  left="128" width="32" height="32" name="basic-bow"/>
+</atlas>

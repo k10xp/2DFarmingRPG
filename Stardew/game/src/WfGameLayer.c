@@ -108,7 +108,7 @@ void WfPushGameLayer(DrawContext* pDC, const char* lvlFilePath)
     memset(&testLayer, 0, sizeof(struct GameFrameworkLayer));
     struct Game2DLayerOptions options;
     memset(&options, 0, sizeof(struct Game2DLayerOptions));
-    options.atlasFilePath = "./Assets/out/main.atlas";
+    options.atlasFilePath = "./WfAssets/out/main.atlas";
     options.levelFilePath = lvlFilePath;
     Game2DLayer_Get(&testLayer, &options, pDC);
     testLayer.onPush = &WfGameLayerOnPush;

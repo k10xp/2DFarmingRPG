@@ -69,8 +69,8 @@ void GameInit(InputContext* pIC, DrawContext* pDC)
     memset(&testLayer, 0, sizeof(struct GameFrameworkLayer));
     struct Game2DLayerOptions options;
     memset(&options, 0, sizeof(struct Game2DLayerOptions));
-    options.atlasFilePath = "./Assets/out/main.atlas";
-    options.tilemapFilePath = "./Assets/out/Farm.tilemap";
+    options.atlasFilePath = "./WfAssets/out/main.atlas";
+    options.tilemapFilePath = "./WfAssets/out/Farm.tilemap";
     Game2DLayer_Get(&testLayer, &options, pDC);
     testLayer.flags |= (EnableOnPop | EnableOnPush | EnableUpdateFn | EnableDrawFn | EnableInputFn);
     GF_PushGameFrameworkLayer(&testLayer);

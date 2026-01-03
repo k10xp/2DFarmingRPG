@@ -4,24 +4,24 @@
 #
 
 # convert jsons from the Tiled editor to binary files containing tilemaps and entities + an atlas.xml file of the tiles used
-python3 game/game_convert_tiled.py ./Assets/out -m ./Assets/Farm.json ./Assets/House.json ./Assets/RoadToTown.json 
+python3 game/game_convert_tiled.py ./WfAssets/out -m ./WfAssets/Farm.json ./WfAssets/House.json ./WfAssets/RoadToTown.json 
 
 # expand animation nodes
-python3 ./engine/scripts/ExpandAnimations.py -o ./Assets/out/expanded_named_sprites.xml ./Assets/out/named_sprites.xml
+python3 ./engine/scripts/ExpandAnimations.py -o ./WfAssets/out/expanded_named_sprites.xml ./WfAssets/out/named_sprites.xml
 
 # merge the list of named sprites into the ones used by the tilemap
-python3 engine/scripts/MergeAtlases.py ./Assets/out/atlas.xml ./Assets/out/expanded_named_sprites.xml > ./Assets/out/atlascombined.xml
+python3 engine/scripts/MergeAtlases.py ./WfAssets/out/atlas.xml ./WfAssets/out/expanded_named_sprites.xml > ./WfAssets/out/atlascombined.xml
 
 # compile the atlascombined.xml into a binary atlas file
-./build/atlastool/AtlasTool ./Assets/out/atlascombined.xml -o ./Assets/out/main.atlas -bmp Atlas.bmp
+./build/atlastool/AtlasTool ./WfAssets/out/atlascombined.xml -o ./WfAssets/out/main.atlas -bmp Atlas.bmp
 
 # compile another atlas file containing sprites and fonts for the games UI 
-./build/atlastool/AtlasTool ./Assets/ui_atlas.xml -o ./Assets/ui_atlas.atlas -bmp UIAtlas.bmp
+./build/atlastool/AtlasTool ./WfAssets/ui_atlas.xml -o ./WfAssets/ui_atlas.atlas -bmp UIAtlas.bmp
 
 # make a dev save file (temporary measure)
-./build/game/Warfarmer --outPersistantFile ./Assets/Saves/Dev/Persistant.game
+./build/game/Warfarmer --outPersistantFile ./WfAssets/Saves/Dev/Persistant.game
 
 # copy tilemap files into the dev save folder
-cp ./Assets/out/Farm.tilemap ./Assets/Saves/Dev
-cp ./Assets/out/House.tilemap ./Assets/Saves/Dev
-cp ./Assets/out/RoadToTown.tilemap ./Assets/Saves/Dev
+cp ./WfAssets/out/Farm.tilemap ./WfAssets/Saves/Dev
+cp ./WfAssets/out/House.tilemap ./WfAssets/Saves/Dev
+cp ./WfAssets/out/RoadToTown.tilemap ./WfAssets/Saves/Dev

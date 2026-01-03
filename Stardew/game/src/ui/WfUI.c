@@ -10,7 +10,7 @@ void WfPushHUD(DrawContext* pDC)
     struct GameFrameworkLayer testLayer;
     memset(&testLayer, 0, sizeof(struct GameFrameworkLayer));
     struct XMLUIGameLayerOptions options;
-    options.xmlPath = "./Assets/GameHUD.xml";
+    options.xmlPath = "./WfAssets/GameHUD.xml";
     options.pDc = pDC;
     testLayer.flags |= (EnableOnPush | EnableOnPop);
     Log_Verbose("making xml ui layer");
@@ -25,7 +25,7 @@ void WfPushSettings(DrawContext* pDC)
     struct GameFrameworkLayer testLayer;
     memset(&testLayer, 0, sizeof(struct GameFrameworkLayer));
     struct XMLUIGameLayerOptions options;
-    options.xmlPath = "./Assets/Settings.xml";
+    options.xmlPath = "./WfAssets/Settings.xml";
     options.pDc = pDC;
     Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);

@@ -17,7 +17,7 @@ static void PopulateSavesList()
     size_t len = 0;
     size_t read;
 
-    fp = fopen("./Assets/Saves/saves.txt", "r");
+    fp = fopen("./WfAssets/Saves/saves.txt", "r");
     if (fp == NULL)
         exit(EXIT_FAILURE);
 

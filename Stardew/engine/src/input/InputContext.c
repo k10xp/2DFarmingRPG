@@ -669,7 +669,7 @@ InputContext In_InitInputContext()
 	memset(&ctx, 0, sizeof(InputContext));
 
 	int size = 0;
-	char* data = LoadFile("./Assets/Keymap.json", &size);
+	char* data = LoadFile("./WfAssets/Keymap.json", &size);
 	ERROR(data, "can't load data");
 	cJSON* json = cJSON_ParseWithLength(data, size);
 	ERROR(json, "can't parse json");

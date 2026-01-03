@@ -394,7 +394,7 @@ void GameInit(InputContext* pIC, DrawContext* pDC)
     memset(&testLayer, 0, sizeof(struct GameFrameworkLayer));
     struct XMLUIGameLayerOptions options;
     options.bLoadImmediately = true;
-    options.xmlPath = "./Assets/test.xml";
+    options.xmlPath = "./WfAssets/test.xml";
     options.pDc = pDC;
     Log_Verbose("making xml ui layer");
     XMLUIGameLayer_Get(&testLayer, &options);

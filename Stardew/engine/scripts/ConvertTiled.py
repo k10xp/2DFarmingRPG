@@ -22,7 +22,7 @@ def do_cmd_args():
     parser.add_argument('-m', '--tile_maps', nargs='+', default=[], help="list of tilemap json files output from Tiled. In total, an atlas file for all levels and a level binary file for each level will be output")
     parser.add_argument("-a", '--atlas_tool', default=None, help="optional path to atlas tool which will compile an atlas xml file AOT for faster loading")
     parser.add_argument("outputDir", type=str, help="the output directory")
-    parser.add_argument("-A", "--assets_folder", default="./Assets")
+    parser.add_argument("-A", "--assets_folder", default="./WfAssets/")
     parser.add_argument("-r", "--rle", type=bool, default=False)
     parser.add_argument("-bmp", "--atlasBmp", type=str, default=None, help="Optional atlas debug bitmap output path")
     parser.add_argument("-iw", "--atlasIW", type=int, default=512, help="Atlas initial width.")
@@ -74,7 +74,7 @@ class AtlasSprite:
         self.name = name
     def get_attributes(self, counter):
         return {
-            "source" : "./Assets/" + self.path,
+            "source" : "./WfAssets/" + self.path,
             "top" : str(int(self.top)),
             "left" : str(int(self.left)),
             "width" : str(int(self.width)),

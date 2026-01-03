@@ -1,0 +1,14 @@
+{ "columns":9,
+ "image":"Image\/pickaxe.png",
+ "imageheight":256,
+ "imagewidth":576,
+ "margin":0,
+ "name":"pickaxe",
+ "spacing":0,
+ "tilecount":36,
+ "tiledversion":"1.11.1-99-gec89c545",
+ "tileheight":64,
+ "tilewidth":64,
+ "type":"tileset",
+ "version":"1.11"
+}

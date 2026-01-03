@@ -45,3 +45,8 @@ jobs:
         cd Stardew
         sudo ./compile_assets.sh
 
+    - name: Build Debian Package
+      run: |
+        cd Stardew
+        sudo ./BuildDebianPkg.sh
+

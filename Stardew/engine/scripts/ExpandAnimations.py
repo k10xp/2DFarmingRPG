@@ -11,7 +11,7 @@ def do_cmd_args():
 
                     <animation name="walk-base-female-down"
                                 fps="10.0"
-                                source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png"
+                                source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png"
                                 startx="0"
                                 starty="0"
                                 incx="64"
@@ -22,15 +22,15 @@ def do_cmd_args():
                     And this script will expand it like so:
 
                     <animation-frames name="walk-base-female-down" fps="10.0">
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="0" width="64" height="64" name="walk-base-female-down0" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="64" width="64" height="64" name="walk-base-female-down1" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="128" width="64" height="64" name="walk-base-female-down2" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="192" width="64" height="64" name="walk-base-female-down3" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="256" width="64" height="64" name="walk-base-female-down4" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="320" width="64" height="64" name="walk-base-female-down5" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="384" width="64" height="64" name="walk-base-female-down6" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="448" width="64" height="64" name="walk-base-female-down7" />
-                        <sprite source="./Assets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="512" width="64" height="64" name="walk-base-female-down8" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="0" width="64" height="64" name="walk-base-female-down0" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="64" width="64" height="64" name="walk-base-female-down1" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="128" width="64" height="64" name="walk-base-female-down2" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="192" width="64" height="64" name="walk-base-female-down3" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="256" width="64" height="64" name="walk-base-female-down4" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="320" width="64" height="64" name="walk-base-female-down5" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="384" width="64" height="64" name="walk-base-female-down6" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="448" width="64" height="64" name="walk-base-female-down7" />
+                        <sprite source="./WfAssets/Image/lpc_base_assets/LPC Base Assets/sprites/people/female_walkcycle.png" top="128" left="512" width="64" height="64" name="walk-base-female-down8" />
                     </animation-frames>
                     """,
                     epilog='Jim Marshall - 2025')

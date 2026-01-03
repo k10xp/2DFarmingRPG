@@ -11,15 +11,15 @@ cmake .. -DCMAKE_BUILD_TYPE=$1
 make
 cd game
 
-if [ ! -d "Assets" ]; then
-  mkdir Assets
+if [ ! -d "WfAssets" ]; then
+  mkdir WfAssets
 fi
 
 cd ..
 cd ..
 
 echo "Copying assets folder..."
-cp -a Assets build/game
+cp -a WfAssets build/game
 
 echo "Copying test data..."
 cp -a enginetest/data build/enginetest

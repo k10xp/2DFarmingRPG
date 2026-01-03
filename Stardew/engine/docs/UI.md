@@ -8,9 +8,9 @@ The game engine defines the XMLUIGameLayer game framework layer type. To initial
 
 ```xml
 <UIroot>
-	<atlas binary="./Assets/ui_atlas.atlas">
+	<atlas binary="./WfAssets/ui_atlas.atlas">
 	</atlas>
-    <screen viewmodelFile="./Assets/settings.lua" viewmodelFunction="GetSettingsViewModel">
+    <screen viewmodelFile="./WfAssets/settings.lua" viewmodelFunction="GetSettingsViewModel">
         
     </screen>
 </UIroot>
@@ -21,14 +21,14 @@ The two important top level elements are ```atlas``` and ```screen```. Atlas can
 ```xml
 <UIroot>
     <atlas>
-        <sprite source="./Assets/Image/kenney_ui-pack/PNG/Grey/Default/slide_horizontal_color.png" top="0" left="0" width="96" height="16" name="defaultRailHorizontal"/>
-        <sprite source="./Assets/Image/kenney_ui-pack/PNG/Grey/Default/slide_horizontal_color_section.png" top="0" left="0" width="16" height="16" name="defaultSliderHorizontal"/>
-        <font source="./Assets/Starzy_Darzy_lowercase_letters.ttf" name="default" options="normal">
+        <sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/slide_horizontal_color.png" top="0" left="0" width="96" height="16" name="defaultRailHorizontal"/>
+        <sprite source="./WfAssets/Image/kenney_ui-pack/PNG/Grey/Default/slide_horizontal_color_section.png" top="0" left="0" width="16" height="16" name="defaultSliderHorizontal"/>
+        <font source="./WfAssets/Starzy_Darzy_lowercase_letters.ttf" name="default" options="normal">
             <size type="pts" val="16"/>
             <size type="pts" val="32"/>
         </font>
     </atlas>
-    <screen viewmodelFile="./Assets/settings.lua" viewmodelFunction="GetSettingsViewModel">
+    <screen viewmodelFile="./WfAssets/settings.lua" viewmodelFunction="GetSettingsViewModel">
         
     </screen>
 </UIroot>
@@ -37,7 +37,7 @@ The two important top level elements are ```atlas``` and ```screen```. Atlas can
 The screen element must point to a lua script file and a function that returns the viewmodel. A minimal lua file for the above would look like this:
 
 ```lua
--- file "./Assets/settings.lua
+-- file "./WfAssets/settings.lua
 function GetSettingsViewModel()
     return {
         _
