@@ -39,3 +39,9 @@ jobs:
       run: |
         cd Stardew
         sudo ./RunEngineNetTest.sh
+
+    - name: Compile Assets
+      run: |
+        cd Stardew
+        sudo ./compile_assets.sh
+

@@ -146,8 +146,8 @@ def run_atlas_tool(path, xmlPath, args):
     print(f"Running Atlas Tool...\n")
     print(binPath)
     print(argsList)
-    print(f"Std Out:\n{result.stdout.decode("utf-8")}\n")
-    print(f"Std Err:\n{result.stderr.decode("utf-8")}\n")
+    print(f"Std Out:\n{result.stdout.decode('utf-8')}\n")
+    print(f"Std Err:\n{result.stderr.decode('utf-8')}\n")
 
 def count_tilemap_layers(layers):
     i = 0

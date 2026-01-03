@@ -9,6 +9,8 @@ python engine/scripts/MergeAtlases.py ./Assets/out/atlas.xml ./Assets/out/expand
 
 "engine/scripts/AtlasTool.exe" ./Assets/ui_atlas.xml -o ./Assets/ui_atlas.atlas
 
+"game/Release/WarFarmer.exe" --outPersistantFile ./Assets/Saves/Dev/Persistant.game
+
 robocopy "./Assets" "game\Release\Assets" /E /XO
 
 pause
