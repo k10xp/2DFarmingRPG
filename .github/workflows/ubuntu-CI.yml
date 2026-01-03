@@ -49,4 +49,9 @@ jobs:
       run: |
         cd Stardew
         sudo ./BuildDebianPkg.sh
+      
+    - uses: actions/upload-artifact@v4
+      with:
+        name: my-artifact
+        path: Stardew/*.deb
 
