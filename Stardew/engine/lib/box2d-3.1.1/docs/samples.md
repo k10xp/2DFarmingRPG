@@ -1,7 +1,9 @@
 # Samples {#samples}
+
 Once you have conquered the HelloWorld example, you should start looking
 at Box2D's samples application. The samples application is a testing framework and demo
 environment. Here are some of the features:
+
 - Camera with pan and zoom
 - Mouse dragging of dynamic bodies
 - Many samples in a tree view

@@ -1,5 +1,3 @@
-
-
 echo installing .vscode folder...
 
 if [ ! -d "../.vscode" ];

@@ -1,4 +1,5 @@
 # Hello Box2D {#hello}
+
 In the distribution of Box2D is a Hello World unit test written in C. The test
 creates a large ground box and a small dynamic box. This code does not
 contain any graphics. All you will see is text output in the console of
@@ -7,6 +8,7 @@ the box's position over time.
 This is a good example of how to get up and running with Box2D.
 
 ## Creating a World
+
 Every Box2D program begins with the creation of a world object.
 The world is the physics hub that manages memory, objects, and simulation.
 The world is represented by an opaque handle called `b2WorldId`.
@@ -20,7 +22,7 @@ b2WorldDef worldDef = b2DefaultWorldDef();
 The world definition is a temporary object that you can create on the stack. The function
 `b2DefaultWorldDef()` populates the world definition with default values. This is necessary because C does not have constructors and zero initialization is not appropriate for `b2WorldDef`.
 
-Now I configure the world gravity vector. Note that Box2D has no concept of *up* and you may point gravity in any direction you like. Box2D example code uses the positive y-axis as the up direction.
+Now I configure the world gravity vector. Note that Box2D has no concept of _up_ and you may point gravity in any direction you like. Box2D example code uses the positive y-axis as the up direction.
 
 ```c
 worldDef.gravity = (b2Vec2){0.0f, -10.0f};
@@ -38,7 +40,9 @@ definition is no longer needed.
 So now we have our physics world, let's start adding some stuff to it.
 
 ## Creating a Ground Box
+
 Bodies are built using the following steps:
+
 1. Define a body with position, damping, etc.
 2. Use the world id to create the body.
 3. Define shapes with friction, density, etc.
@@ -108,6 +112,7 @@ Many of the algorithms in Box2D are based on the rigid body model and optimized 
 that in mind. If this is violated you may get unexpected behavior.
 
 ## Creating a Dynamic Body
+
 I can use the same technique to create a
 dynamic body. The main difference, besides dimensions, is that I must
 establish the dynamic body's mass properties.
@@ -162,6 +167,7 @@ b2CreatePolygonShape(bodyId, &shapeDef, &dynamicBox);
 That's it for initialization. We are now ready to begin simulating.
 
 ## Simulating the World
+
 I have initialized the ground box and a dynamic box. Now we are
 ready to set Newton loose to do his thing. I just have a couple more
 issues to consider.
@@ -249,6 +255,7 @@ output should look like this:
 ```
 
 ## Cleanup
+
 When you are done with the simulation, you should destroy the world.
 
 ```c

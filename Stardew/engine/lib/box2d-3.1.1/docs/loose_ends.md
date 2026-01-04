@@ -1,6 +1,7 @@
 # Loose Ends
 
 ## User Data
+
 Bodies, shapes, and joints allow you to attach user data
 as a `void*`. This is handy when you are examining Box2D data
 structures and you want to determine how they relate to the objects in
@@ -18,10 +19,11 @@ entity->bodyId = b2CreateBody(myWorldId, &bodyDef);
 ```
 
 Here are some examples of cases where you would need the user data:
--   Applying damage to an entity using a collision result.
--   Playing a scripted event if the player is inside an axis-aligned box.
--   Accessing a game structure when Box2D notifies you that a joint is
-    going to be destroyed.
+
+- Applying damage to an entity using a collision result.
+- Playing a scripted event if the player is inside an axis-aligned box.
+- Accessing a game structure when Box2D notifies you that a joint is
+  going to be destroyed.
 
 Keep in mind that user data is optional and you can put anything in it.
 However, you should be consistent. For example, if you want to store an
@@ -31,10 +33,11 @@ pointer on another body. Casting a `GameEntity` to a `ParticleSystem` pointer
 may lead to a crash.
 
 ## Pixels and Coordinate Systems
+
 I recommend using MKS (meters, kilograms, and seconds) units and
 radians for angles. You may have trouble working with meters because
 your game is expressed in terms of pixels. To deal with this in the
-sample I have the whole *game* world in meters and just use an OpenGL
+sample I have the whole _game_ world in meters and just use an OpenGL
 viewport transformation to scale the world into screen space.
 
 You use code like this to scale your graphics.
@@ -81,8 +84,10 @@ by Box2D using `b2SetLengthUnitsPerMeter()`. This is experimental and not
 well tested.
 
 ## Debug Drawing
+
 You can implement the function pointers in `b2DebugDraw` struct to get detailed
 drawing of the Box2D world. Debug draw provides:
+
 - shapes
 - joints
 - broad-phase axis-aligned bounding boxes (AABBs)
@@ -96,10 +101,12 @@ necessary data is internal and subject to change.
 The samples application draws the Box2D world using the `b2DebugDraw`.
 
 ## Limitations
+
 Box2D uses several approximations to simulate rigid body physics
 efficiently. This brings some limitations.
 
 Here are the current limitations:
+
 1. Extreme mass ratios may cause joint stretching and collision overlap.
 2. Box2D uses soft constraints to improve robustness. This can lead to joint and contact flexing.
 3. Continuous collision does not handle all situations. For example, general dynamic versus dynamic continuous collision is not handled. [Bullets](#bullets) handle this in a limited way. This is done for performance reasons.

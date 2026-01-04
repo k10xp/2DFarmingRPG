@@ -2,46 +2,46 @@ name: Windows CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install Conan
-      uses: conan-io/setup-conan@v1
+      - name: Install Conan
+        uses: conan-io/setup-conan@v1
 
-    - name: Install Conan dependencies
-      run: |
-        cd Stardew
-        cmd /c "GetDependenciesConan.bat"
+      - name: Install Conan dependencies
+        run: |
+          cd Stardew
+          cmd /c "GetDependenciesConan.bat"
 
-    - name: Create version
-      run: |
-        cd Stardew/game
-        python make_release_version_header.py 
-        
-    - name: Build
-      run: |
-        cd Stardew
-        cmd /c "BuildRelease.bat"
+      - name: Create version
+        run: |
+          cd Stardew/game
+          python make_release_version_header.py
 
-    - name: Test
-      run: |
-        cd ./Stardew/build/enginetest/Release
-        ./StardewEngineTest.exe
+      - name: Build
+        run: |
+          cd Stardew
+          cmd /c "BuildRelease.bat"
 
-    - name: Compile Assets
-      run: |
-        cd Stardew
-        cmd /c "compile_assets.bat"
+      - name: Test
+        run: |
+          cd ./Stardew/build/enginetest/Release
+          ./StardewEngineTest.exe
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: my-artifact
-        path: Stardew/build/game/Release # or path/to/artifact
+      - name: Compile Assets
+        run: |
+          cd Stardew
+          cmd /c "compile_assets.bat"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: Stardew/build/game/Release # or path/to/artifact

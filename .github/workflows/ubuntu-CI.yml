@@ -2,9 +2,9 @@ name: Ubuntu CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   BUILD_TYPE: Release
@@ -14,44 +14,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Get Dependencies
-      run: |
-        cd Stardew
-        bash GetDependencies.sh
+      - uses: actions/checkout@v4
+      - name: Get Dependencies
+        run: |
+          cd Stardew
+          bash GetDependencies.sh
 
-    - name: Create version
-      run: |
-        cd Stardew/game
-        python3 make_release_version_header.py 
+      - name: Create version
+        run: |
+          cd Stardew/game
+          python3 make_release_version_header.py
 
-    - name: Build
-      run: |
-        cd Stardew
-        bash BuildRelease.sh
+      - name: Build
+        run: |
+          cd Stardew
+          bash BuildRelease.sh
 
-    - name: Test
-      run: |
-        cd Stardew/build/enginetest
-        ./StardewEngineTest
+      - name: Test
+        run: |
+          cd Stardew/build/enginetest
+          ./StardewEngineTest
 
-    - name: NetTest
-      run: |
-        cd Stardew
-        sudo ./RunEngineNetTest.sh
+      - name: NetTest
+        run: |
+          cd Stardew
+          sudo ./RunEngineNetTest.sh
 
-    - name: Compile Assets
-      run: |
-        cd Stardew
-        sudo ./compile_assets.sh
+      - name: Compile Assets
+        run: |
+          cd Stardew
+          sudo ./compile_assets.sh
 
-    - name: Build Debian Package
-      run: |
-        cd Stardew
-        sudo ./BuildDebianPkg.sh
-      
-    - uses: actions/upload-artifact@v4
-      with:
-        name: my-artifact
-        path: Stardew/*.deb
+      - name: Build Debian Package
+        run: |
+          cd Stardew
+          sudo ./BuildDebianPkg.sh
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: Stardew/*.deb

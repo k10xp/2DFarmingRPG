@@ -3,6 +3,7 @@
 cglm can be built using one of the following build systems:
 
 ## CMake (All platforms)
+
 ```bash
 $ mkdir build
 $ cd build
@@ -16,7 +17,7 @@ $ sudo make install # [Optional]
 ```CMake
 option(CGLM_SHARED "Shared build" ON)
 option(CGLM_STATIC "Static build" OFF)
-option(CGLM_USE_C99 "" OFF) # C11 
+option(CGLM_USE_C99 "" OFF) # C11
 option(CGLM_USE_TEST "Enable Tests" OFF) # for make check - make test
 ```
 
@@ -26,9 +27,9 @@ option(CGLM_USE_TEST "Enable Tests" OFF) # for make check - make test
 
 This requires no building or installation of cglm.
 
-* Example:
+- Example:
 
-``` cmake
+```cmake
 cmake_minimum_required(VERSION 3.8.2)
 
 project(<Your Project Name>)
@@ -42,7 +43,8 @@ add_subdirectory(external/cglm/ EXCLUDE_FROM_ALL)
 
 #### Linked
 
-* Example:
+- Example:
+
 ```cmake
 cmake_minimum_required(VERSION 3.8.2)
 
@@ -106,8 +108,11 @@ buildtype=release
 default_library=shared
 build_tests=true # to run tests: ninja test
 ```
+
 ### Including in a Meson project
-* Example:
+
+- Example:
+
 ```meson
 # Clone cglm or create a cglm.wrap under <source_root>/subprojects
 project('name', 'c')
@@ -123,7 +128,7 @@ Currently only default build options are supported. Add **cglm** dependency to y
 
 ```swift
 ...
-Package( 
+Package(
   ...
   dependencies: [
     ...
@@ -134,6 +139,7 @@ Package(
 ```
 
 Now add **cgml** as a dependency to your target. Product choices are:
+
 - **cglm** for inlined version of the library which can be linked only statically
 - **cglmc** for a compiled version of the library with no linking limitation
 
@@ -172,6 +178,7 @@ pc_path pkg-config` and change the path the files are installed to via
 prefix path to your `PKG_CONFIG_PATH` environment variable.
 
 ## Windows (MSBuild)
+
 Windows related build file and project files are located in `win` folder,
 make sure you are inside `cglm/win` folder.
 Code Analysis is enabled, so it may take awhile to build.
@@ -180,7 +187,9 @@ Code Analysis is enabled, so it may take awhile to build.
 $ cd win
 $ .\build.bat
 ```
+
 if `msbuild` won't work (because of multi version VS) then try to build with `devenv`:
+
 ```Powershell
 $ devenv cglm.sln /Build Release
 ```
@@ -190,10 +199,13 @@ $ devenv cglm.sln /Build Release
 You can see test project in same visual studio solution file. It is enough to run that project to run tests.
 
 # Building the documentation
+
 First you need install Sphinx: http://www.sphinx-doc.org/en/master/usage/installation.html
 then:
+
 ```bash
 $ cd docs
 $ sphinx-build source build
 ```
+
 it will compile docs into build folder, you can run index.html inside that function.

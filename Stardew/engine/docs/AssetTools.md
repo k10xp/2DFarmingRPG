@@ -1,10 +1,12 @@
 # Asset Tools
 
 These are scripts and tools in the scripts folder, together they provide a means of converting source assets:
+
 - [Tiled](https://www.mapeditor.org/) map files
 - image files, .png's, .jpegs etc
 
 Into the game engines binary format files:
+
 - .atlas files
 - .tilemap files (misnomer: also contain entities, will be renamed)
 
@@ -12,7 +14,7 @@ For specific command line usage pass -h to them.
 
 ## ConvertTiled.py
 
-Create level files for your game using the program [Tiled](https://www.mapeditor.org/). Into the object layers you can add entities that are defined however you like defined as points, lines, polygons, boxes etc. Define the entities you want this way and give them custom properties that they will need to have. Be consistant with the class names. 
+Create level files for your game using the program [Tiled](https://www.mapeditor.org/). Into the object layers you can add entities that are defined however you like defined as points, lines, polygons, boxes etc. Define the entities you want this way and give them custom properties that they will need to have. Be consistant with the class names.
 
 Next we run a python script to convert the tiled .json file into a binary file the engine will load. To add your own type of entities to the file, extend the script the engine provides, ConvertTiled.py, like so:
 
@@ -28,12 +30,12 @@ import os
 import struct
 
 print(os.path.abspath("../Stardew/engine/scripts"))
-sys.path.insert(1, os.path.abspath("../Stardew/engine/scripts"))  
+sys.path.insert(1, os.path.abspath("../Stardew/engine/scripts"))
 from ConvertTiled import main, register_entity_serializer, get_tiled_object_custom_prop
 
 def serialize_WoodedArea(file, obj):
     # convert the json object to binary format
-    # Our entity serializer needs to be able to load this 
+    # Our entity serializer needs to be able to load this
     file.write(struct.pack("I", 1)) # version
     file.write(struct.pack("f", get_tiled_object_custom_prop(obj, "ConiferousPercentage")["value"]))
     file.write(struct.pack("f", get_tiled_object_custom_prop(obj, "DeciduousPercentage")["value"]))
@@ -44,7 +46,7 @@ def serialize_WoodedArea(file, obj):
 def get_type_WoodedArea(obj):
     return 6                       # this corresponds to the entity type we used when we called Et2D_RegisterEntityType
 
-register_entity_serializer("WoodedArea", serialize_WoodedArea, get_type_WoodedArea, False) # each 
+register_entity_serializer("WoodedArea", serialize_WoodedArea, get_type_WoodedArea, False) # each
 
 main()
 
@@ -53,12 +55,13 @@ main()
 The ConvertTiled.py script takes a list of tiled json files as input
 
 as output it will produce:
+
 - for each input:
-    - a .tilemap binary file
-        - this contains the tilemaps and entities for the level
+  - a .tilemap binary file
+    - this contains the tilemaps and entities for the level
 - an atlas.xml file
-    - this contains the file paths of all tiles used within the all for all level files passed in and their coordinates within the file, as well as their width and height
-    - the game can load an atlas from this directly or you can precompile it (recommended), see section below
+  - this contains the file paths of all tiles used within the all for all level files passed in and their coordinates within the file, as well as their width and height
+  - the game can load an atlas from this directly or you can precompile it (recommended), see section below
 
 ## MergeAtlases.py
 
@@ -127,7 +130,7 @@ I recommend you create and maintain a compile assets script as you add assets to
 
 ```bash
 # convert jsons from the Tiled editor to binary files containing tilemaps and entities + an atlas.xml file of the tiles used
-python3 game/game_convert_tiled.py ./WfAssets/out -m ./WfAssets/Farm.json ./WfAssets/House.json ./WfAssets/RoadToTown.json 
+python3 game/game_convert_tiled.py ./WfAssets/out -m ./WfAssets/Farm.json ./WfAssets/House.json ./WfAssets/RoadToTown.json
 
 # expand animation nodes
 python3 ./engine/scripts/ExpandAnimations.py -o ./WfAssets/out/expanded_named_sprites.xml ./WfAssets/out/named_sprites.xml
@@ -138,9 +141,9 @@ python3 engine/scripts/MergeAtlases.py ./WfAssets/out/atlas.xml ./WfAssets/out/e
 # compile the atlascombined.xml into a binary atlas file
 ./build/atlastool/AtlasTool ./WfAssets/out/atlascombined.xml -o ./WfAssets/out/main.atlas -bmp Atlas.bmp
 
-# compile another atlas file containing sprites and fonts for the games UI 
+# compile another atlas file containing sprites and fonts for the games UI
 ./build/atlastool/AtlasTool ./WfAssets/ui_atlas.xml -o ./WfAssets/ui_atlas.atlas -bmp UIAtlas.bmp
 
 ```
-A make file would be even better.
 
+A make file would be even better.

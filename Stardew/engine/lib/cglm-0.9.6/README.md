@@ -43,10 +43,10 @@ A highly optimized 2D|3D math library. Also known as OpenGL Mathematics (glm) fo
 <i>If you're using C++, you might want to check out <a href="https://github.com/g-truc/glm">GLM</a></i>
 </p>
 
- - Allocation-free
- - Header-only
- - SIMD-optimized
- - API-agnostic
+- Allocation-free
+- Header-only
+- SIMD-optimized
+- API-agnostic
 
 ---
 
@@ -64,6 +64,7 @@ cglm can be used in it's entirety as a header-only library simply by including `
 #### Header-only
 
 Include the `cglm/cglm.h` header and use functions with the `glm_` prefix.
+
 ```c
 #include "cglm/cglm.h"
 
@@ -76,6 +77,7 @@ glm_vec2_zero(vector);
 #### Struct API
 
 Include `cglm/struct.h` and use `glms_`.
+
 ```c
 #include "cglm/struct.h"
 
@@ -87,6 +89,7 @@ vec2s vector = glms_vec2_zero();
 #### Linked
 
 Include `cglm/call.h` and use `glmc_`.
+
 ```c
 #include "cglm/call.h"
 
@@ -98,7 +101,7 @@ glmc_vec2_zero(vector);
 
 ### ❗ Alignment
 
-While cglm by default aligns what's necessary, it is possible to disable this by defining `CGLM_ALL_UNALIGNED`. If you're targeting machines with any kind of SIMD support, make sure that all `vec4`, `mat4` and `mat2` arguments you pass to cglm functions are aligned to prevent unexpected crashes, alternatively use the unaligned versions if present. 
+While cglm by default aligns what's necessary, it is possible to disable this by defining `CGLM_ALL_UNALIGNED`. If you're targeting machines with any kind of SIMD support, make sure that all `vec4`, `mat4` and `mat2` arguments you pass to cglm functions are aligned to prevent unexpected crashes, alternatively use the unaligned versions if present.
 
 ### Struct API
 
@@ -111,7 +114,7 @@ mat4s mat = GLMS_MAT4_IDENTITY_INIT;
 mat4s inv = glms_mat4_inv(mat);
 ```
 
-Struct functions generally take parameters *by copy* and *return* the results rather than taking pointers and writing to out parameters. That means your variables can usually be `const`, if you're into that.
+Struct functions generally take parameters _by copy_ and _return_ the results rather than taking pointers and writing to out parameters. That means your variables can usually be `const`, if you're into that.
 
 The types used are actually unions that allow access to the same data in multiple ways. One of these involves anonymous structures available since C11. MSVC supports them in earlier versions out of the box and GCC/Clang as well if you enable `-fms-extensions`.
 To explicitly enable anonymous structures `#define CGLM_USE_ANONYMOUS_STRUCT 1`, or `0` to disable them.
@@ -124,8 +127,8 @@ For backwards compatibility, you can also `#define CGLM_NO_ANONYMOUS_STRUCT` to 
 - **[bugfix]** Euler angles had been previously implemented in reverse order (extrinsic). This was fixed to be intrinsic.
 - **[major change]** Starting with **v0.4.0**, quaternions are stored as [x, y, z, w]. Previously it was [w, x, y, z].
 - **[api rename]** Starting with **v0.4.5**, `glm_simd_` functions are renamed to `glmm_`.
-- **[new option]** Starting with **v0.4.5**, alignment requirements can be disabled. Read more in the documentation.  
-- **[major change]** Starting with **v0.5.0**, vec3 functions occupy the **glm_vec3_** namespace. This used to be **glm_vec_** in earlier versions.
+- **[new option]** Starting with **v0.4.5**, alignment requirements can be disabled. Read more in the documentation.
+- **[major change]** Starting with **v0.5.0**, vec3 functions occupy the **glm*vec3*** namespace. This used to be **glm*vec*** in earlier versions.
 - **[major change]** Starting with **v0.5.1**, `vec3` and `mat3` types are not aligned by default.
 - **[major change]** Starting with **v0.7.3**, inline print functions are disabled by default in release mode to eliminate printing costs (see the Options chapter of the docs). <br> Colored output can be disabled (see documentation).
 - **[major change]** Starting with **v0.8.3**, alternate clipspace configurations are supported. The `CGLM_FORCE_DEPTH_ZERO_TO_ONE` and `CGLM_FORCE_LEFT_HANDED` flags are provided to control clip depth and handedness. This makes it easier to incorporate cglm into projects using graphics APIs such as Vulkan or Metal. See https://cglm.readthedocs.io/en/latest/opt.html#clipspace-option-s
@@ -153,6 +156,7 @@ For backwards compatibility, you can also `#define CGLM_NO_ANONYMOUS_STRUCT` to 
 - curve interpolation helpers (SMC, deCasteljau...)
 - comversion helpers from cglm types to Apple's simd library to pass cglm types to Metal GL without packing them on both sides
 - ray intersection helpers
+
 ---
 
 <table>
@@ -173,6 +177,7 @@ For backwards compatibility, you can also `#define CGLM_NO_ANONYMOUS_STRUCT` to 
 ---
 
 cglm contains general purpose mat4 product and inverse functions but also provides optimized versions for affine transformations. If you want to multiply two affine transformation matrices you can use glm_mul instead of glm_mat4_mul and glm_inv_tr (ROT + TR) instead glm_mat4_inv.
+
 ```C
 /* multiplication */
 mat4 modelMat;
@@ -187,13 +192,11 @@ glm_inv_tr(modelMat);
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)]
 <a href="https://github.com/recp/cglm/graphs/contributors"><img src="https://opencollective.com/cglm/contributors.svg?width=890&button=false" /></a>
 
-
 ## Backers
 
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/cglm#backer)]
 
 <a href="https://opencollective.com/cglm#backers" target="_blank"><img src="https://opencollective.com/cglm/backers.svg?width=890"></a>
-
 
 ## Sponsors
 

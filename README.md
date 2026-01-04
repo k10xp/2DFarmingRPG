@@ -1,4 +1,5 @@
 # Readme
+
 WORK IN PROGRESS
 
 A 2D Game engine and farming RPG for windows and Linux.
@@ -19,7 +20,8 @@ https://jimmarshall35.github.io/2DFarmingRPG/
 
 System supplied:
 (Should exist as system packages on linux, or gotten through conan package manager for windows build - version numbers are the versions conan fetches)
-- libxml2/2.13.8 
+
+- libxml2/2.13.8
 - freetype/2.13.3
 - lua/5.4.7
 - glfw/3.4
@@ -28,22 +30,23 @@ System supplied:
 Future work will be to make the linux build use conan for consistency, I don't mind having the vendored libraries
 
 Vendored:
+
 - Box2D
 - cJSON
 - glad
 - CGLM
 - netcode
 
-
 # Build
 
 To Build:
+
 - Windows
   - Buildtime Dependencies
-      - MSVC toolchain
-      - Conan package manager
-      - CMake
-      - Python 3
+    - MSVC toolchain
+    - Conan package manager
+    - CMake
+    - Python 3
   - Run GetDependenciesConan.bat
   - Run BuildRelease.bat
   - Run compile_assets.bat

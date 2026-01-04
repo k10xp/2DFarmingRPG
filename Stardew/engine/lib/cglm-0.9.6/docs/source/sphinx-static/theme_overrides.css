@@ -7,6 +7,7 @@
    * Comment from yocto project theme_overrides.css
    */
 
-  .wy-nav-content{ max-width: none; }
-
+  .wy-nav-content {
+    max-width: none;
+  }
 }

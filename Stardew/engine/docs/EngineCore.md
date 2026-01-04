@@ -3,49 +3,66 @@
 ## DynamicArray.c/.h
 
 - A dynamic array similar to a C++ vector
-- Create new with 
-```c 
+- Create new with
+
+```c
 struct MyStruct* v = VECTOR_NEW(struct MyStruct)
 ```
-- push with 
-    - when capacity is reached the vector will double in size
+
+- push with
+  - when capacity is reached the vector will double in size
+
 ```c
 struct MyStruct s;
 v = VectorPush(v, &s);
 
 ```
+
 - pop with
+
 ```c
 v = VectorPop(v);
 ```
+
 - resize with
 
 ```c
 v = VectorResize(v);
 ```
+
 - get the last item with
+
 ```c
 struct MyStruct* pTop = VectorTop(v);
 ```
+
 - clear the vector with
-    - note this doesn't deallocate any memory, that only happens when the vector is destroyed
+  - note this doesn't deallocate any memory, that only happens when the vector is destroyed
+
 ```c
 v = VectorClear(v);
 ```
 
 - note this doesn't deallocate any memory, that only happens when the vector is destroyed
+
 ```c
 DestoryVector(v);
 ```
+
 - Vectors can be accessed as if they were normal arrays:
+
 ```c
 struct MyStruct s = v[1];
 ```
-- Size of vector can be gotten with 
+
+- Size of vector can be gotten with
+
 ```c
 int sz = VectorSize(v);
 ```
+
 - they can be resized at will (this will increase their capcity but not size)
+
 ```c
 v = VectorResize(v)
 ```
@@ -59,28 +76,38 @@ This is an array of a specific type of object that you can request an index into
 The memory for the pool consists of two areas, the pool itself and a list of free indices.
 
 - Initialize a new object pool:
+
 ```c
 /* returns the new object pool*/
 void* InitObjectPool(int objectSize, int poolInitialSize)
 ```
+
 - Get a handle from the pool:
+
 ```c
-/* must assign return value to object pool variable as it might have resized */ 
+/* must assign return value to object pool variable as it might have resized */
 void* GetObjectPoolIndex(void* pObjectPool, int* pOutIndex)
 ```
+
 - access an instance in the pool by using the handle as an index:
+
 ```c
 int hMyStruct = GetStructHandle();
 struct MyStruct* c = &gObjectPool[hMyStruct];
 ```
+
 - free a pool allocated object:
+
 ```c
 void FreeObjectPoolIndex(void* pObjectPool, int indexToFree);
 ```
+
 - destroy an object pool:
+
 ```c
 void* FreeObjectPool(void* pObjectPool);
 ```
+
 - NOTE - just like the vector these often return a value which needs to be assigned back to the object pool
 
 ## SharedPtr.h

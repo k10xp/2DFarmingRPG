@@ -1,4 +1,5 @@
 # Overview
+
 Box2D is a 2D rigid body simulation library for games. Programmers can
 use it in their games to make objects move in realistic ways and make
 the game world more interactive. From the game engine's point of view,
@@ -14,6 +15,7 @@ engine begin with the b2 prefix. Hopefully this is sufficient to avoid
 name clashing with your application.
 
 ## Prerequisites
+
 In this manual I'll assume you are familiar with basic physics
 concepts, such as mass, force, torque, and impulses. If not, please
 first consult Google search and Wikipedia.
@@ -32,6 +34,7 @@ should be comfortable with compiling, linking, and debugging.
 > Box2D. There are many resources for this online.
 
 ## Scope
+
 This manual covers the majority of the Box2D API. However, not every
 aspect is covered. Please look at the Reference section and samples
 application included with Box2D to learn more.
@@ -44,6 +47,7 @@ Box2D may be out of sync with this manual.
 > latest version on the main branch.
 
 ## Feedback and Bugs
+
 Please file bugs and feature requests here:
 [Box2D Issues](https://github.com/erincatto/box2d/issues)
 
@@ -56,21 +60,25 @@ There is also a [Discord server](https://discord.gg/NKYgCBP) and a
 [GitHub Discussions](https://github.com/erincatto/box2d/discussions).
 
 ## Core Concepts
+
 Box2D works with several fundamental concepts and objects. I briefly
 define these objects here and more details are given later in this
 document.
 
 ### rigid body
+
 A chunk of matter that is so strong that the distance between any two
 bits of matter on the chunk is constant. They are hard like a diamond.
-In the following discussion I use *body* interchangeably with rigid body.
+In the following discussion I use _body_ interchangeably with rigid body.
 
 ### shape
+
 A shape binds collision geometry to a body and adds material properties such as
 density, friction, and restitution. A shape puts collision geometry into the
 collision system (broad-phase) so that it can collide with other shapes.
 
 ### constraint
+
 A constraint is a physical connection that removes degrees of freedom
 from bodies. A 2D body has 3 degrees of freedom (two translation
 coordinates and one rotation coordinate). If I take a body and pin it
@@ -79,20 +87,24 @@ At this point the body can only rotate about the pin, so the constraint
 has removed 2 degrees of freedom.
 
 ### contact constraint
+
 A special constraint designed to prevent penetration of rigid bodies and
 to simulate friction and restitution. You do not create contact
 constraints; they are created automatically by Box2D.
 
 ### joint constraint
+
 This is a constraint used to hold two or more bodies together. Box2D
 supports several joint types: revolute, prismatic, distance, and more.
 Joints may have limits, motors, and/or springs.
 
 ### joint limit
+
 A joint limit restricts the range of motion of a joint. For example, the
 human elbow only allows a certain range of angles.
 
 ### joint motor
+
 A joint motor drives the motion of the connected bodies according to the
 joint's degrees of freedom. For example, you can use a motor to drive
 the rotation of an elbow. Motors have a target speed and a maximum force
@@ -100,6 +112,7 @@ or torque. The simulation will apply the force or torque required to
 achieve the desired speed.
 
 ### joint spring
+
 A joint spring has a stiffness and damping. In Box2D spring stiffness is
 expressed in terms or Hertz or cycles per second. This lets you configure how
 quickly a spring reacts regardless of the body masses. Joint springs also
@@ -107,17 +120,20 @@ have a damping ratio to let you specify how quickly the spring will come to
 rest.
 
 ### world
+
 A physics world is a collection of bodies, shapes, joints, and contacts
 that interact together. Box2D supports the creation of multiple worlds which
 are completely independent.
 
 ### solver
+
 The physics world has a solver that is used to advance time and to
 resolve contact and joint constraints. The Box2D solver is a high
 performance sequential solver that operates in order N time, where N is
 the number of constraints.
 
 ### continuous collision
+
 The solver advances bodies in time using discrete time steps. Without
 intervention this can lead to tunneling.
 ![Tunneling Effect](images/tunneling1.svg)
@@ -128,6 +144,7 @@ the first time of impact (TOI). Second, speculative collision is used to create
 contact constraints between bodies before they touch.
 
 ### events
+
 World simulation leads to the creation of events that are available at the end
 of the time step:
 
@@ -139,6 +156,7 @@ of the time step:
 These events allow your application to react to changes in the simulation.
 
 ## Modules
+
 Box2D's primary purpose is to provide rigid body simulation. However,
 there are math and collision features that may be useful apart from the
 rigid body simulation. These are provided in the `include` directory. Anything
@@ -151,6 +169,7 @@ study the code and ask questions. I'm happy to share all the details of how
 Box2D works internally.
 
 ## Units
+
 Box2D works with floating point numbers and tolerances have to be used
 to make Box2D perform well. These tolerances have been tuned to work
 well with meters-kilogram-second (MKS) units. In particular, Box2D has
@@ -166,7 +185,7 @@ Unfortunately this will lead to a poor simulation and possibly weird
 behavior. An object of length 200 pixels would be seen by Box2D as the
 size of a 45 story building.
 
-> **Caution**: 
+> **Caution**:
 > Box2D is tuned for MKS units. Keep the size of moving objects larger than 1cm.
 > You'll need to use some scaling system when
 > you render your environment and actors. The Box2D samples application
@@ -183,7 +202,7 @@ Another limitation to consider is overall world size. If your world units
 become larger than 12 kilometers or so, then the lost precision can affect
 stability.
 
-> **Caution**: 
+> **Caution**:
 > Box2D works best with world sizes less than 12 kilometers. If you are
 > careful with your simulation tuning, this can be pushed up to around 24
 > kilometers, which is much larger than most game worlds.
@@ -195,6 +214,7 @@ so when you access the angle of a body, it will be between \f$-\pi\f$ and \f$\pi
 > Box2D uses radians, not degrees.
 
 ## Changing the length units
+
 Advanced users may change the length unit by calling `b2SetLengthUnitsPerMeter()`
 at application startup. If you keep Box2D in a shared library, you will need
 to call this if the shared library is reloaded.
@@ -208,9 +228,10 @@ It is also harder to get support for using Box2D if you change the unit
 system, because values are harder to communicate and may become non-intuitive.
 
 ## Ids and Definitions
+
 Fast memory management plays a central role in the design of the Box2D
 interface. When you create a world, body, shape or joint, you will receive
-a handle called an *id*. These ids are opaque and are passed to various functions
+a handle called an _id_. These ids are opaque and are passed to various functions
 to access the underlying data.
 
 These ids provide some safety. If you use an id after it has been freed you will
@@ -245,7 +266,7 @@ myBodyId = b2_nullBodyId;
 
 Notice that the body id is set to null using the constant `b2_nullBodyId`. You should treat
 ids as opaque data, however you may zero initialize all Box2D ids and they will be considered
-*null*.
+_null_.
 
 Shapes are created in a similar way. For example, here is how a box shape is created:
 

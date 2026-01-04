@@ -32,7 +32,7 @@ the mover is trying to slide along a surface and we don't want to stop that even
 Once you have some collision planes from `b2World_CollideMover()`, you can process and filter them to generate an array of `b2CollisionPlane`. These collision planes can then be sent to `b2SolvePlanes()` to generate a new position for the mover
 that attempts to find the optimal new position given the current position.
 
-These collision planes support *soft collision* using a `pushLimit`. This push limit is a distance value. A rigid surface will have a push limit of `FLT_MAX`. However, you may want some surfaces to have a limited effect on the character. For example, you may want the mover to push through other players or enemies yet still resolve the collision so they are not overlapped. Another example is a door or elevator that could otherwise push the mover through the floor.
+These collision planes support _soft collision_ using a `pushLimit`. This push limit is a distance value. A rigid surface will have a push limit of `FLT_MAX`. However, you may want some surfaces to have a limited effect on the character. For example, you may want the mover to push through other players or enemies yet still resolve the collision so they are not overlapped. Another example is a door or elevator that could otherwise push the mover through the floor.
 
 Finally after calling `b2SolverPlanes()` you can call `b2ClipVector()` to clip your velocity vector so the mover will not keep trying to push into a wall, which could lead to a huge velocity accumulation otherwise.
 

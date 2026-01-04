@@ -2,24 +2,9 @@
 
 The Game2D layer has an entity system whereby entity types are defined by a numerical ID, a set of callbacks, an object layer index, a transform, a user data pointer (or handle) and a list of components.
 
-The entity callbacks are:
-    - Init
-    - Draw
-    - Input
-    - Update
-    - PostPhysics
-    - Draw
-    - OnDestroy
-    - GetBoundingBox
-    - GetSortPos (defines order in which entities within an object layer are drawn)
+The entity callbacks are: - Init - Draw - Input - Update - PostPhysics - Draw - OnDestroy - GetBoundingBox - GetSortPos (defines order in which entities within an object layer are drawn)
 
-There are a fixed number of different types of components, as of writing these are:
-    - Sprite
-        - These have their own offset transform from the entities transform
-    - StaticCollider
-    - KinematicCollider
-    - TextSprite
-    - AnimatedSprite
+There are a fixed number of different types of components, as of writing these are: - Sprite - These have their own offset transform from the entities transform - StaticCollider - KinematicCollider - TextSprite - AnimatedSprite
 
 This will be subject to change. The game won't be able to define new components so the engine should provide a good set that cover everything.
 
@@ -36,12 +21,12 @@ Your game will define a list of entity serializers which can serialize a particu
 enum WfEntityTypes
 {
     // start the enum containing your entities at EBET_Last and let it auto increment
-    WfEntityType_PlayerStart = EBET_Last, 
+    WfEntityType_PlayerStart = EBET_Last,
 }
 static void DeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pOutEnt, struct GameLayer2DData* pData)
 {
     BS_SerializeU32(1, bs); // version
-    /* 
+    /*
         load data fromthe file here and populate pOutEnt with it.
         Data common to all entity types will already be loaded into pOutEnt,
         you'll want to create a user data struct with entity specific data in and and set the entities userdata pointer/handle to it..
@@ -68,7 +53,7 @@ static void DeSerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D
 
 static void SerializePlayerEntity(struct BinarySerializer* bs, struct Entity2D* pInEnt, struct GameLayer2DData* pData)
 {
-    
+
     u32 version = 0;
     BS_DeSerializeU32(&version, bs);
     switch (version)
@@ -98,4 +83,3 @@ int main()
 ```
 
 See AssetTools.md to see how you can create a level full of entities that the engine can load.
-

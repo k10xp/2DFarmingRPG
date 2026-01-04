@@ -1,5 +1,7 @@
 # Collision
+
 Box2D provides geometric types and functions. These include:
+
 - primitives: circles, capsules, segments, and convex polygons
 - convex hull and related helper functions
 - mass and bounding box computation
@@ -18,17 +20,20 @@ engine. So the collision interface only contains features that are also useful i
 the physics simulation.
 
 ## Shape Primitives
+
 Shape primitives describe collision geometry and may be used independently of
 physics simulation. At a minimum, you should understand how to create
 primitives that can be later attached to rigid bodies.
 
 Box2D shape primitives support several operations:
+
 - Test a point for overlap with the primitive
 - Perform a ray cast against the primitive
 - Compute the primitive's bounding box
 - Compute the mass properties of the primitive
 
 ### Circles
+
 Circles have a center and radius. Circles are solid.
 
 ![Circle](images/circle.svg)
@@ -46,6 +51,7 @@ b2Circle circle = {{2.0f, 3.0f}, 0.5f};
 ```
 
 ### Capsules
+
 Capsules have two center points and a radius. The center points are the centers of two
 semicircles that are connected by a rectangle.
 
@@ -59,6 +65,7 @@ capsule.radius = 0.25f;
 ```
 
 ### Polygons
+
 Box2D polygons are solid convex polygons. A polygon is convex when all
 line segments connecting two points in the interior do not cross any
 edge of the polygon. Polygons are solid and never hollow. A polygon must
@@ -91,7 +98,7 @@ b2Polygon square = b2MakeSquare(0.5f);
 b2Polygon box = b2MakeBox(0.5f, 1.0f);
 ```
 
-The values provided to these functions are *extents*, which are half-widths or half-heights.
+The values provided to these functions are _extents_, which are half-widths or half-heights.
 This corresponds with circles and capsules using radii instead of diameters.
 
 Box2D also supports rounded polygons. These are convex polygons with a thick rounded skin.
@@ -133,6 +140,7 @@ if (questionableHull.count == 0)
 Degenerate points may be coincident and/or collinear. For the hull to be viable, the enclosed area must be sufficiently positive.
 
 ### Segments
+
 Segments are line segments. Segment
 shapes can collide with circles, capsules, and polygons but not with other line segments.
 The collision algorithms used by Box2D require that at least
@@ -149,10 +157,11 @@ b2Segment segment2 = {{0.0f, 0.0f}, {1.0f, 0.0f}};
 ```
 
 ### Ghost Collisions
+
 In many cases a game environment is constructed by connecting several
 segment shapes end-to-end. This can give rise to an unexpected artifact
 when a polygon slides along the chain of segments. In the figure below there is
- a box colliding with an internal vertex. These *ghost* collisions
+a box colliding with an internal vertex. These _ghost_ collisions
 are caused when the polygon collides with an internal vertex generating
 an internal collision normal.
 
@@ -163,7 +172,7 @@ present, the internal collision seems like a bug. But normally when
 Box2D collides two shapes, it views them in isolation.
 
 `b2ChainSegment` provides a mechanism for eliminating ghost
-collisions by storing the adjacent *ghost* vertices. Box2D uses these
+collisions by storing the adjacent _ghost_ vertices. Box2D uses these
 ghost vertices to prevent internal collisions.
 
 ![Ghost Vertices](images/ghost_vertices.svg){html: width=30%}
@@ -174,7 +183,8 @@ vertex towards the second vertex. This matches the counter-clockwise winding ord
 used by polygons.
 
 ### Chain segment
-Chain segments use a concept called *ghost vertices* that Box2D can use to eliminate ghost
+
+Chain segments use a concept called _ghost vertices_ that Box2D can use to eliminate ghost
 collisions.
 
 ```c
@@ -191,9 +201,11 @@ Chain segments are not created directly. Instead, you can create chains of line
 segments. See `b2ChainDef` and `b2CreateChain()`.
 
 ## Geometric Queries
+
 You can perform a geometric queries on a single shape.
 
 ### Shape Point Test
+
 You can test a point for overlap with a shape. You provide a transform
 for the shape and a world point.
 
@@ -205,11 +217,12 @@ bool hit = b2PointInCapsule(point, &myCapsule);
 See also `b2PointInCircle()` and `b2PointInPolygon()`.
 
 ### Ray Cast
+
 You can cast a ray at a shape to get the point of first intersection and normal vector.
 
 > **Caution**:
 > No hit will register if the ray starts inside a convex shape like a circle or polygon. This is
-> consistent with Box2D treating convex shapes as solid. 
+> consistent with Box2D treating convex shapes as solid.
 
 ```c
 b2RayCastInput input = {0};
@@ -225,6 +238,7 @@ if (output.hit == true)
 ```
 
 ### Shape Cast
+
 You can also cast a shape at another shape. This uses an abstract way of describing the moving shape. It is represented as a point cloud with a radius. This implies a convex shape even if the input data is not convex. The internal algorithm (GJK) will essentially only use the convex portion.
 
 ```c
@@ -245,6 +259,7 @@ if (output.hit == true)
 Even more generic, you can use `b2ShapeCast()` to linearly cast one point cloud at another point cloud. All shape cast functions use this internally.
 
 ### Distance
+
 `b2ShapeDistance()` function can be used to compute the distance between two
 shapes. The distance function needs both shapes to be converted into a
 `b2DistanceProxy` (which are point clouds with radii). There is also some caching used to warm start the
@@ -253,13 +268,14 @@ distance function for repeated calls. This can improve performance when the shap
 ![Distance Function](images/distance.svg)
 
 ### Time of Impact
-If two shapes are moving fast, they may *tunnel* through each other in a
+
+If two shapes are moving fast, they may _tunnel_ through each other in a
 single time step.
 
 ![Tunneling](images/tunneling2.svg){html: width=30%}
 
 The `b2TimeOfImpact()` function is used to determine the time when two moving shapes collide.
-This is called the *time of impact* (TOI). The main purpose of `b2TimeOfImpact()` is for
+This is called the _time of impact_ (TOI). The main purpose of `b2TimeOfImpact()` is for
 tunnel prevention. Box2D uses this internally to prevent moving objects from tunneling through
 static shapes.
 
@@ -283,10 +299,11 @@ The function requires two shapes (converted to `b2DistanceProxy`) and two
 `b2Sweep` structures. The sweep structure defines the initial and final
 transforms of the shapes.
 
-You can use fixed rotations to perform a *shape cast*. In this case, the
+You can use fixed rotations to perform a _shape cast_. In this case, the
 time of impact function will not miss any collisions.
 
 ### Contact Manifolds
+
 Box2D has functions to compute contact points for overlapping shapes. If
 we consider circle-circle or circle-polygon, we can only get one contact
 point and normal. In the case of polygon-polygon we can get two points.
@@ -304,6 +321,7 @@ points. The contact points store the normal and tangential (friction) impulses
 computed in the rigid body simulation.
 
 ## Dynamic Tree
+
 `b2DynamicTree` is used by Box2D to organize large numbers of
 shapes efficiently. The object does not know directly about shapes. Instead it
 operates on axis-aligned bounding boxes (`b2AABB`) with user data integers.

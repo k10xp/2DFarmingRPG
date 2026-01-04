@@ -1,39 +1,39 @@
 {
-    "files.associations": {
-        "rootwidget.h": "c",
-        "assertlib.h": "c",
-        "radiogroupwidget.h": "c",
-        "handledefs.h": "c",
-        "staticwidget.h": "c",
-        "sliderwidget.h": "c",
-        "widget.h": "c",
-        "glfw3.h": "c",
-        "drawcontext.h": "c",
-        "inputcontext.h": "c"
-    },
-    "C_Cpp.errorSquiggles": "enabled",
-    "editor.tokenColorCustomizations": {
-        "textMateRules": [
-            {
-                "scope": "googletest.failed",
-                "settings": {
-                    "foreground": "#f00"
-                }
-            },
-            {
-                "scope": "googletest.passed",
-                "settings": {
-                    "foreground": "#0f0"
-                }
-            },
-            {
-                "scope": "googletest.run",
-                "settings": {
-                    "foreground": "#0f0"
-                }
-            }
-        ]
-    },
-    "cmake.generator": "Unix Makefiles",
-    "gtest-adapter.supportLocation": true
+  "files.associations": {
+    "rootwidget.h": "c",
+    "assertlib.h": "c",
+    "radiogroupwidget.h": "c",
+    "handledefs.h": "c",
+    "staticwidget.h": "c",
+    "sliderwidget.h": "c",
+    "widget.h": "c",
+    "glfw3.h": "c",
+    "drawcontext.h": "c",
+    "inputcontext.h": "c"
+  },
+  "C_Cpp.errorSquiggles": "enabled",
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "googletest.failed",
+        "settings": {
+          "foreground": "#f00"
+        }
+      },
+      {
+        "scope": "googletest.passed",
+        "settings": {
+          "foreground": "#0f0"
+        }
+      },
+      {
+        "scope": "googletest.run",
+        "settings": {
+          "foreground": "#0f0"
+        }
+      }
+    ]
+  },
+  "cmake.generator": "Unix Makefiles",
+  "gtest-adapter.supportLocation": true
 }

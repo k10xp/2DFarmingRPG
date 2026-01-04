@@ -1,5 +1,4 @@
-How to build netcode
-====================
+# How to build netcode
 
 ## Building on Windows
 
@@ -47,4 +46,4 @@ If you have questions please create an issue at https://github.com/mas-bandwidth
 
 cheers
 
- - Glenn
+- Glenn

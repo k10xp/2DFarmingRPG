@@ -25,7 +25,7 @@ The sequence of operations for a client connect are:
 
 ## General Conventions
 
-**netcode** is a binary protocol. 
+**netcode** is a binary protocol.
 
 All data is written in little-endian byte order unless otherwise specified.
 
@@ -77,7 +77,7 @@ Prior to encryption the private connect token data has the following binary form
 
 This data is variable size but for simplicity is written to a fixed size buffer of 1024 bytes. Unused bytes are zero padded.
 
-Encryption of the private connect token data is performed with the libsodium AEAD primitive *crypto_aead_xchacha20poly1305_ietf_encrypt* using the following binary data as the _associated data_: 
+Encryption of the private connect token data is performed with the libsodium AEAD primitive _crypto_aead_xchacha20poly1305_ietf_encrypt_ using the following binary data as the _associated data_:
 
     [version info] (13 bytes)       // "NETCODE 1.02" ASCII with null terminator.
     [protocol id] (uint64)          // 64 bit value unique to this particular game/application
@@ -144,26 +144,26 @@ Prior to encryption, challenge tokens have the following structure:
     [user data] (256 bytes)
     <zero pad to 300 bytes>
 
-Encryption of the challenge token data is performed with the libsodium AEAD primitive *crypto_aead_chacha20poly1305_ietf_encrypt* with no associated data, a random key generated when the dedicated server starts, and a sequence number that starts at zero and increases with each challenge token generated. The sequence number is extended by padding high bits with zero to create a 96 bit nonce.
+Encryption of the challenge token data is performed with the libsodium AEAD primitive _crypto_aead_chacha20poly1305_ietf_encrypt_ with no associated data, a random key generated when the dedicated server starts, and a sequence number that starts at zero and increases with each challenge token generated. The sequence number is extended by padding high bits with zero to create a 96 bit nonce.
 
 Encryption is performed on the first 300 - 16 bytes, and the last 16 bytes store the HMAC of the encrypted buffer:
 
     [encrypted challenge token] (284 bytes)
     [hmac of encrypted challenge token data] (16 bytes)
-    
+
 This is referred to as the _encrypted challenge token data_.
 
 ## Packets
 
 **netcode** has the following packets:
 
-* _connection request packet_ (0)
-* _connection denied packet_ (1)
-* _connection challenge packet_ (2)
-* _connection response packet_ (3)
-* _connection keep alive packet_ (4)
-* _connection payload packet_ (5)
-* _connection disconnect packet_ (6)
+- _connection request packet_ (0)
+- _connection denied packet_ (1)
+- _connection challenge packet_ (2)
+- _connection response packet_ (3)
+- _connection keep alive packet_ (4)
+- _connection payload packet_ (5)
+- _connection disconnect packet_ (6)
 
 The first packet type _connection request packet_ (0) is not encrypted and has the following format:
 
@@ -173,8 +173,8 @@ The first packet type _connection request packet_ (0) is not encrypted and has t
     [connect token expire timestamp] (8 bytes)
     [connect token nonce] (24 bytes)
     [encrypted private connect token data] (1024 bytes)
-    
-All other packet types are encrypted. 
+
+All other packet types are encrypted.
 
 Prior to encryption, packet types >= 1 have the following format:
 
@@ -182,14 +182,14 @@ Prior to encryption, packet types >= 1 have the following format:
     [sequence number] (variable length 1-8 bytes)
     [per-packet type data] (variable length according to packet type)
 
-The low 4 bits of the prefix byte contain the packet type. 
+The low 4 bits of the prefix byte contain the packet type.
 
-The high 4 bits contain the number of bytes for the sequence number in the range [1,8]. 
+The high 4 bits contain the number of bytes for the sequence number in the range [1,8].
 
 The sequence number is encoded by omitting high zero bytes. For example, a sequence number of 1000 is 0x000003E8 and requires only two bytes to send its value. Therefore, the high 4 bits of the prefix byte are set to 2 and the sequence data written to the packet is:
 
     0xE8,0x03
-    
+
 The sequence number bytes are _reversed_ when written to the packet like so:
 
     <for each sequence byte written>
@@ -197,7 +197,7 @@ The sequence number bytes are _reversed_ when written to the packet like so:
         write_byte( sequence_number & 0xFF )
         sequence_number >>= 8
     }
-    
+
 After the sequence number comes the per-packet type data:
 
 _connection denied packet_:
@@ -208,7 +208,7 @@ _connection challenge packet_:
 
     [challenge token sequence] (uint64)
     [encrypted challenge token data] (300 bytes)
-    
+
 _connection response packet_:
 
     [challenge token sequence] (uint64)
@@ -218,16 +218,16 @@ _connection keep-alive packet_:
 
     [client index] (uint32)
     [max clients] (uint32)
-    
+
 _connection payload packet_:
 
     [payload data] (1 to 1200 bytes)
-    
+
 _connection disconnect packet_:
-    
+
     <no data>
 
-The per-packet type data is encrypted using the libsodium AEAD primitive *crypto_aead_chacha20poly1305_ietf_encrypt* with the following binary data as the _associated data_: 
+The per-packet type data is encrypted using the libsodium AEAD primitive _crypto_aead_chacha20poly1305_ietf_encrypt_ with the following binary data as the _associated data_:
 
     [version info] (13 bytes)       // "NETCODE 1.02" ASCII with null terminator.
     [protocol id] (uint64)          // 64 bit value unique to this particular game/application
@@ -250,34 +250,33 @@ Post encryption, packet types >= 1 have the following format:
 
 The following steps are taken when reading an encrypted packet, in this exact order:
 
-* If the packet size is less than 18 bytes then it is too small to possibly be valid, ignore the packet.
+- If the packet size is less than 18 bytes then it is too small to possibly be valid, ignore the packet.
 
-* If the low 4 bits of the prefix byte are greater than or equal to 7, the packet type is invalid, ignore the packet.
+- If the low 4 bits of the prefix byte are greater than or equal to 7, the packet type is invalid, ignore the packet.
 
-* The server ignores packets with type _connection challenge packet_. 
+- The server ignores packets with type _connection challenge packet_.
 
-* The client ignores packets with type _connection request packet_ and _connection response packet_.
+- The client ignores packets with type _connection request packet_ and _connection response packet_.
 
-* If the high 4 bits of the prefix byte (sequence bytes) are outside the range [1,8], ignore the packet.
+- If the high 4 bits of the prefix byte (sequence bytes) are outside the range [1,8], ignore the packet.
 
-* If the packet size is less than 1 + sequence bytes + 16, it cannot possibly be valid, ignore the packet.
+- If the packet size is less than 1 + sequence bytes + 16, it cannot possibly be valid, ignore the packet.
 
-* If the per-packet type data size does not match the expected size for the packet type, ignore the packet.
+- If the per-packet type data size does not match the expected size for the packet type, ignore the packet.
+  - 0 bytes for _connection denied packet_
+  - 308 bytes for _connection challenge packet_
+  - 308 bytes for _connection response packet_
+  - 8 bytes for _connection keep-alive packet_
+  - [1,1200] bytes for _connection payload packet_
+  - 0 bytes for _connection disconnect packet_
 
-    * 0 bytes for _connection denied packet_
-    * 308 bytes for _connection challenge packet_
-    * 308 bytes for _connection response packet_
-    * 8 bytes for _connection keep-alive packet_
-    * [1,1200] bytes for _connection payload packet_
-    * 0 bytes for _connection disconnect packet_
+- If the packet type fails the replay protection already received test, ignore the packet. _See the section on replay protection below for details_.
 
-* If the packet type fails the replay protection already received test, ignore the packet. _See the section on replay protection below for details_.
+- If the per-packet type data fails to decrypt, ignore the packet.
 
-* If the per-packet type data fails to decrypt, ignore the packet.
+- Advance the most recent replay protection sequence #. _See the section on replay protection below for details_.
 
-* Advance the most recent replay protection sequence #. _See the section on replay protection below for details_.
-
-* If all the above checks pass, the packet is processed.
+- If all the above checks pass, the packet is processed.
 
 ## Replay Protection
 
@@ -285,11 +284,11 @@ Replay protection stops an attacker from recording a valid packet and replaying 
 
 To enable replay protection, netcode does the following:
 
-* Encrypted packets are sent with 64 bit sequence numbers that start at zero and increase with each packet sent.
+- Encrypted packets are sent with 64 bit sequence numbers that start at zero and increase with each packet sent.
 
-* The sequence number is included in the packet header and can be read by the receiver of a packet prior to decryption.
+- The sequence number is included in the packet header and can be read by the receiver of a packet prior to decryption.
 
-* The sequence number is used as the nonce for packet encryption, so any modification to the sequence number fails the encryption signature check.
+- The sequence number is used as the nonce for packet encryption, so any modification to the sequence number fails the encryption signature check.
 
 The replay protection algorithm is as follows:
 
@@ -301,9 +300,9 @@ The replay protection algorithm is as follows:
 
 Replay protection is applied to the following packet types on both client and server:
 
-* _connection keep alive packet_
-* _connection payload packet_
-* _connection disconnect packet_
+- _connection keep alive packet_
+- _connection payload packet_
+- _connection disconnect packet_
 
 The replay buffer size is implementation specific, but as a guide, a few seconds worth of packets at a typical send rate (20-60HZ) should be supported. Conservatively, a replay buffer size of 256 entries per-client should be sufficient for most applications.
 
@@ -311,22 +310,22 @@ The replay buffer size is implementation specific, but as a guide, a few seconds
 
 The client has the following states:
 
-* _connect token expired_ (-6)
-* _invalid connect token_ (-5)
-* _connection timed out_ (-4)
-* _connection response timed out_ (-3)
-* _connection request timed out_ (-2)
-* _connection denied_ (-1)
-* _disconnected_ (0)
-* _sending connection request_ (1)
-* _sending connection response_ (2)
-* _connected_ (3)
+- _connect token expired_ (-6)
+- _invalid connect token_ (-5)
+- _connection timed out_ (-4)
+- _connection response timed out_ (-3)
+- _connection request timed out_ (-2)
+- _connection denied_ (-1)
+- _disconnected_ (0)
+- _sending connection request_ (1)
+- _sending connection response_ (2)
+- _connected_ (3)
 
 The initial state is disconnected (0). Negative states represent error states. The goal state is _connected_ (3).
 
 ### Request Connect Token
 
-When a client wants to connect to a server, it requests a _connect token_ from the web backend. 
+When a client wants to connect to a server, it requests a _connect token_ from the web backend.
 
 The following aspects are outside the scope of this standard:
 
@@ -342,7 +341,7 @@ Before doing this, the client checks that the connect token is valid. If the num
 
 ### Sending Connection Request
 
-While in _sending connection request_ the client sends _connection request packets_ to the server at some rate, like 10HZ. 
+While in _sending connection request_ the client sends _connection request packets_ to the server at some rate, like 10HZ.
 
 When the client receives a _connection challenge packet_ from the server, it stores the challenge token data and transitions to _sending challenge response_. This represents a successful transition to the next stage in the connection process.
 
@@ -352,7 +351,7 @@ If a _connection request denied_ packet is received while in _sending connection
 
 ### Sending Challenge Response
 
-While in _sending challenge response_ the client sends _challenge response packets_ to the server at some rate, like 10HZ. 
+While in _sending challenge response_ the client sends _challenge response packets_ to the server at some rate, like 10HZ.
 
 When the client receives a _connection keep-alive packet_ from the server, it stores the client index and max clients in the packet, and transitions to _connected_.
 
@@ -374,7 +373,7 @@ While _connected_ the client buffers _connection payload packets_ received from 
 
 While _connected_ the client application may send _connection payload packets_ to the server. In the absence of _connection payload packets_ sent by the client application, the client generates and sends _connection keep-alive packets_ to the server at some rate, like 10HZ.
 
-If no _connection payload packet_ or _connection keep-alive packet_ are received from the server within the timeout period specified in the connect token, the client transitions to _connection timed out_. 
+If no _connection payload packet_ or _connection keep-alive packet_ are received from the server within the timeout period specified in the connect token, the client transitions to _connection timed out_.
 
 While _connected_ if the client receives a _connection disconnect_ packet from the server, it transitions to _disconnected_.
 
@@ -386,9 +385,9 @@ If the client wishes to disconnect from the server, it sends a number of redunda
 
 The dedicated server must be on a publicly accessible IP address and port.
 
-The server manages a set of n client slots, where each slot from [0,n-1] represents room for one connected client. 
+The server manages a set of n client slots, where each slot from [0,n-1] represents room for one connected client.
 
-The maximum number of client slots per-server is implementation specific. Typical uses cases are expected in the range of [2,64] but the reference implementation supports up to 256 clients per-server. 
+The maximum number of client slots per-server is implementation specific. Typical uses cases are expected in the range of [2,64] but the reference implementation supports up to 256 clients per-server.
 
 You may support more clients per-server if your implementation is able to handle them efficiently.
 
@@ -397,7 +396,7 @@ You may support more clients per-server if your implementation is able to handle
 The server follows these strict rules when processing connection requests:
 
 1. Clients must have a valid connect token to connect.
-2. Respond to a client only when absolutely necessary. 
+2. Respond to a client only when absolutely necessary.
 3. Ignore any malformed request as soon as possible, with the minimum amount of work.
 4. Make sure any response packet is smaller than the request packet to avoid DDoS amplification.
 
@@ -412,41 +411,41 @@ When a server receives a connection request packet from a client it contains the
 
 This packet is not encrypted, however:
 
-* Only the dedicated server instance and the web backend can read the encrypted private connect token data, because it is encrypted with a private key shared between them.
+- Only the dedicated server instance and the web backend can read the encrypted private connect token data, because it is encrypted with a private key shared between them.
 
-* The important aspects of the packet such as the version info, protocol id and connect token expire timestamp, are protected by the AEAD construct, and thus cannot be modified without failing the signature check.
+- The important aspects of the packet such as the version info, protocol id and connect token expire timestamp, are protected by the AEAD construct, and thus cannot be modified without failing the signature check.
 
 The server takes the following steps, in this exact order, when processing a _connection request packet_:
 
-* If the packet is not the expected size of 1078 bytes, ignore the packet.
+- If the packet is not the expected size of 1078 bytes, ignore the packet.
 
-* If the version info in the packet doesn't match "NETCODE 1.02" (13 bytes, with null terminator), ignore the packet.
+- If the version info in the packet doesn't match "NETCODE 1.02" (13 bytes, with null terminator), ignore the packet.
 
-* If the protocol id in the packet doesn't match the expected protocol id of the dedicated server, ignore the packet.
+- If the protocol id in the packet doesn't match the expected protocol id of the dedicated server, ignore the packet.
 
-* If the connect token expire timestamp is <= the current timestamp, ignore the packet.
+- If the connect token expire timestamp is <= the current timestamp, ignore the packet.
 
-* If the encrypted private connect token data doesn't decrypt with the private key, using the associated data constructed from: version info, protocol id and expire timestamp, ignore the packet.
+- If the encrypted private connect token data doesn't decrypt with the private key, using the associated data constructed from: version info, protocol id and expire timestamp, ignore the packet.
 
-* If the decrypted private connect token fails to be read for any reason, for example, having a number of server addresses outside of the expected range of [1,32], or having an address type value outside of range [0,1], ignore the packet.
+- If the decrypted private connect token fails to be read for any reason, for example, having a number of server addresses outside of the expected range of [1,32], or having an address type value outside of range [0,1], ignore the packet.
 
-* If the dedicated server public address is not in the list of server addresses in the private connect token, ignore the packet.
+- If the dedicated server public address is not in the list of server addresses in the private connect token, ignore the packet.
 
-* If a client from the packet IP source address and port is already connected, ignore the packet.
+- If a client from the packet IP source address and port is already connected, ignore the packet.
 
-* If a client with the client id contained in the private connect token data is already connected, ignore the packet.
+- If a client with the client id contained in the private connect token data is already connected, ignore the packet.
 
-* If the connect token has already been used by a different packet source IP address and port, ignore the packet. 
+- If the connect token has already been used by a different packet source IP address and port, ignore the packet.
 
-* Otherwise, add the private connect token hmac + packet source IP address and port to the history of connect tokens already used.
+- Otherwise, add the private connect token hmac + packet source IP address and port to the history of connect tokens already used.
 
-* If no client slots are available, then the server is full. Respond with a _connection denied packet_.
+- If no client slots are available, then the server is full. Respond with a _connection denied packet_.
 
-* Add an encryption mapping for the packet source IP address and port so that packets read from that address and port are decrypted with the client to server key in the private connect token, and packets sent to that address and port are encrypted with the server to client key in the private connect token. This encryption mapping expires in _timeout_ seconds of no packets being sent to or received from that address and port, or if a client fails to establish a connection with the server within _timeout_ seconds.
+- Add an encryption mapping for the packet source IP address and port so that packets read from that address and port are decrypted with the client to server key in the private connect token, and packets sent to that address and port are encrypted with the server to client key in the private connect token. This encryption mapping expires in _timeout_ seconds of no packets being sent to or received from that address and port, or if a client fails to establish a connection with the server within _timeout_ seconds.
 
-* If for some reason this encryption mapping cannot be added, ignore the packet.
+- If for some reason this encryption mapping cannot be added, ignore the packet.
 
-* Otherwise, respond with a _connection challenge packet_ and increment the _connection challenge sequence number_.
+- Otherwise, respond with a _connection challenge packet_ and increment the _connection challenge sequence number_.
 
 ### Processing Connection Response Packets
 
@@ -461,25 +460,25 @@ The _connection response packet_ contains the following data:
 
 The server takes these steps, in this exact order, when processing a _connection response packet_:
 
-* If the _encrypted challenge token data_ fails to decrypt, ignore the packet.
+- If the _encrypted challenge token data_ fails to decrypt, ignore the packet.
 
-* If a client from the packet source address and port is already connected, ignore the packet.
+- If a client from the packet source address and port is already connected, ignore the packet.
 
-* If a client with the client id contained in the encrypted challenge token data is already connected, ignore the packet.
+- If a client with the client id contained in the encrypted challenge token data is already connected, ignore the packet.
 
-* If no client slots are available, then the server is full. Respond with a _connection denied packet_.
+- If no client slots are available, then the server is full. Respond with a _connection denied packet_.
 
-* Assign the packet IP address + port and client id to a free client slot and mark that client as connected.
+- Assign the packet IP address + port and client id to a free client slot and mark that client as connected.
 
-* Copy across the user data from the challenge token into the client slot so it is accessible to the server application.
+- Copy across the user data from the challenge token into the client slot so it is accessible to the server application.
 
-* Set the _confirmed_ flag for that client slot to false.
+- Set the _confirmed_ flag for that client slot to false.
 
-* Respond with a _connection keep-alive_ packet.
+- Respond with a _connection keep-alive_ packet.
 
 ### Connected Clients
 
-Once a client is asigned to a slot on the server, it is logically connected. 
+Once a client is asigned to a slot on the server, it is logically connected.
 
 The index of this slot is used to identify clients on the server and is called the _client index_.
 
@@ -487,9 +486,9 @@ Packets received by the server from that client's address and port are mapped to
 
 These packets include:
 
-* _connection keep-alive packet_
-* _connection payload packet_
-* _connection disconnect packet_
+- _connection keep-alive packet_
+- _connection payload packet_
+- _connection disconnect packet_
 
 The server buffers _connection payload packets_ received from connected clients client so their payload data can be delivered to the server application as netcode packets.
 

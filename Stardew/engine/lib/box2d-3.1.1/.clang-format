@@ -22,12 +22,12 @@ InsertNewlineAtEOF: true
 IncludeBlocks: Regroup
 
 IncludeCategories:
-  - Regex:           '^"(box2d\/)'
-    Priority:        2
-  - Regex:           '^<.*'
-    Priority:        3
-  - Regex:           '^".*'
-    Priority:        1
+  - Regex: '^"(box2d\/)'
+    Priority: 2
+  - Regex: "^<.*"
+    Priority: 3
+  - Regex: '^".*'
+    Priority: 1
 
 IndentExternBlock: NoIndent
 IndentCaseLabels: true
@@ -37,4 +37,3 @@ AccessModifierOffset: -4
 SpacesInParens: Custom
 SpacesInParensOptions:
   Other: true
-  

@@ -9,6 +9,7 @@ The engine is designed to provide a main loop for the game and the have the game
 - the drawing code
 
 but will not include:
+
 - input
 - scene management
 - UI
@@ -35,7 +36,6 @@ target_link_libraries(Game PUBLIC StardewEngine)
 
 In the main function of the game, call EngineStart, passing in a GameInit function that pushes a game framework layer to start your game.
 Your game can define its own game framework layer or use a built in one.
-
 
 Here's an example of starting a game using the builtin Game2DLayer:
 
@@ -86,4 +86,3 @@ int main(int argc, char** argv)
 If you use the built in Game2DLayer your game can register entity types with asset tooling and the entity system.
 
 For more information on this see Entities.md and Assets.md
-
