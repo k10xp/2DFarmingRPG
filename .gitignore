@@ -2,3 +2,10 @@ Stardew/build/
 .vscode/
 Dev/
 .DS_Store
+__pycache__
+node_modules
+
+#binary
+test.bin
+AtlasTool.exe
+StardewEngine.dll
